@@ -35,7 +35,12 @@
 
 #include <ctype.h>
 #include <stdio.h>
+
+#ifdef _MSC_VER
+#include <WinSock.h>
+#else
 #include <arpa/inet.h>
+#endif
 
 namespace milliways {
 
