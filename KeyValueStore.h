@@ -282,13 +282,13 @@ public:
 	typedef seriously::Traits<DataLocator> mapped_traits;
 	typedef BTree< B, key_traits, mapped_traits > kv_tree_type;
 	typedef BTreeFileStorage< BLOCKSIZE, B, key_traits, mapped_traits > kv_tree_storage_type;
-	typedef typename kv_tree_type::node_type kv_tree_node_type;
-	typedef typename kv_tree_type::lookup_type kv_tree_lookup_type;
-	typedef typename kv_tree_type::iterator kv_tree_iterator_type;
+	typedef kv_tree_type::node_type kv_tree_node_type;
+	typedef kv_tree_type::lookup_type kv_tree_lookup_type;
+	typedef kv_tree_type::iterator kv_tree_iterator_type;
 
 //	typedef FileBlockStorage<BLOCKSIZE, BLOCK_CACHESIZE> block_storage_type;
-	typedef typename kv_tree_storage_type::block_storage_t block_storage_type;
-	typedef typename block_storage_type::block_t block_type;
+	typedef kv_tree_storage_type::block_storage_t block_storage_type;
+	typedef block_storage_type::block_t block_type;
 
 	typedef int32_t key_index_type;
 	typedef seriously::Traits<key_index_type> index_key_traits;
@@ -301,9 +301,9 @@ public:
 	struct Search
 	{
 	public:
-		typedef typename SizedLocator::offset_t offset_t;
-		typedef typename SizedLocator::uoffset_t uoffset_t;
-		typedef typename SizedLocator::size_type size_type;
+		typedef SizedLocator::offset_t offset_t;
+		typedef SizedLocator::uoffset_t uoffset_t;
+		typedef SizedLocator::size_type size_type;
 
 		Search() {}
 		Search(const Search& other) : m_lookup(other.m_lookup), m_value_loc(SizedLocator(other.m_value_loc)) {}
@@ -391,10 +391,10 @@ public:
 	public:
 		typedef KeyValueStore kv_type;
 		typedef base_iterator self_type;
-		typedef typename kv_type::kv_tree_type kv_tree_type;
-		typedef typename kv_type::kv_tree_node_type kv_tree_node_type;
-		typedef typename kv_type::kv_tree_lookup_type kv_tree_lookup_type;
-		typedef typename kv_type::kv_tree_iterator_type kv_tree_iterator_type;
+		typedef kv_type::kv_tree_type kv_tree_type;
+		typedef kv_type::kv_tree_node_type kv_tree_node_type;
+		typedef kv_type::kv_tree_lookup_type kv_tree_lookup_type;
+		typedef kv_type::kv_tree_iterator_type kv_tree_iterator_type;
 		typedef std::string value_type;
 		typedef value_type& reference;
 		typedef const value_type& const_reference;
