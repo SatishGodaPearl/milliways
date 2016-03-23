@@ -184,7 +184,7 @@ TEST_CASE( "BTree Operations", "[BTreeOps]" ) {
 		REQUIRE(lookup.key() == "foo");
 		std::cerr << lookup << std::endl;
 
-		tree.dotGraph("/tmp/tree-dot", /* display */ true);
+		tree.dotGraph("./tree-dot", /* display */ true);
 
 		tree.close();
 	}
