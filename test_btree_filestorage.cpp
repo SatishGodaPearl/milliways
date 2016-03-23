@@ -37,15 +37,15 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 	typedef milliways::BTree<B_TEST, seriously::Traits<std::string>, seriously::Traits<int32_t> > btree_t;
 	typedef milliways::BTreeMemoryStorage<B_TEST, seriously::Traits<std::string>, seriously::Traits<int32_t> > btree_mem_st_t;
 	typedef milliways::BTreeFileStorage< BLOCK_SIZE, B_TEST, seriously::Traits<std::string>, seriously::Traits<int32_t> > btree_fs_t;
-	typedef typename btree_fs_t::block_storage_t btree_blockstorage_t;
-	typedef typename btree_t::node_type btree_node_t;
+	typedef btree_fs_t::block_storage_t btree_blockstorage_t;
+	typedef btree_t::node_type btree_node_t;
 	typedef milliways::node_id_t btree_node_id_t;
 
 	SECTION( "can be plugged in" )
 	{
 		btree_t tree;
 
-		btree_fs_t* storage = new btree_fs_t("/tmp/test_tree");
+		btree_fs_t* storage = new btree_fs_t("./test_tree");
 		storage->attach(&tree);
 
 		REQUIRE(tree.storage());
@@ -55,7 +55,7 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 	SECTION( "can serialize/deserialize correct header" ) {
 		btree_node_id_t root_id;
 
-		const std::string test_pathname("/tmp/test_tree");
+		const std::string test_pathname("./test_tree");
 
 		std::cerr << "CREATE AND WRITE" << std::endl;
 		{
@@ -101,7 +101,7 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 		{
 			btree_t tree;
 
-			btree_fs_t* storage = new btree_fs_t("/tmp/test_tree_2");
+			btree_fs_t* storage = new btree_fs_t("./test_tree_2");
 			storage->attach(&tree);
 
 			tree.open();
@@ -139,7 +139,7 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 		{
 			btree_t tree;
 
-			btree_fs_t* storage = new btree_fs_t("/tmp/test_tree_2");
+			btree_fs_t* storage = new btree_fs_t("./test_tree_2");
 			storage->attach(&tree);
 
 			tree.open();
@@ -160,7 +160,7 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 	SECTION( "can be attached to existing block storage" ) {
 		btree_node_id_t root_id;
 
-		const std::string test_pathname("/tmp/test_tree");
+		const std::string test_pathname("./test_tree");
 
 		std::cerr << "CREATE AND WRITE" << std::endl;
 		{
