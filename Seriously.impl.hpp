@@ -31,8 +31,13 @@
 #include <functional>
 
 #include <string.h>
-#include <arpa/inet.h>
 #include <assert.h>
+
+#ifdef _MSC_VER
+#include <WinSock.h>
+#else
+#include <arpa/inet.h>
+#endif
 
 namespace seriously {
 
@@ -469,6 +474,7 @@ inline ssize_t Traits<uint64_t>::deserialize(const char*& src, size_t& avail, ty
 
 /* -- size_t ------------------------------------------------------- */
 
+#ifndef _MSC_VER
 inline ssize_t Traits<size_t>::serialize(char*& dst, size_t& avail, const type& v)
 {
 	typedef uint64_t serialized_type;
@@ -512,6 +518,7 @@ inline ssize_t Traits<size_t>::deserialize(const char*& src, size_t& avail, type
 	src = srcp;
 	return (initial_avail - avail);
 }
+#endif
 
 /* -- std::string -------------------------------------------------- */
 
