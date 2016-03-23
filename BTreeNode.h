@@ -92,7 +92,7 @@ private:
 	key_type m_key;
 };
 
-template < int B_, typename KeyTraits, typename TTraits, class Compare = std::less<typename KeyTraits::type> >
+template < int B_, typename KeyTraits, typename TTraits, class Compare >
 inline std::ostream& operator<< ( std::ostream& out, const BTreeLookup<B_, KeyTraits, TTraits, Compare>& value )
 {
 	node_id_t node_id = value.nodeId();
