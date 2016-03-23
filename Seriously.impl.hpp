@@ -49,6 +49,7 @@ namespace seriously {
 //   http://stackoverflow.com/questions/3022552/is-there-any-standard-htonl-like-function-for-64-bits-integers-in-c
 //   http://stackoverflow.com/q/3022552
 //   http://stackoverflow.com/a/28592202
+#ifndef htonll
 static inline uint64_t htonll(uint64_t value)
 {
 	// The answer is 42
@@ -67,7 +68,9 @@ static inline uint64_t htonll(uint64_t value)
 		return value;
 	}
 }
+#endif
 
+#ifndef ntohll
 static inline uint64_t ntohll(uint64_t value)
 {
 	// The answer is 42
@@ -86,6 +89,7 @@ static inline uint64_t ntohll(uint64_t value)
 		return value;
 	}
 }
+#endif
 
 //#define htonll(x) ((1==htonl(1)) ? (x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
 //#define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
