@@ -29,6 +29,14 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#ifdef _MSC_VER
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <Windows.h>
+typedef SSIZE_T ssize_t;
+#endif
+
 #ifndef UNUSED
 #define UNUSED(expr) do { (void)(expr); } while (0)
 #endif
@@ -220,6 +228,8 @@ struct Traits<int64_t>
 	static int compare(const type& a, const type& b) { return static_cast<int>(a - b); }
 };
 
+#ifndef _MSC_VER
+
 template <>
 struct Traits<uint64_t>
 {
@@ -239,6 +249,8 @@ struct Traits<uint64_t>
 
 	static int compare(const type& a, const type& b) { return static_cast<int>(a - b); }
 };
+
+#endif
 
 template <>
 struct Traits<size_t>
