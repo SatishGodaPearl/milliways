@@ -1,7 +1,11 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 2.8)
 project(milliways)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+if (MSVC)
+    add_definitions(-DNOMINMAX)
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+endif()
 
 #set(SOURCE_FILES main.cpp BlockStorage.impl.hpp BlockStorage.h LRUCache.impl.hpp LRUCache.h ordered_map.h ordered_map.impl.hpp)
 #add_executable(milliways ${SOURCE_FILES})
@@ -23,3 +27,9 @@ add_executable(test_btree_ops ${SOURCE_FILES})
 
 set(SOURCE_FILES test_kv.cpp catch.hpp Utils.h Utils.impl.hpp Seriously.h Seriously.impl.hpp BlockStorage.h BlockStorage.impl.hpp BTreeCommon.h BTreeNode.h BTreeNode.impl.hpp BTree.h BTree.impl.hpp BTreeFileStorage.h BTreeFileStorage.impl.hpp KeyValueStore.h KeyValueStore.impl.hpp)
 add_executable(test_kv ${SOURCE_FILES})
+
+if (MSVC)
+    target_link_libraries(test_btree_filestorage Ws2_32)
+    target_link_libraries(test_btree_ops Ws2_32)
+    target_link_libraries(test_kv Ws2_32)
+endif()
