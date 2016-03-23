@@ -29,10 +29,10 @@
 
 TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 	typedef milliways::KeyValueStore kv_t;
-	typedef typename kv_t::block_storage_type kv_blockstorage_t;
+	typedef kv_t::block_storage_type kv_blockstorage_t;
 
 	SECTION( "freshly created kv store works" ) {
-		const std::string test_pathname("/tmp/test_kv");
+		const std::string test_pathname("./test_kv");
 
 		REQUIRE(true);
 
@@ -67,7 +67,7 @@ TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 	}
 
 	SECTION( "load after write/close works" ) {
-		const std::string test_pathname("/tmp/test_kv");
+		const std::string test_pathname("./test_kv");
 
 		REQUIRE(true);
 
@@ -131,7 +131,7 @@ TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 	}
 
 	SECTION( "iteration works" ) {
-		const std::string test_pathname("/tmp/test_kv");
+		const std::string test_pathname("./test_kv");
 
 		std::remove(test_pathname.c_str());
 
@@ -201,7 +201,7 @@ TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 	}
 
 	SECTION( "straming reads" ) {
-		const std::string test_pathname("/tmp/test_kv");
+		const std::string test_pathname("./test_kv");
 
 		std::remove(test_pathname.c_str());
 
