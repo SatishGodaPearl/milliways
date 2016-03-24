@@ -338,6 +338,151 @@ TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 			kv.open();
 			REQUIRE(kv.isOpen());
 
+			for (kv_t::iterator it = kv.begin(); it != kv.end(); ++it)
+			{
+				std::string key = (*it);
+				REQUIRE(test_set.count(key) == 1);
+				std::string value;
+				REQUIRE(kv.get(*it, value));
+				REQUIRE(value == test_set[key]);
+			}
+
+			for (kv_set_t::const_iterator t_it = test_set.begin(); t_it != test_set.end(); ++t_it)
+			{
+				const std::string& key = t_it->first;
+				const std::string& value = t_it->second;
+
+				REQUIRE(kv.has(key));
+				std::string kv_value;
+				REQUIRE(kv.get(key, kv_value));
+				REQUIRE(kv_value == value);
+			}
+
+			kv.close();
+		}
+
+		std::remove(test_pathname.c_str());
+	}
+
+	SECTION( "largish values works" ) {
+		const std::string test_pathname("/tmp/test_kv");
+
+		std::remove(test_pathname.c_str());
+
+		const std::string large_value1 = random_string(8192);
+		const std::string large_value2 = random_string(8192);
+
+		std::cerr << "CREATE AND WRITE" << std::endl;
+		{
+			kv_blockstorage_t* bs = new kv_blockstorage_t(test_pathname);
+
+			kv_t kv(bs);
+
+			kv.open();
+			REQUIRE(kv.isOpen());
+
+			kv.put("foo", large_value1);
+			REQUIRE(kv.has("foo"));
+
+			kv.put("bar", large_value2);
+			REQUIRE(kv.has("bar"));
+
+			std::string value;
+			REQUIRE(kv.get("foo", value));
+			REQUIRE(value == large_value1);
+			REQUIRE(kv.get("bar", value));
+			REQUIRE(value == large_value2);
+
+			kv.close();
+		}
+
+		std::cerr << "OPEN AND LOAD" << std::endl;
+		{
+			kv_blockstorage_t* bs = new kv_blockstorage_t(test_pathname);
+
+			kv_t kv(bs);
+
+			kv.open();
+			REQUIRE(kv.isOpen());
+
+			REQUIRE(kv.has("foo"));
+			REQUIRE(kv.has("bar"));
+
+			std::string value;
+			REQUIRE(kv.get("foo", value));
+			REQUIRE(value == large_value1);
+			REQUIRE(kv.get("bar", value));
+			REQUIRE(value == large_value2);
+
+			kv.close();
+		}
+
+		std::remove(test_pathname.c_str());
+	}
+
+	SECTION( "sets with largish values works" ) {
+		const std::string test_pathname("/tmp/test_kv");
+
+		std::remove(test_pathname.c_str());
+
+		typedef std::map<std::string, std::string> kv_set_t;
+		kv_set_t test_set;
+		const int test_set_size = 16;
+		const int max_key_len = 20;
+		const int min_value_len = 4096;
+		const int max_value_len = 16384;
+
+		for (int i = 0; i < test_set_size; ++i)
+		{
+			std::string key = random_string(rand_int(1, max_key_len));
+			std::string value = random_string(rand_int(min_value_len, max_value_len));
+			test_set[key] = value;
+		}
+
+		std::cerr << "CREATE AND WRITE" << std::endl;
+		{
+			kv_blockstorage_t* bs = new kv_blockstorage_t(test_pathname);
+
+			kv_t kv(bs);
+
+			kv.open();
+			REQUIRE(kv.isOpen());
+
+			for (kv_set_t::const_iterator t_it = test_set.begin(); t_it != test_set.end(); ++t_it)
+				REQUIRE(kv.put(t_it->first, t_it->second));
+
+			for (kv_t::iterator it = kv.begin(); it != kv.end(); ++it)
+			{
+				std::string key = (*it);
+				REQUIRE(test_set.count(key) == 1);
+				std::string value;
+				REQUIRE(kv.get(*it, value));
+				REQUIRE(value == test_set[key]);
+			}
+
+			for (kv_set_t::const_iterator t_it = test_set.begin(); t_it != test_set.end(); ++t_it)
+			{
+				const std::string& key = t_it->first;
+				const std::string& value = t_it->second;
+
+				REQUIRE(kv.has(key));
+				std::string kv_value;
+				REQUIRE(kv.get(key, kv_value));
+				REQUIRE(kv_value == value);
+			}
+
+			kv.close();
+		}
+
+		std::cerr << "OPEN AND LOAD" << std::endl;
+		{
+			kv_blockstorage_t* bs = new kv_blockstorage_t(test_pathname);
+
+			kv_t kv(bs);
+
+			kv.open();
+			REQUIRE(kv.isOpen());
+
 			for (kv_set_t::const_iterator t_it = test_set.begin(); t_it != test_set.end(); ++t_it)
 				REQUIRE(kv.put(t_it->first, t_it->second));
 
