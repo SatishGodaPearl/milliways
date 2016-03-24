@@ -177,6 +177,8 @@ public:
 	SizedLocator& shrink(size_type value) { m_size -= value; return *this; }
 	SizedLocator& grow(size_type value) { m_size += value; return *this; }
 
+	SizedLocator& consume(size_type value) { shrink(value); delta(value); return *this; }
+
 	size_type envelope_size() const { return size(); }
 	size_type envelope_size(size_type value) { return size(value); }
 
@@ -518,10 +520,7 @@ private:
 	 * free space starts.
 	 */
 	block_id_t m_first_block_id;
-	block_id_t m_current_block_id;
-	size_t m_current_block_offset;
-	size_t m_current_block_avail;
-	block_type* m_current_block;
+	SizedLocator m_next_location;
 
 	int m_kv_header_uid;
 };

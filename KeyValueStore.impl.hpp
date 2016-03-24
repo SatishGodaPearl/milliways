@@ -156,8 +156,7 @@ namespace milliways {
 
 inline KeyValueStore::KeyValueStore(block_storage_type* blockstorage) :
 	m_blockstorage(blockstorage), m_storage(NULL), m_kv_tree(NULL),
-	m_first_block_id(BLOCK_ID_INVALID), m_current_block_id(BLOCK_ID_INVALID),
-	m_current_block_offset(0), m_current_block_avail(0), m_current_block(NULL),
+	m_first_block_id(BLOCK_ID_INVALID),
 	m_kv_header_uid(-1)
 {
 	m_storage = new kv_tree_storage_type(m_blockstorage);
@@ -331,8 +330,7 @@ inline bool KeyValueStore::get(const std::string& key, std::string& value)
     size_t initial = contents_loc.size();
 	bool ok = read(value, contents_loc);
 	size_t consumed = initial - contents_loc.size();
-	result.locator().delta(consumed);
-	result.locator().shrink(consumed);
+	result.locator().consume(consumed);		// move and shrink
 	return ok;
 }
 
@@ -356,8 +354,7 @@ inline bool KeyValueStore::get(Search& result, std::string& value, ssize_t parti
 	size_t initial = contents_loc.size();
 	bool ok = read(value, contents_loc);
 	size_t consumed = initial - contents_loc.size();
-	result.locator().delta(consumed);
-	result.locator().shrink(consumed);
+	result.locator().consume(consumed);		// move and shrink
 	return ok;
 }
 
@@ -645,8 +642,7 @@ inline bool KeyValueStore::read(std::string& dst, SizedLocator& location)
 		dst_data = NULL;
 	}
 
-	location.delta(nread);
-	location.shrink(nread);
+	location.consume(nread);				// move and shrink
 	return (nread == length) ? true : false;
 }
 
@@ -702,55 +698,44 @@ inline bool KeyValueStore::write(const std::string& src, SizedLocator& location)
 	assert(src_rem == 0);
 	assert(dst_avail >= 0);
 
-	location.delta(nwritten);
-	location.shrink(nwritten);
+	location.consume(nwritten);				// move and shrink
 	return (nwritten == src.length()) ? true : false;
 }
 
 inline bool KeyValueStore::alloc_value_envelope(SizedLocator& dst)
 {
 	size_t amount = dst.envelope_size();
-	if ((! block_id_valid(m_current_block_id)) || (m_current_block_avail < amount))
+	if ((! m_next_location.valid()) || (m_next_location.size() < amount))
 	{
 		size_t n_blocks = size_in_blocks(amount);
 		assert((n_blocks * BLOCKSIZE) >= amount);
-		m_current_block = NULL;
-		m_current_block_id = block_alloc_id(n_blocks);
-		if (! block_id_valid(m_current_block_id))
+		m_next_location.block_id(block_alloc_id(n_blocks));
+		if (! block_id_valid(m_next_location.block_id()))
 			return false;
-		m_current_block_offset = 0;
-		m_current_block_avail = n_blocks * BLOCKSIZE;
+		m_next_location.offset(0);
+		m_next_location.size(n_blocks * BLOCKSIZE);
 		if (! block_id_valid(m_first_block_id))
-			m_first_block_id = m_current_block_id;
+			m_first_block_id = m_next_location.block_id();
 	}
 
 	assert(block_id_valid(m_first_block_id));
-	assert(block_id_valid(m_current_block_id));
+	assert(m_next_location.valid());
 
-	if (! m_current_block)
-		m_current_block = block_get(m_current_block_id);
-
-	assert(m_current_block);
-
-	assert(m_current_block_avail >= amount);
-	assert(m_current_block_offset >= 0);
+	assert(m_next_location.size() >= amount);
+	assert(m_next_location.offset() >= 0);
 	if (amount <= BLOCKSIZE)
 	{
-		assert(m_current_block_offset <= (BLOCKSIZE - amount));
+		assert(m_next_location.offset() <= (BLOCKSIZE - amount));
 	}
 
 	// set dst SizedLocator to allocated space
-	dst.block_id(m_current_block_id);
-	dst.offset(m_current_block_offset);
+	dst.block_id(m_next_location.block_id());
+	dst.offset(m_next_location.offset());
 
 	// compute next block id / avail
-	block_id_t old_block_id = m_current_block_id;
-	m_current_block_offset += (amount % BLOCKSIZE);
-	m_current_block_id     += (amount / BLOCKSIZE);
-	m_current_block_avail  -= (amount % BLOCKSIZE);
-	if (m_current_block_id != old_block_id)
-		m_current_block = NULL;
-	// std::cerr << "m_current_block id:" << m_current_block_id << " offset:" << m_current_block_offset << " avail:" <<  m_current_block_avail << std::endl;
+	block_id_t old_block_id = m_next_location.block_id();
+	m_next_location.consume(amount);		// move and shrink
+	assert(m_next_location.size() >= 0);
 	return true;
 }
 
@@ -775,14 +760,14 @@ inline bool KeyValueStore::header_write()
 	 	static_cast<uint32_t>(BLOCKSIZE) << static_cast<uint32_t>(B) <<
 	 	static_cast<uint32_t>(KEY_MAX_SIZE);
 
-	packer << m_first_block_id << m_current_block_id << m_current_block_offset << m_current_block_avail;
+	packer << m_first_block_id << m_next_location.block_id() <<
+		static_cast<size_t>(m_next_location.offset()) << static_cast<size_t>(m_next_location.size());
 
 	std::string userHeader(packer.data(), packer.size());
 	m_blockstorage->setUserHeader(m_kv_header_uid, userHeader);
 
 	// std::cerr << "-> KV WRITE VER:" << MAJOR_VERSION << "." << MINOR_VERSION << " BLOCKSIZE:" << BLOCKSIZE <<
 	// 	" B:" << B << std::endl;
-	// std::cerr << "  first block id:" << m_first_block_id << "  current block id:" << m_current_block_id << " offset:" << m_current_block_offset << " avail:" << m_current_block_avail << std::endl;
 
 //	std::cerr << "W KV userHeader[" << m_kv_header_uid << "]:" << std::endl;
 //	std::cerr << s_hexdump(userHeader.data(), userHeader.size()) << std::endl;
@@ -829,8 +814,12 @@ inline bool KeyValueStore::header_read()
 	assert(v_BLOCKSIZE == BLOCKSIZE);
 	assert(v_MAJOR <= MAJOR_VERSION);
 
-	packer >> m_first_block_id >> m_current_block_id >> m_current_block_offset >> m_current_block_avail;
-	// std::cerr << "  first block id:" << m_first_block_id << "  current block id:" << m_current_block_id << " offset:" << m_current_block_offset << " avail:" << m_current_block_avail << std::endl;
+	block_id_t v_next_block_id;
+	size_t v_offset, v_avail;
+	packer >> m_first_block_id >> v_next_block_id >> v_offset >> v_avail;
+	m_next_location.block_id(v_next_block_id);
+	m_next_location.offset(v_offset);
+	m_next_location.size(v_avail);
 
 	return true;
 }
