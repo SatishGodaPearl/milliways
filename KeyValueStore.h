@@ -42,9 +42,10 @@
 
 namespace milliways {
 
-static const size_t KV_BLOCKSIZE = 4096;
-static const int KV_CACHESIZE = 1024;
-static const int KV_B = 5;
+static const size_t KV_BLOCKSIZE = MILLIWAYS_DEFAULT_BLOCK_SIZE;			/* default: 4096 */
+static const int KV_BLOCK_CACHESIZE = MILLIWAYS_DEFAULT_BLOCK_CACHE_SIZE;	/* default: 8192 */
+static const int KV_NODE_CACHESIZE = MILLIWAYS_DEFAULT_NODE_CACHE_SIZE;		/* default: 1024 */
+static const int KV_B = MILLIWAYS_DEFAULT_B_FACTOR;							/* default: 73   */
 
 typedef uint32_t serialized_value_size_type;
 
@@ -262,7 +263,8 @@ public:
 	static const int MINOR_VERSION = 1;
 
 	static const size_t BLOCKSIZE = KV_BLOCKSIZE;
-	static const int CACHESIZE = KV_CACHESIZE;
+	static const int NODE_CACHESIZE = KV_NODE_CACHESIZE;
+	static const int BLOCK_CACHESIZE = KV_BLOCK_CACHESIZE;
 	static const int B = KV_B;
 	static const int KEY_HASH_SIZE = 20;
 
