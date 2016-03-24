@@ -27,6 +27,26 @@
 
 #include "KeyValueStore.h"
 
+static inline int rand_int(int lo, int hi)
+{
+	return rand() % (hi - lo + 1) + lo;
+}
+
+static std::string random_string(int length)
+{
+	static const char alphanum[] =
+		"0123456789"
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		"abcdefghijklmnopqrstuvwxyz";
+
+	std::string r(length, '\0');
+
+	for (int i = 0; i < length; ++i)
+		r[i] = alphanum[rand_int(0, sizeof(alphanum) - 1)];
+
+	return r;
+}
+
 TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 	typedef milliways::KeyValueStore kv_t;
 	typedef typename kv_t::block_storage_type kv_blockstorage_t;
@@ -252,6 +272,57 @@ TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 		REQUIRE(piece.substr(0,5) == "amet,");
 		REQUIRE(piece.length() > 8);
 		REQUIRE(piece.substr(piece.length()-8,8) == "laborum.");
+
+		kv.close();
+	}
+
+	SECTION( "largish sets works" ) {
+		const std::string test_pathname("/tmp/test_kv");
+
+		std::remove(test_pathname.c_str());
+
+		typedef std::map<std::string, std::string> kv_set_t;
+		kv_set_t test_set;
+		const int test_set_size = 2048;
+		const int max_key_len = 20;
+		const int max_value_len = 256;
+
+		for (int i = 0; i < test_set_size; ++i)
+		{
+			std::string key = random_string(rand_int(1, max_key_len));
+			std::string value = random_string(rand_int(1, max_value_len));
+			test_set[key] = value;
+		}
+
+		kv_blockstorage_t* bs = new kv_blockstorage_t(test_pathname);
+
+		kv_t kv(bs);
+
+		kv.open();
+		REQUIRE(kv.isOpen());
+
+		for (kv_set_t::const_iterator t_it = test_set.begin(); t_it != test_set.end(); ++t_it)
+			REQUIRE(kv.put(t_it->first, t_it->second));
+
+		for (kv_t::iterator it = kv.begin(); it != kv.end(); ++it)
+		{
+			std::string key = (*it);
+			REQUIRE(test_set.count(key) == 1);
+			std::string value;
+			REQUIRE(kv.get(*it, value));
+			REQUIRE(value == test_set[key]);
+		}
+
+		for (kv_set_t::const_iterator t_it = test_set.begin(); t_it != test_set.end(); ++t_it)
+		{
+			const std::string& key = t_it->first;
+			const std::string& value = t_it->second;
+
+			REQUIRE(kv.has(key));
+			std::string kv_value;
+			REQUIRE(kv.get(key, kv_value));
+			REQUIRE(kv_value == value);
+		}
 
 		kv.close();
 	}
