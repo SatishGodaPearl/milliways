@@ -725,7 +725,7 @@ inline bool KeyValueStore::alloc_value_envelope(SizedLocator& dst)
 	assert(m_next_location.offset() >= 0);
 	if (amount <= BLOCKSIZE)
 	{
-		assert(m_next_location.offset() <= (BLOCKSIZE - amount));
+		assert(static_cast<ssize_t>(m_next_location.offset()) <= static_cast<ssize_t>((BLOCKSIZE - amount)));
 	}
 
 	// set dst SizedLocator to allocated space
@@ -733,7 +733,6 @@ inline bool KeyValueStore::alloc_value_envelope(SizedLocator& dst)
 	dst.offset(m_next_location.offset());
 
 	// compute next block id / avail
-	block_id_t old_block_id = m_next_location.block_id();
 	m_next_location.consume(amount);		// move and shrink
 	assert(m_next_location.size() >= 0);
 	return true;
