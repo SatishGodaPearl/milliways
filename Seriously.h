@@ -10,7 +10,7 @@
  * License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
@@ -228,7 +228,7 @@ struct Traits<int64_t>
 	static int compare(const type& a, const type& b) { return static_cast<int>(a - b); }
 };
 
-#ifndef _MSC_VER
+#ifdef __APPLE__
 
 template <>
 struct Traits<uint64_t>
