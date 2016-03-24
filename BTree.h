@@ -272,6 +272,7 @@ public:
 		assert(! isOpen());
 
 		m_tree->m_io = NULL;
+		m_tree->m_io_allocated = false;
 		m_tree = NULL;
 
 		m_root_id = NODE_ID_INVALID;
