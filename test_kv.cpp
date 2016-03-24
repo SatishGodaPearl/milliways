@@ -294,36 +294,76 @@ TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 			test_set[key] = value;
 		}
 
-		kv_blockstorage_t* bs = new kv_blockstorage_t(test_pathname);
-
-		kv_t kv(bs);
-
-		kv.open();
-		REQUIRE(kv.isOpen());
-
-		for (kv_set_t::const_iterator t_it = test_set.begin(); t_it != test_set.end(); ++t_it)
-			REQUIRE(kv.put(t_it->first, t_it->second));
-
-		for (kv_t::iterator it = kv.begin(); it != kv.end(); ++it)
+		std::cerr << "CREATE AND WRITE" << std::endl;
 		{
-			std::string key = (*it);
-			REQUIRE(test_set.count(key) == 1);
-			std::string value;
-			REQUIRE(kv.get(*it, value));
-			REQUIRE(value == test_set[key]);
+			kv_blockstorage_t* bs = new kv_blockstorage_t(test_pathname);
+
+			kv_t kv(bs);
+
+			kv.open();
+			REQUIRE(kv.isOpen());
+
+			for (kv_set_t::const_iterator t_it = test_set.begin(); t_it != test_set.end(); ++t_it)
+				REQUIRE(kv.put(t_it->first, t_it->second));
+
+			for (kv_t::iterator it = kv.begin(); it != kv.end(); ++it)
+			{
+				std::string key = (*it);
+				REQUIRE(test_set.count(key) == 1);
+				std::string value;
+				REQUIRE(kv.get(*it, value));
+				REQUIRE(value == test_set[key]);
+			}
+
+			for (kv_set_t::const_iterator t_it = test_set.begin(); t_it != test_set.end(); ++t_it)
+			{
+				const std::string& key = t_it->first;
+				const std::string& value = t_it->second;
+
+				REQUIRE(kv.has(key));
+				std::string kv_value;
+				REQUIRE(kv.get(key, kv_value));
+				REQUIRE(kv_value == value);
+			}
+
+			kv.close();
 		}
 
-		for (kv_set_t::const_iterator t_it = test_set.begin(); t_it != test_set.end(); ++t_it)
+		std::cerr << "OPEN AND LOAD" << std::endl;
 		{
-			const std::string& key = t_it->first;
-			const std::string& value = t_it->second;
+			kv_blockstorage_t* bs = new kv_blockstorage_t(test_pathname);
 
-			REQUIRE(kv.has(key));
-			std::string kv_value;
-			REQUIRE(kv.get(key, kv_value));
-			REQUIRE(kv_value == value);
+			kv_t kv(bs);
+
+			kv.open();
+			REQUIRE(kv.isOpen());
+
+			for (kv_set_t::const_iterator t_it = test_set.begin(); t_it != test_set.end(); ++t_it)
+				REQUIRE(kv.put(t_it->first, t_it->second));
+
+			for (kv_t::iterator it = kv.begin(); it != kv.end(); ++it)
+			{
+				std::string key = (*it);
+				REQUIRE(test_set.count(key) == 1);
+				std::string value;
+				REQUIRE(kv.get(*it, value));
+				REQUIRE(value == test_set[key]);
+			}
+
+			for (kv_set_t::const_iterator t_it = test_set.begin(); t_it != test_set.end(); ++t_it)
+			{
+				const std::string& key = t_it->first;
+				const std::string& value = t_it->second;
+
+				REQUIRE(kv.has(key));
+				std::string kv_value;
+				REQUIRE(kv.get(key, kv_value));
+				REQUIRE(kv_value == value);
+			}
+
+			kv.close();
 		}
 
-		kv.close();
+		std::remove(test_pathname.c_str());
 	}
 }
