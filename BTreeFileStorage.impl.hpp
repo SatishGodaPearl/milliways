@@ -260,6 +260,7 @@ inline int BTreeFileStorage_Compute_Max_B()
 	size_t leaf_B = ((BLOCKSIZE - head_size) / (MAX_SERIALIZED_KEYSIZE + TTraits::SerializedSize) + 1) / 2;
 	size_t internal_B = ((BLOCKSIZE - head_size + MAX_SERIALIZED_KEYSIZE) / (MAX_SERIALIZED_KEYSIZE + sizeof(uint32_t))) / 2;
 
+	// with BLOCKSIZE == 4096:
 	// KeyValueStore leaf_B: 73       (MAX_SERIALIZED_KEYSIZE==24 for 20 byte *binary* + 4 length)
 	// KeyValueStore internal_B: 73   (MAX_SERIALIZED_KEYSIZE==24 for 20 byte *binary* + 4 length)
 

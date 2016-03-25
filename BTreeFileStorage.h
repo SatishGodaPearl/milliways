@@ -126,7 +126,7 @@ class BTreeFileStorage : public BTreeStorage<B_, KeyTraits, TTraits, Compare>
 {
 public:
 	static const size_t BlockSize = BLOCKSIZE;
-	static const int BlockCacheSize = 32;
+	static const int BlockCacheSize = MILLIWAYS_DEFAULT_BLOCK_CACHE_SIZE;
 
 	typedef Block<BLOCKSIZE> block_t;
 	typedef FileBlockStorage<BLOCKSIZE, BlockCacheSize> block_storage_t;
@@ -143,7 +143,7 @@ public:
 	typedef BTreeNode<B_, KeyTraits, TTraits, Compare> node_type;
 	typedef BTreeStorage<B_, KeyTraits, TTraits, Compare> base_type;
 
-	typedef LRUNodeCache< 1024, BLOCKSIZE, B_, KeyTraits, TTraits, Compare > cache_type;
+	typedef LRUNodeCache< MILLIWAYS_DEFAULT_NODE_CACHE_SIZE, BLOCKSIZE, B_, KeyTraits, TTraits, Compare > cache_type;
 
 	static const int B = B_;
 
