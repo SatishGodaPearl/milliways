@@ -159,6 +159,10 @@ inline KeyValueStore::KeyValueStore(block_storage_type* blockstorage) :
 	m_first_block_id(BLOCK_ID_INVALID),
 	m_kv_header_uid(-1)
 {
+	int max_B = BTreeFileStorage_Compute_Max_B< BLOCKSIZE, KEY_MAX_SIZE + 4, mapped_traits >();
+
+	assert(B <= max_B);
+
 	m_storage = new kv_tree_storage_type(m_blockstorage);
 	m_kv_tree = new kv_tree_type(m_storage);
 

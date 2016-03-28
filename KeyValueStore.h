@@ -215,14 +215,14 @@ struct Traits<milliways::DataLocator>
 	typedef milliways::DataLocator type;
 	typedef type serialized_type;
 	enum { Size = sizeof(type) };
-	enum { SerializedSize = (sizeof(int16_t) + sizeof(uint16_t)) };
+	enum { SerializedSize = (sizeof(uint32_t) + sizeof(uint16_t)) };
 
 	static ssize_t serialize(char*& dst, size_t& avail, const type& v);
 	static ssize_t deserialize(const char*& src, size_t& avail, type& v);
 
 	static size_t size(const type& value)    { UNUSED(value); return Size; }
 	static size_t maxsize(const type& value) { UNUSED(value); return Size; }
-	static size_t serializedsize(const type& value) { UNUSED(value); return Size; }
+	static size_t serializedsize(const type& value) { UNUSED(value); return SerializedSize; }
 
 	static bool valid(const type& value)     { return value.valid(); }
 
@@ -236,14 +236,14 @@ struct Traits<milliways::SizedLocator>
 	typedef type serialized_type;
 	typedef milliways::serialized_value_size_type serialized_size_type;	/* uint32_t */
 	enum { Size = sizeof(type) };
-	enum { SerializedSize = (sizeof(int16_t) + sizeof(uint16_t) + sizeof(serialized_size_type)) };
+	enum { SerializedSize = (sizeof(uint32_t) + sizeof(uint16_t) + sizeof(serialized_size_type)) };
 
 	static ssize_t serialize(char*& dst, size_t& avail, const type& v);
 	static ssize_t deserialize(const char*& src, size_t& avail, type& v);
 
 	static size_t size(const type& value)    { UNUSED(value); return Size; }
 	static size_t maxsize(const type& value) { UNUSED(value); return Size; }
-	static size_t serializedsize(const type& value) { UNUSED(value); return Size; }
+	static size_t serializedsize(const type& value) { UNUSED(value); return SerializedSize; }
 
 	static bool valid(const type& value)     { return value.valid(); }
 
