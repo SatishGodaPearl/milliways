@@ -24,5 +24,8 @@ add_executable(test_btree_ops ${SOURCE_FILES})
 set(SOURCE_FILES test_kv.cpp catch.hpp Utils.h Utils.impl.hpp Seriously.h Seriously.impl.hpp BlockStorage.h BlockStorage.impl.hpp BTreeCommon.h BTreeNode.h BTreeNode.impl.hpp BTree.h BTree.impl.hpp BTreeFileStorage.h BTreeFileStorage.impl.hpp KeyValueStore.h KeyValueStore.impl.hpp)
 add_executable(test_kv ${SOURCE_FILES})
 
+set(SOURCE_FILES test_kv2.cpp catch.hpp Utils.h Utils.impl.hpp Seriously.h Seriously.impl.hpp BlockStorage.h BlockStorage.impl.hpp BTreeCommon.h BTreeNode.h BTreeNode.impl.hpp BTree.h BTree.impl.hpp BTreeFileStorage.h BTreeFileStorage.impl.hpp KeyValueStore.h KeyValueStore.impl.hpp)
+add_executable(test_kv2 ${SOURCE_FILES})
+
 set(SOURCE_FILES test_shptr.cpp catch.hpp Utils.h Utils.impl.hpp)
 add_executable(test_shptr ${SOURCE_FILES})

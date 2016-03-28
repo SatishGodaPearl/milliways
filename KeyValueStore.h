@@ -327,7 +327,7 @@ public:
 
 		bool found() const { return m_lookup.found(); }
 		const std::string& key() const { return m_lookup.key(); }
-		kv_tree_node_type* node() const { return m_lookup.node(); }
+		shptr<kv_tree_node_type> node() const { return m_lookup.node(); }
 		int pos() const { return m_lookup.pos(); }
 		node_id_t nodeId() const { return m_lookup.nodeId(); }
 
@@ -487,7 +487,7 @@ protected:
 
 	block_id_t block_alloc_id(int n_blocks = 1) { assert(m_blockstorage); return m_blockstorage->allocId(n_blocks); }
 	bool block_dispose(block_id_t block_id, int count = 1) { assert(m_blockstorage); return m_blockstorage->dispose(block_id, count); }
-	block_type* block_get(block_id_t block_id) { assert(m_blockstorage); return m_blockstorage->get(block_id); }
+	shptr<block_type> block_get(block_id_t block_id) { assert(m_blockstorage); return m_blockstorage->get(block_id); }
 	bool block_put(const block_type& src) { assert(m_blockstorage); return m_blockstorage->put(src); }
 
 	/* -- Tree access ---------------------------------------------- */

@@ -110,6 +110,20 @@ inline std::string s_hexdump(const void* ptr, int buflen)
 	return ss.str();
 }
 
+inline std::string hexify(const std::string& input)
+{
+    static const char* const lut = "0123456789ABCDEF";
+    size_t len = input.length();
+
+    std::string output(2 * len, '\0');
+    for (size_t i = 0; i < len; ++i)
+    {
+        const unsigned char c = input[i];
+        output[i * 2]     = lut[(c & 0xF0) >> 4];
+        output[i * 2 + 1] = lut[(c & 0x0F)];
+    }
+    return output;
+}
 
 /* ----------------------------------------------------------------- *
  *   shptr<T>                                                        *

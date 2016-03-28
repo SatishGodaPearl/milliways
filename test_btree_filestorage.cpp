@@ -39,6 +39,7 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 	typedef milliways::BTreeFileStorage< BLOCK_SIZE, B_TEST, seriously::Traits<std::string>, seriously::Traits<int32_t> > btree_fs_t;
 	typedef typename btree_fs_t::block_storage_t btree_blockstorage_t;
 	typedef typename btree_t::node_type btree_node_t;
+	typedef milliways::shptr<typename btree_t::node_type> btree_node_ptr_t;
 	typedef milliways::node_id_t btree_node_id_t;
 
 	SECTION( "can be plugged in" )
@@ -50,6 +51,11 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 
 		REQUIRE(tree.storage());
 		REQUIRE(tree.storage() == storage);
+		tree.close();
+		assert(tree.storage() != NULL);
+		storage->detach();
+		assert(tree.storage() == NULL);
+		delete storage;
 	}
 
 	SECTION( "can serialize/deserialize correct header" ) {
@@ -71,10 +77,12 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 
 			if (!tree.hasRoot())
 				tree.node_alloc();
-			btree_node_t* root = tree.root();
+			btree_node_ptr_t root = tree.root();
 
 			root_id = root->id();
 			tree.close();
+			storage->detach();
+			delete storage;
 		}
 
 		std::cerr << "OPEN AND LOAD" << std::endl;
@@ -89,6 +97,8 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 
 			REQUIRE(tree.rootId() == root_id);
 			tree.close();
+			storage->detach();
+			delete storage;
 		}
 
 		std::remove(test_pathname.c_str());
@@ -109,10 +119,10 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 
 			if (!tree.hasRoot())
 				tree.node_alloc();
-			btree_node_t* root = tree.root();
+			btree_node_ptr_t root = tree.root();
 
-			btree_node_t* child1 = root->child_alloc();
-			btree_node_t* child2 = root->child_alloc();
+			btree_node_ptr_t child1 = root->child_alloc();
+			btree_node_ptr_t child2 = root->child_alloc();
 			root->n(1);
 			root->child(0) = child1->id();
 			root->child(1) = child2->id();
@@ -133,6 +143,8 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 			// storage->node_put(child2);
 
 			tree.close();
+			storage->detach();
+			delete storage;
 		}
 
 		std::cerr << "OPEN AND LOAD" << std::endl;
@@ -147,13 +159,15 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 
 			REQUIRE(tree.rootId() == root_id);
 
-			btree_node_t* root = storage->node_get(tree.rootId());
+			btree_node_ptr_t root = storage->node_get(tree.rootId());
 
 			REQUIRE(root);
 			REQUIRE(root->n() == 1);
 			std::cerr << "root n:" << root->n() << " leaf:" << (root->leaf() ? "T" : "F") << " left:" << root->leftId() << " right:" << root->rightId() << "\n";
 
 			tree.close();
+			storage->detach();
+			delete storage;
 		}
 	}
 
@@ -185,7 +199,7 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 			REQUIRE(storage->isOpen());
 			REQUIRE(tree.isOpen());
 
-			btree_node_t* root = tree.root();
+			btree_node_ptr_t root = tree.root();
 
 			root_id = root->id();
 			REQUIRE(milliways::node_id_valid(root_id));
@@ -194,6 +208,8 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 			REQUIRE(! bs->isOpen());
 			REQUIRE(! storage->isOpen());
 			REQUIRE(! tree.isOpen());
+			storage->detach();
+			delete bs;
 		}
 
 		std::cerr << "OPEN AND LOAD" << std::endl;
@@ -219,7 +235,7 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 
 			REQUIRE(tree.rootId() == root_id);
 
-			btree_node_t* root = tree.root();
+			btree_node_ptr_t root = tree.root();
 
 			REQUIRE(root->id() == root_id);
 
@@ -227,6 +243,8 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 			REQUIRE(! bs->isOpen());
 			REQUIRE(! storage->isOpen());
 			REQUIRE(! tree.isOpen());
+			storage->detach();
+			delete bs;
 		}
 
 		std::remove(test_pathname.c_str());

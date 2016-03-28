@@ -34,6 +34,7 @@
 TEST_CASE( "BTree", "[BTree]" ) {
 	typedef milliways::BTree<B_TEST, seriously::Traits<std::string>, seriously::Traits<int32_t> > btree_t;
 	typedef typename btree_t::node_type btree_node_t;
+	typedef milliways::shptr<typename btree_t::node_type> btree_node_ptr_t;
 
 	SECTION( "starts empty" ) {
 		btree_t tree;
@@ -44,12 +45,12 @@ TEST_CASE( "BTree", "[BTree]" ) {
 
 	SECTION( "can alloc children" ) {
 		btree_t tree;
-		btree_node_t* root = tree.node_alloc();
+		btree_node_ptr_t root = tree.node_alloc();
 
 		REQUIRE(root);
 		REQUIRE(tree.rootId() == root->id());
 
-		btree_node_t* child = tree.node_child_alloc(root);
+		btree_node_ptr_t child = tree.node_child_alloc(root);
 
 		REQUIRE(child);
 		REQUIRE(child->leaf());
@@ -62,7 +63,7 @@ TEST_CASE( "BTree", "[BTree]" ) {
 
 	SECTION( "root is created automatically when requested" ) {
 		btree_t tree;
-		btree_node_t* root = tree.root();
+		btree_node_ptr_t root = tree.root();
 
 		REQUIRE(root);
 		REQUIRE(tree.rootId() == root->id());
@@ -74,7 +75,7 @@ TEST_CASE( "BTree", "[BTree]" ) {
 		REQUIRE(tree.size() == 0);
 		REQUIRE(! tree.hasRoot());
 
-		btree_node_t* node = tree.node_alloc();
+		btree_node_ptr_t node = tree.node_alloc();
 
 		REQUIRE(node);
 		REQUIRE(node->leaf());
@@ -93,6 +94,7 @@ TEST_CASE( "BTree Memory Storage", "[BTreeMemoryStorage]" ) {
 	typedef milliways::BTree<B_TEST, seriously::Traits<std::string>, seriously::Traits<int32_t> > btree_t;
 	typedef milliways::BTreeMemoryStorage<B_TEST, seriously::Traits<std::string>, seriously::Traits<int32_t> > btree_mem_st_t;
 	typedef typename btree_t::node_type btree_node_t;
+	typedef milliways::shptr<typename btree_t::node_type> btree_node_ptr_t;
 
 	SECTION( "is present by default" )
 	{
@@ -107,17 +109,17 @@ TEST_CASE( "BTree Memory Storage", "[BTreeMemoryStorage]" ) {
 		if (! tree.hasRoot()) {
 			tree.node_alloc();
 		}
-		btree_node_t* root = tree.root();
+		btree_node_ptr_t root = tree.root();
 
-		btree_node_t* child1 = tree.node_child_alloc(root);
-		btree_node_t* child2 = tree.node_child_alloc(root);
-		btree_node_t* child3 = tree.node_child_alloc(root);
+		btree_node_ptr_t child1 = tree.node_child_alloc(root);
+		btree_node_ptr_t child2 = tree.node_child_alloc(root);
+		btree_node_ptr_t child3 = tree.node_child_alloc(root);
 
-		btree_node_t* child1_1 = tree.node_child_alloc(child1);
-		btree_node_t* child3_1 = tree.node_child_alloc(child3);
-		btree_node_t* child3_2 = tree.node_child_alloc(child3);
+		btree_node_ptr_t child1_1 = tree.node_child_alloc(child1);
+		btree_node_ptr_t child3_1 = tree.node_child_alloc(child3);
+		btree_node_ptr_t child3_2 = tree.node_child_alloc(child3);
 
-		btree_node_t* node = tree.node_get(root->id());
+		btree_node_ptr_t node = tree.node_get(root->id());
 		REQUIRE(node->id() == root->id());
 
 		node = tree.node_get(child1->id());
