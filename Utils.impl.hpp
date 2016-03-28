@@ -110,6 +110,13 @@ inline std::string s_hexdump(const void* ptr, int buflen)
 	return ss.str();
 }
 
+
+/* ----------------------------------------------------------------- *
+ *   shptr<T>                                                        *
+ * ----------------------------------------------------------------- */
+
+shptr_manager shptr_manager::s_instance;
+
 } /* end of namespace milliways */
 
 #endif /* MILLIWAYS_UTILS_IMPL_H */
