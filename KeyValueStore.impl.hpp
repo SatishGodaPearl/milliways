@@ -159,6 +159,10 @@ inline KeyValueStore::KeyValueStore(block_storage_type* blockstorage) :
 	m_first_block_id(BLOCK_ID_INVALID),
 	m_kv_header_uid(-1)
 {
+	int max_B = BTreeFileStorage_Compute_Max_B< BLOCKSIZE, KEY_MAX_SIZE + 4, mapped_traits >();
+
+	assert(B <= max_B);
+
 	m_storage = new kv_tree_storage_type(m_blockstorage);
 	m_kv_tree = new kv_tree_type(m_storage);
 
@@ -241,7 +245,7 @@ inline bool KeyValueStore::find(const std::string& key, Search& result)
 	{
 		assert(where.found());
 
-		kv_tree_node_type* node = where.node();
+		shptr<kv_tree_node_type> node( where.node() );
 		assert(node);
 
 		result.dataLocator(node->value(where.pos()));
@@ -256,7 +260,7 @@ inline bool KeyValueStore::find(const std::string& key, Search& result)
 
 	assert(result.valid());
 
-	block_type* block = block_get(result.block_id());
+	shptr<block_type> block(block_get(result.block_id()));
 	assert(block);
 
 	/*
@@ -397,7 +401,7 @@ inline bool KeyValueStore::put(const std::string& key, const std::string& value,
 	Search result;
 	bool present = find(key, result);
 
-	block_type* head_block = NULL;
+	shptr<block_type> head_block;
 	bool do_allocate = true;
 
 	if (present)
@@ -421,7 +425,7 @@ inline bool KeyValueStore::put(const std::string& key, const std::string& value,
 	if (do_allocate)
 	{
 		// -- allocate a new place --
-		head_block = NULL;
+		head_block.reset();
 		result.contents_size(value.length());
 		assert(result.envelope_size() == value.length() + sizeof(serialized_value_size_type));
 		alloc_value_envelope(result.locator());
@@ -485,7 +489,7 @@ inline bool KeyValueStore::find(const std::string& key, DataLocator& data_pos)
 	{
 		assert(where.found());
 
-		kv_tree_node_type* node = where.node();
+		shptr<kv_tree_node_type> node( where.node() );
 		assert(node);
 
 		data_pos = node->value(where.pos());
@@ -515,7 +519,7 @@ inline bool KeyValueStore::find(const std::string& key, SizedLocator& sized_pos)
 	{
 		assert(where.found());
 
-		kv_tree_node_type* node = where.node();
+		shptr<kv_tree_node_type> node( where.node() );
 		assert(node);
 
 		sized_pos.dataLocator(node->value(where.pos()));
@@ -529,7 +533,7 @@ inline bool KeyValueStore::find(const std::string& key, SizedLocator& sized_pos)
 
 	assert(sized_pos.valid());
 
-	block_type* block = block_get(sized_pos.block_id());
+	shptr<block_type> block(block_get(sized_pos.block_id()));
 	assert(block);
 
 	/*
@@ -602,7 +606,7 @@ inline bool KeyValueStore::read(std::string& dst, SizedLocator& location)
 	block_id_t  src_block_id = location.block_id();
 	uint32_t    src_offset   = static_cast<uint32_t>(location.uoffset());
 	size_t      src_rem      = length;
-	block_type *src_block    = NULL;
+	shptr<block_type> src_block;
 	//uint32_t    dst_offset   = 0;
 	size_t      nread        = 0;
 
@@ -624,7 +628,7 @@ inline bool KeyValueStore::read(std::string& dst, SizedLocator& location)
 		if (src_offset >= BLOCKSIZE)
 		{
 			src_block_id++;
-			src_block = NULL;
+			src_block.reset();
 			src_offset = 0;
 		}
 	}
@@ -661,7 +665,7 @@ inline bool KeyValueStore::write(const std::string& src, SizedLocator& location)
 	location.normalize();
 	block_id_t  dst_block_id = location.block_id();
 	uint32_t    dst_offset   = static_cast<uint32_t>(location.uoffset());
-	block_type *dst_block    = NULL;
+	shptr<block_type> dst_block;
 	const char *srcp         = src.data();
 	size_t      src_rem      = src.length();
 	size_t      nwritten     = 0;
@@ -691,7 +695,7 @@ inline bool KeyValueStore::write(const std::string& src, SizedLocator& location)
 		if (dst_offset >= BLOCKSIZE)
 		{
 			dst_block_id++;
-			dst_block = NULL;
+			dst_block.reset();
 			dst_offset = 0;
 		}
 	}

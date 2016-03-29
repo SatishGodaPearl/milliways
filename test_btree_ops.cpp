@@ -38,6 +38,7 @@ TEST_CASE( "BTree Operations", "[BTreeOps]" ) {
 	typedef milliways::BTreeMemoryStorage<B_TEST, seriously::Traits<std::string>, seriously::Traits<int32_t> > btree_mem_st_t;
 	typedef milliways::BTreeFileStorage< BLOCK_SIZE, B_TEST, seriously::Traits<std::string>, seriously::Traits<int32_t> > btree_fs_t;
 	typedef btree_t::node_type btree_node_t;
+	typedef milliways::shptr<btree_t::node_type> btree_node_ptr_t;
 	typedef btree_t::lookup_type btree_lookup_t;
 	typedef milliways::node_id_t btree_node_id_t;
 
@@ -52,10 +53,10 @@ TEST_CASE( "BTree Operations", "[BTreeOps]" ) {
 
 		if (!tree.hasRoot())
 			tree.node_alloc();
-		btree_node_t* root = tree.root();
+		btree_node_ptr_t root = tree.root();
 
-		btree_node_t* child1 = root->child_alloc();
-		btree_node_t* child2 = root->child_alloc();
+		btree_node_ptr_t child1 = root->child_alloc();
+		btree_node_ptr_t child2 = root->child_alloc();
 		root->n(1);
 		root->child(0) = child1->id();
 		root->child(1) = child2->id();

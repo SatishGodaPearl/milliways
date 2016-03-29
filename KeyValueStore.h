@@ -215,14 +215,14 @@ struct Traits<milliways::DataLocator>
 	typedef milliways::DataLocator type;
 	typedef type serialized_type;
 	enum { Size = sizeof(type) };
-	enum { SerializedSize = (sizeof(int16_t) + sizeof(uint16_t)) };
+	enum { SerializedSize = (sizeof(uint32_t) + sizeof(uint16_t)) };
 
 	static ssize_t serialize(char*& dst, size_t& avail, const type& v);
 	static ssize_t deserialize(const char*& src, size_t& avail, type& v);
 
 	static size_t size(const type& value)    { UNUSED(value); return Size; }
 	static size_t maxsize(const type& value) { UNUSED(value); return Size; }
-	static size_t serializedsize(const type& value) { UNUSED(value); return Size; }
+	static size_t serializedsize(const type& value) { UNUSED(value); return SerializedSize; }
 
 	static bool valid(const type& value)     { return value.valid(); }
 
@@ -236,14 +236,14 @@ struct Traits<milliways::SizedLocator>
 	typedef type serialized_type;
 	typedef milliways::serialized_value_size_type serialized_size_type;	/* uint32_t */
 	enum { Size = sizeof(type) };
-	enum { SerializedSize = (sizeof(int16_t) + sizeof(uint16_t) + sizeof(serialized_size_type)) };
+	enum { SerializedSize = (sizeof(uint32_t) + sizeof(uint16_t) + sizeof(serialized_size_type)) };
 
 	static ssize_t serialize(char*& dst, size_t& avail, const type& v);
 	static ssize_t deserialize(const char*& src, size_t& avail, type& v);
 
 	static size_t size(const type& value)    { UNUSED(value); return Size; }
 	static size_t maxsize(const type& value) { UNUSED(value); return Size; }
-	static size_t serializedsize(const type& value) { UNUSED(value); return Size; }
+	static size_t serializedsize(const type& value) { UNUSED(value); return SerializedSize; }
 
 	static bool valid(const type& value)     { return value.valid(); }
 
@@ -327,7 +327,7 @@ public:
 
 		bool found() const { return m_lookup.found(); }
 		const std::string& key() const { return m_lookup.key(); }
-		kv_tree_node_type* node() const { return m_lookup.node(); }
+		shptr<kv_tree_node_type> node() const { return m_lookup.node(); }
 		int pos() const { return m_lookup.pos(); }
 		node_id_t nodeId() const { return m_lookup.nodeId(); }
 
@@ -487,7 +487,7 @@ protected:
 
 	block_id_t block_alloc_id(int n_blocks = 1) { assert(m_blockstorage); return m_blockstorage->allocId(n_blocks); }
 	bool block_dispose(block_id_t block_id, int count = 1) { assert(m_blockstorage); return m_blockstorage->dispose(block_id, count); }
-	block_type* block_get(block_id_t block_id) { assert(m_blockstorage); return m_blockstorage->get(block_id); }
+	shptr<block_type> block_get(block_id_t block_id) { assert(m_blockstorage); return m_blockstorage->get(block_id); }
 	bool block_put(const block_type& src) { assert(m_blockstorage); return m_blockstorage->put(src); }
 
 	/* -- Tree access ---------------------------------------------- */
