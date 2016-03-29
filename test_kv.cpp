@@ -277,7 +277,7 @@ TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 	}
 
 	SECTION( "largish sets works" ) {
-		const std::string test_pathname("/tmp/test_kv");
+		const std::string test_pathname("./test_kv");
 
 		std::remove(test_pathname.c_str());
 
@@ -365,7 +365,7 @@ TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 	}
 
 	SECTION( "largish values works" ) {
-		const std::string test_pathname("/tmp/test_kv");
+		const std::string test_pathname("./test_kv");
 
 		std::remove(test_pathname.c_str());
 
@@ -421,7 +421,7 @@ TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 	}
 
 	SECTION( "sets with largish values works" ) {
-		const std::string test_pathname("/tmp/test_kv");
+		const std::string test_pathname("./test_kv");
 
 		std::remove(test_pathname.c_str());
 
