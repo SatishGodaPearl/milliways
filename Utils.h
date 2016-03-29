@@ -35,6 +35,7 @@ std::ostream& hexdump(std::ostream& out, const void* ptr, int buflen);
 std::string s_hexdump(const void* ptr, int buflen);
 
 std::string hexify(const std::string& input);
+std::string dehexify(const std::string& input);
 
 /* ----------------------------------------------------------------- *
  *   shptr<T>                                                        *
