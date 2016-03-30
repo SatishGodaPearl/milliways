@@ -39,6 +39,8 @@
 
 namespace milliways {
 
+static const int LRUCACHE_L1_CACHE_SIZE = 16;
+
 template <size_t SIZE, typename Key, typename T>
 class LRUCache
 {
@@ -50,10 +52,11 @@ public:
 	typedef typename ordered_map<key_type, mapped_type>::size_type size_type;
 
 	static const size_type Size = SIZE;
+	static const int L1_SIZE = LRUCACHE_L1_CACHE_SIZE;
 
 	typedef enum { op_get, op_set, op_sub } op_type;
 
-	LRUCache() {}
+	LRUCache() : m_l1_last(-1) {}
 	virtual ~LRUCache() { /* call evict_all() in final destructor */ evict_all(); }
 
 	virtual bool on_miss(op_type op, const key_type& key, mapped_type& value);
@@ -84,8 +87,9 @@ private:
 	LRUCache(const LRUCache<SIZE, Key, T>& other);
 	LRUCache& operator= (const LRUCache<SIZE, Key, T>& rhs);
 
-	key_type m_last_key;
-	mapped_type m_last_mapped;
+	key_type m_l1_key[L1_SIZE];
+	mapped_type m_l1_mapped[L1_SIZE];
+	int m_l1_last;
 	ordered_map<key_type, mapped_type> m_omap;
 };
 
