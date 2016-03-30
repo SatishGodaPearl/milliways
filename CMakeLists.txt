@@ -1,7 +1,37 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 2.8)
 project(milliways)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
+include(CheckCXXSourceCompiles)
+include(CheckTypeSize)
+check_cxx_source_compiles("
+    #include <memory>
+    int main() { std::shared_ptr<int> p; return 0; }
+" HAVE_STD_SHARED_PTR)
+check_cxx_source_compiles("
+    #include <tr1/memory>
+    int main() { std::tr1::shared_ptr<int> p; return 0; }
+" HAVE_STD_TR1_SHARED_PTR)
+check_cxx_source_compiles("
+    #include <boost/shared_ptr.hpp>
+    int main() { boost::shared_ptr<int> p; return 0; }
+" HAVE_BOOST_SHARED_PTR)
+
+SET(CMAKE_EXTRA_INCLUDE_FILES stdint.h)
+CHECK_TYPE_SIZE(size_t SIZEOF_SIZE_T LANGUAGE CXX)
+CHECK_TYPE_SIZE(ssize_t SIZEOF_SSIZE_T LANGUAGE CXX)
+CHECK_TYPE_SIZE(short SIZEOF_SHORT LANGUAGE CXX)
+CHECK_TYPE_SIZE(int SIZEOF_INT LANGUAGE CXX)
+CHECK_TYPE_SIZE(long SIZEOF_LONG LANGUAGE CXX)
+CHECK_TYPE_SIZE("unsigned long" SIZEOF_UNSIGNED_LONG LANGUAGE CXX)
+CHECK_TYPE_SIZE("long long" SIZEOF_LONG_LONG LANGUAGE CXX)
+CHECK_TYPE_SIZE(float SIZEOF_FLOAT LANGUAGE CXX)
+CHECK_TYPE_SIZE(double SIZEOF_DOUBLE LANGUAGE CXX)
+SET(CMAKE_EXTRA_INCLUDE_FILES)
+
+configure_file (config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h )
+configure_file (config.h.cmake ${PROJECT_SOURCE_DIR}/config.h )
 
 #set(SOURCE_FILES main.cpp BlockStorage.impl.hpp BlockStorage.h LRUCache.impl.hpp LRUCache.h ordered_map.h ordered_map.impl.hpp)
 #add_executable(milliways ${SOURCE_FILES})
