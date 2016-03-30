@@ -35,6 +35,7 @@ std::ostream& hexdump(std::ostream& out, const void* ptr, int buflen);
 std::string s_hexdump(const void* ptr, int buflen);
 
 std::string hexify(const std::string& input);
+std::string dehexify(const std::string& input);
 
 /* ----------------------------------------------------------------- *
  *   shptr<T>                                                        *
@@ -77,37 +78,42 @@ class shptr
 public:
 	shptr() : m_naked(NULL) {}
 	explicit shptr(T* naked) : m_naked(NULL) { initialize_ptr(naked); }
-	shptr(const shptr<T>& other) : m_naked(NULL) { initialize_ptr(other.m_naked); }
-	virtual ~shptr() { finalize_ptr(); }
+	shptr(const shptr<T>& other) : m_naked(NULL) { assert(other.verify()); initialize_ptr(other.m_naked); }
+	virtual ~shptr() { assert(verify()); finalize_ptr(); }
 	shptr<T>& operator=(const shptr<T>& rhs) {
 		if ((this == &rhs) || (*this == rhs)) return *this;
+		assert(verify());
 		finalize_ptr();
+		assert(rhs.verify());
 		initialize_ptr(rhs.m_naked);
 		return *this;
 	}
 
 	bool operator==(const shptr<T>& rhs) {
 		if (this == &rhs) return true;
+		assert(rhs.verify());
 		return (m_naked == rhs.m_naked) ? true : false;
 	}
 	bool operator!=(const shptr<T>& rhs) { return !(*this == rhs); }
 	bool operator<(const shptr<T>& rhs) const {
 		if (*this == rhs) return false;
+		assert(rhs.verify());
 		return (m_naked < rhs.m_naked);
 	}
 
-	T* get() const 					{ return m_naked; }
-	const T& operator*() const 		{ return *m_naked; }
-	T& operator*()				 	{ return *m_naked; }
-	const T* operator->() const 	{ return m_naked; }
-	T* operator->() 				{ return m_naked; }
+	T* get() const 					{ assert(verify()); return m_naked; }
+	const T& operator*() const 		{ assert(verify()); return *m_naked; }
+	T& operator*()				 	{ assert(verify()); return *m_naked; }
+	const T* operator->() const 	{ assert(verify()); return m_naked; }
+	T* operator->() 				{ assert(verify()); return m_naked; }
 
-	operator void*() const 			{ return m_naked; }
-	operator bool() const 			{ return m_naked ? true : false; }
+	operator void*() const 			{ assert(verify()); return m_naked; }
+	operator bool() const 			{ assert(verify()); return m_naked ? true : false; }
 
-	shptr<T>& reset() { finalize_ptr(); m_naked = NULL; assert(! m_naked); return *this; }
+	shptr<T>& reset() { assert(verify()); finalize_ptr(); m_naked = NULL; assert(! m_naked); return *this; }
 	shptr<T>& reset(T* naked) {
 		if (naked == m_naked) return *this;
+		assert(verify());
 		finalize_ptr();
 		if (! naked) {
 			m_naked = naked;
@@ -118,6 +124,7 @@ public:
 	}
 	shptr<T>& swap(shptr<T>& other) {
 		if ((this == &other) || (*this == other)) return *this;
+		assert(verify());
 		T* tmp = m_naked;
 		m_naked = other.m_naked; other.m_naked = tmp;
 		return *this;
@@ -133,10 +140,26 @@ public:
 		return refcnt_map[m_naked];
 	}
 
+#if defined(MILLIWAYS_CHECK_SHARED_POINTER_CORRUPTION)
+	bool verify() const {
+		if (! m_naked) return true;
+		// WARNING: not thread safe
+		// TODO: implement mutex locking for thread-safety
+		std::map<void*, long>& refcnt_map = shptr_manager::RefcntMap();
+		if (! refcnt_map.count(m_naked))
+			return false;
+		// return (refcnt_map[m_naked] > 0) ? true : false;
+		return true;
+	}
+#else
+	bool verify() const { return true; }
+#endif
+
 protected:
 	void finalize_ptr() {
 		if (! m_naked) return;
 		assert(m_naked);
+		assert(verify());
 		// WARNING: not thread safe
 		// TODO: implement mutex locking for thread-safety
 		std::map<void*, long>& refcnt_map = shptr_manager::RefcntMap();

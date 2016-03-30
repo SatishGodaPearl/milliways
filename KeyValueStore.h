@@ -47,6 +47,7 @@ static const int KV_BLOCK_CACHESIZE = MILLIWAYS_DEFAULT_BLOCK_CACHE_SIZE;	/* def
 static const int KV_NODE_CACHESIZE = MILLIWAYS_DEFAULT_NODE_CACHE_SIZE;		/* default: 1024 */
 static const int KV_B = MILLIWAYS_DEFAULT_B_FACTOR;							/* default: 73   */
 
+typedef uint16_t serialized_data_offset_type;
 typedef uint32_t serialized_value_size_type;
 
 /* ----------------------------------------------------------------- *
@@ -56,8 +57,11 @@ typedef uint32_t serialized_value_size_type;
 struct DataLocator
 {
 public:
-	typedef int16_t offset_t;
-	typedef uint16_t uoffset_t;
+	// we use a large type here for offsets, since we could risk overflow when
+	// doing offset math, then when serializing we'll cast it to uint16_t
+	// since the final offset must reach only a whole block and not more
+	typedef ssize_t offset_t;
+	typedef size_t uoffset_t;
 
 	DataLocator() :
 		m_block_id(BLOCK_ID_INVALID), m_offset(0) {}
@@ -214,8 +218,9 @@ struct Traits<milliways::DataLocator>
 {
 	typedef milliways::DataLocator type;
 	typedef type serialized_type;
+	typedef milliways::serialized_data_offset_type serialized_offset_type;	/* uint16_t */
 	enum { Size = sizeof(type) };
-	enum { SerializedSize = (sizeof(uint32_t) + sizeof(uint16_t)) };
+	enum { SerializedSize = (sizeof(uint32_t) + sizeof(serialized_offset_type)) };
 
 	static ssize_t serialize(char*& dst, size_t& avail, const type& v);
 	static ssize_t deserialize(const char*& src, size_t& avail, type& v);
@@ -234,6 +239,7 @@ struct Traits<milliways::SizedLocator>
 {
 	typedef milliways::SizedLocator type;
 	typedef type serialized_type;
+	typedef milliways::serialized_data_offset_type serialized_offset_type;	/* uint16_t */
 	typedef milliways::serialized_value_size_type serialized_size_type;	/* uint32_t */
 	enum { Size = sizeof(type) };
 	enum { SerializedSize = (sizeof(uint32_t) + sizeof(uint16_t) + sizeof(serialized_size_type)) };

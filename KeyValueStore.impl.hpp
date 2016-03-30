@@ -42,18 +42,18 @@ inline ssize_t Traits<milliways::DataLocator>::serialize(char*& dst, size_t& ava
 	char* dstp = dst;
 	size_t initial_avail = avail;
 
-	if ((sizeof(uint32_t) + sizeof(uoffset_t)) > avail)
+	if ((sizeof(uint32_t) + sizeof(serialized_offset_type)) > avail)
 		return -1;
 
-	assert((sizeof(uint32_t) + sizeof(uoffset_t)) <= avail);
+	assert((sizeof(uint32_t) + sizeof(serialized_offset_type)) <= avail);
 
 	type nv(v);
 	nv.normalize();
 	uint32_t v_block_id = static_cast<uint32_t>(nv.block_id());
-	uint16_t v_offset = static_cast<uoffset_t>(nv.uoffset());
+	uint16_t v_offset = static_cast<serialized_offset_type>(nv.uoffset());
 
 	Traits<uint32_t>::serialize(dstp, avail, v_block_id);
-	Traits<uoffset_t>::serialize(dstp, avail, v_offset);
+	Traits<serialized_offset_type>::serialize(dstp, avail, v_offset);
 
 	if (avail > 0)
 		*dstp = '\0';
@@ -66,18 +66,18 @@ inline ssize_t Traits<milliways::DataLocator>::deserialize(const char*& src, siz
 {
 	typedef type::uoffset_t uoffset_t;
 
-	if (avail < (sizeof(uint32_t) + sizeof(uoffset_t)))
+	if (avail < (sizeof(uint32_t) + sizeof(serialized_offset_type)))
 		return -1;
 
 	const char* srcp = src;
 	size_t initial_avail = avail;
 
 	uint32_t v_block_id = milliways::BLOCK_ID_INVALID;
-	uoffset_t v_offset = 0;
+	serialized_offset_type v_offset = 0;
 
 	if (Traits<uint32_t>::deserialize(srcp, avail, v_block_id) < 0)
 		return -1;
-	if (Traits<uoffset_t>::deserialize(srcp, avail, v_offset) < 0)
+	if (Traits<serialized_offset_type>::deserialize(srcp, avail, v_offset) < 0)
 		return -1;
 
 	v.block_id(v_block_id);
@@ -94,19 +94,19 @@ inline ssize_t Traits<milliways::SizedLocator>::serialize(char*& dst, size_t& av
 	char* dstp = dst;
 	size_t initial_avail = avail;
 
-	if ((sizeof(uint32_t) + sizeof(uoffset_t) + sizeof(serialized_size_type)) > avail)
+	if ((sizeof(uint32_t) + sizeof(serialized_offset_type) + sizeof(serialized_size_type)) > avail)
 		return -1;
 
-	assert((sizeof(uint32_t) + sizeof(uoffset_t) + sizeof(serialized_size_type)) <= avail);
+	assert((sizeof(uint32_t) + sizeof(serialized_offset_type) + sizeof(serialized_size_type)) <= avail);
 
 	type nv(v);
 	nv.normalize();
 	uint32_t v_block_id = static_cast<uint32_t>(nv.block_id());
-	uint16_t v_offset = static_cast<uoffset_t>(nv.uoffset());
+	serialized_offset_type v_offset = static_cast<serialized_offset_type>(nv.uoffset());
 	serialized_size_type v_size = static_cast<serialized_size_type>(nv.size());
 
 	Traits<uint32_t>::serialize(dstp, avail, v_block_id);
-	Traits<uoffset_t>::serialize(dstp, avail, v_offset);
+	Traits<serialized_offset_type>::serialize(dstp, avail, v_offset);
 	Traits<serialized_size_type>::serialize(dstp, avail, v_size);
 
 	if (avail > 0)
@@ -120,19 +120,19 @@ inline ssize_t Traits<milliways::SizedLocator>::deserialize(const char*& src, si
 {
 	typedef type::uoffset_t uoffset_t;
 
-	if (avail < (sizeof(uint32_t) + sizeof(uoffset_t) + sizeof(serialized_size_type)))
+	if (avail < (sizeof(uint32_t) + sizeof(serialized_offset_type) + sizeof(serialized_size_type)))
 		return -1;
 
 	const char* srcp = src;
 	size_t initial_avail = avail;
 
 	uint32_t v_block_id = milliways::BLOCK_ID_INVALID;
-	uoffset_t v_offset = 0;
+	serialized_offset_type v_offset = 0;
 	serialized_size_type v_size = 0;
 
 	if (Traits<uint32_t>::deserialize(srcp, avail, v_block_id) < 0)
 		return -1;
-	if (Traits<uoffset_t>::deserialize(srcp, avail, v_offset) < 0)
+	if (Traits<serialized_offset_type>::deserialize(srcp, avail, v_offset) < 0)
 		return -1;
 	if (Traits<serialized_size_type>::deserialize(srcp, avail, v_size) < 0)
 		return -1;
@@ -759,7 +759,9 @@ inline bool KeyValueStore::header_write()
 	assert(m_blockstorage);
 
 	seriously::Packer<MAX_USER_HEADER> packer;
-	packer << static_cast<uint32_t>(MAJOR_VERSION) << static_cast<uint32_t>(MINOR_VERSION) <<
+	std::string headerPrefix("KEYVALUEDIRECT");
+	packer << headerPrefix <<
+		static_cast<uint32_t>(MAJOR_VERSION) << static_cast<uint32_t>(MINOR_VERSION) <<
 	 	static_cast<uint32_t>(BLOCKSIZE) << static_cast<uint32_t>(B) <<
 	 	static_cast<uint32_t>(KEY_MAX_SIZE);
 
@@ -792,8 +794,10 @@ inline bool KeyValueStore::header_read()
 //	std::cerr << "R userHeader[" << m_kv_header_uid << "]:" << std::endl;
 //	std::cerr << s_hexdump(userHeader.data(), userHeader.size()) << std::endl;
 
+	std::string headerPrefix;
 	uint32_t v_MAJOR, v_MINOR, v_BLOCKSIZE, v_B, v_KEY_MAX_SIZE;
 
+	packer >> headerPrefix;
 	packer >> v_MAJOR >> v_MINOR >> v_BLOCKSIZE >> v_B >> v_KEY_MAX_SIZE;
 
 	// std::cerr << "-> KV READ VER:" << v_MAJOR << "." << v_MINOR << " BLOCKSIZE:" << v_BLOCKSIZE <<
