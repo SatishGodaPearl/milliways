@@ -58,12 +58,21 @@ bool LRUCache<SIZE, Key, T>::on_eviction(const key_type& key, mapped_type& value
 template <size_t SIZE, typename Key, typename T>
 bool LRUCache<SIZE, Key, T>::get(mapped_type& dst, key_type& key)
 {
+	if (key == m_last_key)
+	{
+		dst = m_last_mapped;
+		return true;
+	}
+
 	typename ordered_map<key_type, mapped_type>::const_iterator it = m_omap.find(key);
 
 	if (it != m_omap.end())
 	{
 		// fetch from its place...
 		typename ordered_map<key_type, mapped_type>::value_type item = m_omap.pop(key);
+
+		m_last_key = key;
+		m_last_mapped = item.second;
 
 		// ...and re-insert at top
 		m_omap[key] = item.second;
@@ -82,6 +91,9 @@ bool LRUCache<SIZE, Key, T>::get(mapped_type& dst, key_type& key)
 		bool success = on_miss(op_get, key, value);
 		if (success)
 		{
+			m_last_key = key;
+			m_last_mapped = value;
+
 			m_omap[key] = value;
 			return success;
 		}
@@ -94,6 +106,12 @@ template <size_t SIZE, typename Key, typename T>
 bool LRUCache<SIZE, Key, T>::set(key_type& key, mapped_type& value)
 {
 	typename ordered_map<key_type, mapped_type>::const_iterator it = m_omap.find(key);
+
+	if (key == m_last_key)
+	{
+		m_last_mapped = value;
+		return true;
+	}
 
 	if (it != m_omap.end())
 	{
@@ -108,6 +126,9 @@ bool LRUCache<SIZE, Key, T>::set(key_type& key, mapped_type& value)
 		/* bool success = */ on_miss(op_set, key, value);
 	}
 
+	m_last_key = key;
+	m_last_mapped = value;
+
 	m_omap[key] = value;
 	on_set(key, value);
 
@@ -118,6 +139,12 @@ template <size_t SIZE, typename Key, typename T>
 bool LRUCache<SIZE, Key, T>::del(key_type& key)
 {
 	typename ordered_map<key_type, mapped_type>::const_iterator it = m_omap.find(key);
+
+	if (key == m_last_key)
+	{
+		m_last_key = key_type();
+		m_last_mapped = mapped_type();
+	}
 
 	if (it != m_omap.end())
 	{
@@ -135,10 +162,18 @@ T& LRUCache<SIZE, Key, T>::operator[](const key_type& key)
 {
 	typename ordered_map<key_type, mapped_type>::const_iterator it = m_omap.find(key);
 
+	if (key == m_last_key)
+	{
+		return m_last_mapped;
+	}
+
 	if (it != m_omap.end())
 	{
 		// fetch from its place...
 		typename ordered_map<key_type, mapped_type>::value_type item = m_omap.pop(key);
+
+		m_last_key = key;
+		m_last_mapped = item.second;
 
 		// ...and re-insert at top
 		m_omap[key] = item.second;
@@ -155,6 +190,9 @@ T& LRUCache<SIZE, Key, T>::operator[](const key_type& key)
 		mapped_type value;
 
 		/* bool success = */ on_miss(op_sub, key, value);
+
+		m_last_key = key;
+		m_last_mapped = value;
 
 		m_omap[key] = value;
 		return m_omap[key];
@@ -173,6 +211,12 @@ void LRUCache<SIZE, Key, T>::evict(bool force)
 	{
 		// remove oldest (FIFO)
 		typename ordered_map<key_type, mapped_type>::value_type item = m_omap.pop_front();
+
+		if (item.first == m_last_key)
+		{
+			m_last_key = key_type();
+			m_last_mapped = mapped_type();
+		}
 
 		on_eviction(item.first, item.second);
 	}
@@ -195,6 +239,12 @@ typename std::pair<Key, T> LRUCache<SIZE, Key, T>::pop()
 
 	// remove oldest (FIFO)
 	typename ordered_map<key_type, mapped_type>::value_type item = m_omap.pop_front();
+
+	if (item.first == m_last_key)
+	{
+		m_last_key = key_type();
+		m_last_mapped = mapped_type();
+	}
 
 	on_eviction(item.first, item.second);
 

@@ -84,6 +84,8 @@ private:
 	LRUCache(const LRUCache<SIZE, Key, T>& other);
 	LRUCache& operator= (const LRUCache<SIZE, Key, T>& rhs);
 
+	key_type m_last_key;
+	mapped_type m_last_mapped;
 	ordered_map<key_type, mapped_type> m_omap;
 };
 
