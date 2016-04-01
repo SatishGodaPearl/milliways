@@ -65,4 +65,10 @@
 #define SIZEOF_SIZE_T @SIZEOF_SIZE_T@
 #define SIZEOF_SSIZE_T @SIZEOF_SSIZE_T@
 
+/* Define to 1 if an explicit template for size_t is not needed if all the uint*_t types are there */
+#cmakedefine DOESNT_NEED_TEMPLATED_SIZE_T 1
+
+/* Define to 1 if an explicit template for size_t is allowed even if all the uint*_t types are there */
+#cmakedefine ALLOWS_TEMPLATED_SIZE_T 1
+
 #endif /* MILLIWAYS_CONFIG_H */

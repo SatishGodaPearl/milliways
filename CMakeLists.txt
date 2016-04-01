@@ -18,6 +18,62 @@ check_cxx_source_compiles("
     int main() { boost::shared_ptr<int> p; return 0; }
 " HAVE_BOOST_SHARED_PTR)
 
+check_cxx_source_compiles("
+	#include <stdint.h>
+	#include <stddef.h>
+
+	template <typename T>
+	struct Traits;
+
+	template <>
+	struct Traits<uint8_t>
+	{ typedef uint8_t type; static size_t size() { return sizeof(type); } };
+
+	template <>
+	struct Traits<uint16_t>
+	{ typedef uint16_t type; static size_t size() { return sizeof(type); } };
+
+	template <>
+	struct Traits<uint32_t>
+	{ typedef uint32_t type; static size_t size() { return sizeof(type); } };
+
+	template <>
+	struct Traits<uint64_t>
+	{ typedef uint64_t type; static size_t size() { return sizeof(type); } };
+
+	template <>
+	struct Traits<size_t>
+	{ typedef size_t type; static size_t size() { return sizeof(type); } };
+
+	int main() { size_t size = Traits<size_t>::size(); size++; }
+" ALLOWS_TEMPLATED_SIZE_T)
+
+check_cxx_source_compiles("
+	#include <stdint.h>
+	#include <stddef.h>
+
+	template <typename T>
+	struct Traits;
+
+	template <>
+	struct Traits<uint8_t>
+	{ typedef uint8_t type; static size_t size() { return sizeof(type); } };
+
+	template <>
+	struct Traits<uint16_t>
+	{ typedef uint16_t type; static size_t size() { return sizeof(type); } };
+
+	template <>
+	struct Traits<uint32_t>
+	{ typedef uint32_t type; static size_t size() { return sizeof(type); } };
+
+	template <>
+	struct Traits<uint64_t>
+	{ typedef uint64_t type; static size_t size() { return sizeof(type); } };
+
+	int main() { size_t size = Traits<size_t>::size(); size++; }
+" DOESNT_NEED_TEMPLATED_SIZE_T)
+
 SET(CMAKE_EXTRA_INCLUDE_FILES stdint.h)
 CHECK_TYPE_SIZE(size_t SIZEOF_SIZE_T LANGUAGE CXX)
 CHECK_TYPE_SIZE(ssize_t SIZEOF_SSIZE_T LANGUAGE CXX)
