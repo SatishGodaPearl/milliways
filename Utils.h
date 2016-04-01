@@ -46,6 +46,41 @@
 	#endif
 #endif
 
+#if ! defined(NDEBUG)
+
+#undef TRACE
+#define TRACE( TEXT )                  \
+do                                     \
+{                                      \
+    std::cerr << "[TRACE] " << TEXT << \
+        std::endl;                     \
+    std::cerr.flush();                 \
+}                                      \
+while( 0 )
+
+#undef CTRACE
+#define CTRACE( COND, TEXT )               \
+do                                         \
+{                                          \
+	if ((COND)) {                          \
+        std::cerr << "[TRACE] " << TEXT << \
+            std::endl;                     \
+        std::cerr.flush();                 \
+    }                                      \
+}                                          \
+while( 0 )
+
+#else
+
+#undef TRACE
+#define TRACE( TEXT ) do { } while(0)
+
+#undef CTRACE
+#define CTRACE( COND, TEXT ) do { } while(0)
+
+#endif
+
+
 namespace milliways {
 
 void hexdump(void* ptr, int buflen);
