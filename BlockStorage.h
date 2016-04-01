@@ -210,9 +210,9 @@ public:
 		{
 			if (block->valid())
 				m_storage->write(*block);
-			block->dirty(true);
-			block->index(BLOCK_ID_INVALID);
-			value.reset();
+			// block->dirty(true);
+			// block->index(BLOCK_ID_INVALID);
+			// value.reset();
 		}
 		return true;
 	}

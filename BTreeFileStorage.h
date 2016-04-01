@@ -108,8 +108,8 @@ public:
 		{
 			if (node->id() != NODE_ID_INVALID)
 				m_storage->node_write(*node);
-			node->id(NODE_ID_INVALID);
-			value.reset();
+			// node->id(NODE_ID_INVALID);
+			// value.reset();
 		}
 		return true;
 	}
