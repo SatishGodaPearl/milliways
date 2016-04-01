@@ -384,7 +384,9 @@ bool FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::write(block_t& src)
 
 	try {
 		m_stream.seekp(static_cast<std::streamoff>(pos));
-	} catch (std::ios::failure) {
+	} catch (std::ios::failure& e) {
+		std::cerr << "error writing (seeking) block " << src.index() << ":" << e.what() << std::endl;
+		src.dirty(true);
 		assert(false);
 		return false;
 	}
@@ -392,7 +394,8 @@ bool FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::write(block_t& src)
 	try {
 		m_stream.write(src.data(), BlockSize);
 	} catch (std::ios_base::failure& e) {
-		std::cerr << "error reading block " << src.index() << ":" << e.what() << std::endl;
+		std::cerr << "error writing block " << src.index() << ":" << e.what() << std::endl;
+		src.dirty(true);
 		assert(false);
 		return false;
 	}
@@ -400,9 +403,11 @@ bool FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::write(block_t& src)
 	if (m_stream.fail())
 	{
 		std::cerr << "stream fail writing block " << src.index() << ", error: " << strerror(errno) << std::endl;
+		src.dirty(true);
 		assert(false);
 		return false;
-	}
+	} else
+		src.dirty(false);
 
 	assert(! m_stream.fail());
 

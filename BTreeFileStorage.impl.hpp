@@ -109,6 +109,7 @@ bool BTreeFileStorage<BLOCKSIZE, B_, KeyTraits, TTraits, Compare>::node_write(no
 	bool ok = serialize_node(block, node);
 	m_block_storage->put(block);
 	assert(block.index() == static_cast<block_id_t>(node_id));
+	node.dirty(!ok);
 
 	// std::cerr << "nFS::node_write(" << node.id() << ") <- " << (ok ? "OK" : "NO") << std::endl;
 	return ok;
