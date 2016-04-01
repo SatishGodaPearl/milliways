@@ -88,6 +88,12 @@ check_cxx_source_compiles("
 	int main() { size_t size = Traits<size_t>::size(); size++; }
 " DOESNT_NEED_TEMPLATED_SIZE_T)
 
+check_cxx_source_compiles("
+	#include <vector>
+
+	int main() { typename std::vector<int> v; v.push_back(1); }
+" ALLOWS_TYPENAME_OUTSIDE_TEMPLATES)
+
 SET(CMAKE_EXTRA_INCLUDE_FILES stdint.h)
 CHECK_TYPE_SIZE(size_t SIZEOF_SIZE_T LANGUAGE CXX)
 CHECK_TYPE_SIZE(ssize_t SIZEOF_SSIZE_T LANGUAGE CXX)

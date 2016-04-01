@@ -170,7 +170,7 @@ public:
 	long n_set() const { return m_n_set; }
 	long n_eviction() const { return m_n_eviction; }
 
-	bool on_miss(typename base_type::op_type op, const key_type& key, mapped_type& value)
+	bool on_miss(XTYPENAME base_type::op_type op, const key_type& key, mapped_type& value)
 	{
 		m_n_miss++;
 		switch (op)

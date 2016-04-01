@@ -63,7 +63,7 @@ static std::string random_string(int length)
 
 TEST_CASE( "KeyValue store II", "[KeyValueStoreII]" ) {
 	typedef milliways::KeyValueStore kv_t;
-	typedef typename kv_t::block_storage_type kv_blockstorage_t;
+	typedef XTYPENAME kv_t::block_storage_type kv_blockstorage_t;
 
 	SECTION( "alternate get/put" ) {
 		std::cerr << "T1\n";

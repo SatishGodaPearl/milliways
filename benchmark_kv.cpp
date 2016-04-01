@@ -163,7 +163,7 @@ static const int MAX_WORDS = 1000000;
 static void benchmark_1()
 {
 	typedef milliways::KeyValueStore kv_t;
-	typedef typename kv_t::block_storage_type kv_blockstorage_t;
+	typedef XTYPENAME kv_t::block_storage_type kv_blockstorage_t;
 
 	const std::string words_pathname("/usr/share/dict/words");
 

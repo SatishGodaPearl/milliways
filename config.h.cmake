@@ -71,4 +71,13 @@
 /* Define to 1 if an explicit template for size_t is allowed even if all the uint*_t types are there */
 #cmakedefine ALLOWS_TEMPLATED_SIZE_T 1
 
+/* Define to 1 if "typename" keyword is allowed outside templates (it is not in C++03) */
+#cmakedefine ALLOWS_TYPENAME_OUTSIDE_TEMPLATES 1
+
+#if ALLOWS_TYPENAME_OUTSIDE_TEMPLATES
+#define XTYPENAME typename
+#else /* ! ALLOWS_TYPENAME_OUTSIDE_TEMPLATES */
+#define XTYPENAME
+#endif /* ! ALLOWS_TYPENAME_OUTSIDE_TEMPLATES */
+
 #endif /* MILLIWAYS_CONFIG_H */

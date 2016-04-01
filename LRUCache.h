@@ -35,6 +35,7 @@
 #include <stdint.h>
 #include <assert.h>
 
+#include "config.h"
 #include "ordered_map.h"
 
 namespace milliways {
