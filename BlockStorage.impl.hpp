@@ -435,11 +435,21 @@ bool FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::put(const block_t& src)
 	shptr<block_t> cached( m_lru[src.index()] );
 	if (cached)
 	{
-		assert(cached->index() == src.index());
-		*cached = src;
-		assert(src.dirty() == (*cached).dirty());
+		if (cached.get() != &src)
+		{
+			assert(cached->index() == src.index());
+			*cached = src;
+			assert(src.dirty() == (*cached).dirty());
+		}
 		return true;
+	} else
+	{
+		block_id_t bid = src.index();
+		shptr<block_t> src_ptr( new block_t(bid) );
+		*src_ptr = src;
+		return m_lru.set(bid, src_ptr) ? true : false;
 	}
+
 	return false;
 }
 
