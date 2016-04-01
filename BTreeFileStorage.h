@@ -57,9 +57,10 @@ public:
 
 	static const size_type Size = CACHESIZE;
 	static const size_type BlockSize = BLOCKSIZE;
+	static const node_id_t InvalidCacheKey = NODE_ID_INVALID;
 
 	LRUNodeCache(storage_ptr_type storage) :
-			base_type(), m_storage(storage) {}
+			base_type(LRUNodeCache::InvalidCacheKey), m_storage(storage) {}
 	~LRUNodeCache() { this->evict_all(); }
 
 	bool on_miss(typename base_type::op_type op, const key_type& key, mapped_type& value)

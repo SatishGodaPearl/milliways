@@ -161,9 +161,10 @@ public:
 
 	static const size_type Size = CACHESIZE;
 	static const size_type BlockSize = BLOCKSIZE;
+	static const block_id_t InvalidCacheKey = BLOCK_ID_INVALID;
 
 	LRUBlockCache(storage_ptr_type storage) :
-		base_type(), m_storage(storage) {}
+		base_type(LRUBlockCache::InvalidCacheKey), m_storage(storage) {}
 
 	bool on_miss(typename base_type::op_type op, const key_type& key, mapped_type& value)
 	{

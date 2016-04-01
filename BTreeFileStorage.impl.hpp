@@ -34,6 +34,16 @@
 
 namespace milliways {
 
+template < size_t CACHESIZE, size_t BLOCKSIZE, int B_, typename KeyTraits, typename TTraits, class Compare >
+const typename LRUNodeCache<CACHESIZE, BLOCKSIZE, B_, KeyTraits, TTraits, Compare>::size_type LRUNodeCache<CACHESIZE, BLOCKSIZE, B_, KeyTraits, TTraits, Compare>::Size;
+
+template < size_t CACHESIZE, size_t BLOCKSIZE, int B_, typename KeyTraits, typename TTraits, class Compare >
+const typename LRUNodeCache<CACHESIZE, BLOCKSIZE, B_, KeyTraits, TTraits, Compare>::size_type LRUNodeCache<CACHESIZE, BLOCKSIZE, B_, KeyTraits, TTraits, Compare>::BlockSize;
+
+template < size_t CACHESIZE, size_t BLOCKSIZE, int B_, typename KeyTraits, typename TTraits, class Compare >
+const node_id_t LRUNodeCache<CACHESIZE, BLOCKSIZE, B_, KeyTraits, TTraits, Compare>::InvalidCacheKey;
+
+
 template < size_t BLOCKSIZE, int B_, typename KeyTraits, typename TTraits, class Compare >
 BTreeFileStorage<BLOCKSIZE, B_, KeyTraits, TTraits, Compare>::~BTreeFileStorage()
 {

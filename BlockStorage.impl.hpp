@@ -192,6 +192,19 @@ bool BlockStorage<BLOCKSIZE>::dispose(block_t& block)
 }
 
 /* ----------------------------------------------------------------- *
+ *   LRUBlockCache                                                   *
+ * ----------------------------------------------------------------- */
+
+template < size_t BLOCKSIZE, size_t CACHESIZE >
+const typename LRUBlockCache<BLOCKSIZE, CACHESIZE>::size_type LRUBlockCache<BLOCKSIZE, CACHESIZE>::Size;
+
+template < size_t BLOCKSIZE, size_t CACHESIZE >
+const typename LRUBlockCache<BLOCKSIZE, CACHESIZE>::size_type LRUBlockCache<BLOCKSIZE, CACHESIZE>::BlockSize;
+
+template < size_t BLOCKSIZE, size_t CACHESIZE >
+const block_id_t LRUBlockCache<BLOCKSIZE, CACHESIZE>::InvalidCacheKey;
+
+/* ----------------------------------------------------------------- *
  *   FileBlockStorage                                                *
  * ----------------------------------------------------------------- */
 

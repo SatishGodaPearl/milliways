@@ -31,6 +31,20 @@
 
 namespace milliways {
 
+// template <size_t SIZE, typename Key, typename T>
+// LRUCache<SIZE, Key, T>::LRUCache() :
+// 	m_l1_last(-1)
+// {
+// 	clear_l1();
+// }
+
+template <size_t SIZE, typename Key, typename T>
+LRUCache<SIZE, Key, T>::LRUCache(const key_type& invalid) :
+	m_l1_last(-1), m_invalid_key(invalid)
+{
+	clear_l1();
+}
+
 template <size_t SIZE, typename Key, typename T>
 bool LRUCache<SIZE, Key, T>::on_miss(op_type op, const key_type& key, mapped_type& value)
 {
@@ -61,7 +75,8 @@ bool LRUCache<SIZE, Key, T>::get(mapped_type& dst, key_type& key)
 	for (int i = 0; i < L1_SIZE; i++)
 		if (key == m_l1_key[i])
 		{
-			dst = m_l1_mapped[i];
+			assert(m_l1_mapped[i]);
+			dst = *m_l1_mapped[i];
 			return true;
 		}
 
@@ -71,15 +86,18 @@ bool LRUCache<SIZE, Key, T>::get(mapped_type& dst, key_type& key)
 	{
 		// fetch from its place...
 		typename ordered_map<key_type, mapped_type>::value_type item = m_omap.pop(key);
-
-		m_l1_last = (m_l1_last + 1) % L1_SIZE;
-		m_l1_key[m_l1_last] = key;
-		m_l1_mapped[m_l1_last] = item.second;
+		assert(item.first == key);
 
 		// ...and re-insert at top
 		m_omap[key] = item.second;
 
-		dst = item.second;
+		mapped_type* mptr = &m_omap[key];
+
+		m_l1_last = (m_l1_last + 1) % L1_SIZE;
+		m_l1_key[m_l1_last] = key;
+		m_l1_mapped[m_l1_last] = mptr;
+
+		dst = *mptr;
 		return true;
 	} else
 	{
@@ -93,11 +111,14 @@ bool LRUCache<SIZE, Key, T>::get(mapped_type& dst, key_type& key)
 		bool success = on_miss(op_get, key, value);
 		if (success)
 		{
+			m_omap[key] = value;
+
+			mapped_type* mptr = &m_omap[key];
+
 			m_l1_last = (m_l1_last + 1) % L1_SIZE;
 			m_l1_key[m_l1_last] = key;
-			m_l1_mapped[m_l1_last] = value;
+			m_l1_mapped[m_l1_last] = mptr;
 
-			m_omap[key] = value;
 			return success;
 		}
 	}
@@ -111,7 +132,8 @@ bool LRUCache<SIZE, Key, T>::set(key_type& key, mapped_type& value)
 	for (int i = 0; i < L1_SIZE; i++)
 		if (key == m_l1_key[i])
 		{
-			m_l1_mapped[i] = value;
+			assert(m_l1_mapped[i]);
+			(*m_l1_mapped[i]) = value;
 			return true;
 		}
 
@@ -120,7 +142,16 @@ bool LRUCache<SIZE, Key, T>::set(key_type& key, mapped_type& value)
 	if (it != m_omap.end())
 	{
 		// remove existing from its place...
-		/* typename ordered_map<key_type, mapped_type>::value_type item = */ m_omap.pop(key);
+		typename ordered_map<key_type, mapped_type>::value_type item = m_omap.pop(key);
+		assert(item.first == key);
+
+		for (int i = 0; i < L1_SIZE; i++)
+			if (item.first == m_l1_key[i])
+			{
+				invalidate_key(m_l1_key[i]);
+				m_l1_mapped[i] = NULL;
+				// break;
+			}
 	} else
 	{
 		if (m_omap.size() >= Size)
@@ -130,12 +161,14 @@ bool LRUCache<SIZE, Key, T>::set(key_type& key, mapped_type& value)
 		/* bool success = */ on_miss(op_set, key, value);
 	}
 
-	m_l1_last = (m_l1_last + 1) % L1_SIZE;
-	m_l1_key[m_l1_last] = key;
-	m_l1_mapped[m_l1_last] = value;
-
 	m_omap[key] = value;
 	on_set(key, value);
+
+	mapped_type* mptr = &m_omap[key];
+
+	m_l1_last = (m_l1_last + 1) % L1_SIZE;
+	m_l1_key[m_l1_last] = key;
+	m_l1_mapped[m_l1_last] = mptr;
 
 	return true;
 }
@@ -146,8 +179,8 @@ bool LRUCache<SIZE, Key, T>::del(key_type& key)
 	for (int i = 0; i < L1_SIZE; i++)
 		if (key == m_l1_key[i])
 		{
-			m_l1_key[i] = key_type();
-			m_l1_mapped[i] = mapped_type();
+			invalidate_key(m_l1_key[i]);
+			m_l1_mapped[i] = NULL;
 			// break;
 		}
 
@@ -169,7 +202,10 @@ T& LRUCache<SIZE, Key, T>::operator[](const key_type& key)
 {
 	for (int i = 0; i < L1_SIZE; i++)
 		if (key == m_l1_key[i])
-			return m_l1_mapped[i];
+		{
+			assert(m_l1_mapped[i]);
+			return (*m_l1_mapped[i]);
+		}
 
 	typename ordered_map<key_type, mapped_type>::const_iterator it = m_omap.find(key);
 
@@ -177,15 +213,18 @@ T& LRUCache<SIZE, Key, T>::operator[](const key_type& key)
 	{
 		// fetch from its place...
 		typename ordered_map<key_type, mapped_type>::value_type item = m_omap.pop(key);
-
-		m_l1_last = (m_l1_last + 1) % L1_SIZE;
-		m_l1_key[m_l1_last] = key;
-		m_l1_mapped[m_l1_last] = item.second;
+		assert(item.first == key);
 
 		// ...and re-insert at top
 		m_omap[key] = item.second;
 
-		return m_omap[key];
+		mapped_type* mptr = &m_omap[key];
+
+		m_l1_last = (m_l1_last + 1) % L1_SIZE;
+		m_l1_key[m_l1_last] = key;
+		m_l1_mapped[m_l1_last] = mptr;
+
+		return *mptr;
 	} else
 	{
 		// miss - use overridable function
@@ -198,12 +237,15 @@ T& LRUCache<SIZE, Key, T>::operator[](const key_type& key)
 
 		/* bool success = */ on_miss(op_sub, key, value);
 
+		m_omap[key] = value;
+
+		mapped_type* mptr = &m_omap[key];
+
 		m_l1_last = (m_l1_last + 1) % L1_SIZE;
 		m_l1_key[m_l1_last] = key;
-		m_l1_mapped[m_l1_last] = value;
+		m_l1_mapped[m_l1_last] = mptr;
 
-		m_omap[key] = value;
-		return m_omap[key];
+		return *mptr;
 	}
 }
 
@@ -220,23 +262,37 @@ void LRUCache<SIZE, Key, T>::evict(bool force)
 		// remove oldest (FIFO)
 		typename ordered_map<key_type, mapped_type>::value_type item = m_omap.pop_front();
 
+		on_eviction(item.first, item.second);
+
 		for (int i = 0; i < L1_SIZE; i++)
 			if (item.first == m_l1_key[i])
 			{
-				m_l1_key[i] = key_type();
-				m_l1_mapped[i] = mapped_type();
+				invalidate_key(m_l1_key[i]);
+				m_l1_mapped[i] = NULL;
+				assert(! m_l1_mapped[i]);
 				// break;
 			}
-
-		on_eviction(item.first, item.second);
 	}
 }
 
 template <size_t SIZE, typename Key, typename T>
 void LRUCache<SIZE, Key, T>::evict_all()
 {
+	clear_l1();
+
 	while (m_omap.size() > 0)
 		evict(/* force */ true);
+}
+
+template <size_t SIZE, typename Key, typename T>
+void LRUCache<SIZE, Key, T>::clear_l1()
+{
+	for (int i = 0; i < L1_SIZE; i++)
+	{
+		invalidate_key(m_l1_key[i]);
+		m_l1_mapped[i] = NULL;
+	}
+	m_l1_last = -1;
 }
 
 template <size_t SIZE, typename Key, typename T>
@@ -250,15 +306,15 @@ typename std::pair<Key, T> LRUCache<SIZE, Key, T>::pop()
 	// remove oldest (FIFO)
 	typename ordered_map<key_type, mapped_type>::value_type item = m_omap.pop_front();
 
+	on_eviction(item.first, item.second);
+
 	for (int i = 0; i < L1_SIZE; i++)
 		if (item.first == m_l1_key[i])
 		{
-			m_l1_key[i] = key_type();
-			m_l1_mapped[i] = mapped_type();
+			invalidate_key(m_l1_key[i]);
+			m_l1_mapped[i] = NULL;
 			// break;
 		}
-
-	on_eviction(item.first, item.second);
 
 	return std::pair<Key, T>(item.first, item.second);
 }
