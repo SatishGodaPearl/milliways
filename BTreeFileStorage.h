@@ -107,7 +107,10 @@ public:
 		if (node)
 		{
 			if (node->id() != NODE_ID_INVALID)
-				m_storage->node_write(*node);
+			{
+				bool ok = m_storage->node_write(*node);
+				assert(ok);
+			}
 			// node->id(NODE_ID_INVALID);
 			// value.reset();
 		}

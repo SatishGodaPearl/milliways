@@ -209,7 +209,11 @@ public:
 		if (block)
 		{
 			if (block->valid())
-				m_storage->write(*block);
+			{
+				bool ok = m_storage->write(*block);
+				assert(ok);
+				// if (ok) block->dirty(false);
+			}
 			// block->dirty(true);
 			// block->index(BLOCK_ID_INVALID);
 			// value.reset();
