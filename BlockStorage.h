@@ -56,7 +56,7 @@ public:
 
 	Block(block_id_t index) :
 			m_index(index), m_dirty(false) { memset(m_data, 0, sizeof(m_data)); }
-	Block(const Block<BLOCKSIZE>& other) { m_index = other.m_index; m_data = other.m_data; m_dirty = other.m_dirty; }
+	Block(const Block<BLOCKSIZE>& other) : m_index(other.m_index), m_data(other.m_data), m_dirty(other.m_dirty) { }
 	Block& operator= (const Block<BLOCKSIZE>& rhs) { assert(this != &rhs); m_index = rhs.index(); memcpy(m_data, rhs.m_data, sizeof(m_data)); m_dirty = rhs.m_dirty; return *this; }
 
 	virtual ~Block() {}
