@@ -96,7 +96,7 @@ public:
 
 	BlockStorage() :
 		m_header_block_id(BLOCK_ID_INVALID) {}
-	virtual ~BlockStorage() { /* cal close() from the most derived class */ }
+	virtual ~BlockStorage() { /* call close() from the most derived class, and BEFORE destruction  */ }
 
 	/* -- General I/O ---------------------------------------------- */
 
@@ -238,9 +238,7 @@ public:
 	FileBlockStorage(const std::string& pathname) :
 		BlockStorage<BLOCKSIZE>(),
 		m_pathname(pathname), m_created(false), m_count(-1), m_next_block_id(BLOCK_ID_INVALID), m_lru(this) {}
-	~FileBlockStorage() {
-		close();
-	}
+	~FileBlockStorage(); 	/* call close() before destruction! */
 
 	/* -- General I/O ---------------------------------------------- */
 

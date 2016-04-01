@@ -35,6 +35,23 @@
 namespace milliways {
 
 template < size_t BLOCKSIZE, int B_, typename KeyTraits, typename TTraits, class Compare >
+BTreeFileStorage<BLOCKSIZE, B_, KeyTraits, TTraits, Compare>::~BTreeFileStorage()
+{
+	if (isOpen())
+	{
+		std::cerr << std::endl << "WARNING: BTreeFileStorage still open at destruction time. Call close() *BEFORE* destruction!." << std::endl << std::endl;
+		close();
+	}
+	assert(! isOpen());
+	if (m_bs_allocated && m_block_storage)
+	{
+		delete m_block_storage;
+		m_block_storage = NULL;
+		m_bs_allocated = false;
+	}
+}
+
+template < size_t BLOCKSIZE, int B_, typename KeyTraits, typename TTraits, class Compare >
 void BTreeFileStorage<BLOCKSIZE, B_, KeyTraits, TTraits, Compare>::node_dispose_id_helper(node_id_t node_id)
 {
 	assert(m_block_storage);

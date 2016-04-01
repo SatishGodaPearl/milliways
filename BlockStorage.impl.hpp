@@ -196,6 +196,18 @@ bool BlockStorage<BLOCKSIZE>::dispose(block_t& block)
  * ----------------------------------------------------------------- */
 
 template <size_t BLOCKSIZE, int CACHE_SIZE>
+FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::~FileBlockStorage()
+{
+	/* call close() from the most derived class */
+	if (isOpen())
+	{
+		std::cerr << std::endl << "WARNING: FileBlockStorage still open at destruction time. Call close() *BEFORE* destruction!." << std::endl << std::endl;
+		close();
+	}
+	assert(! isOpen());
+}
+
+template <size_t BLOCKSIZE, int CACHE_SIZE>
 bool FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::openHelper()
 {
 	if (isOpen())

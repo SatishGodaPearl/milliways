@@ -162,15 +162,8 @@ public:
 		m_bs_allocated = true;
 		m_btree_header_uid = m_block_storage->allocUserHeader();
 	}
-	virtual ~BTreeFileStorage() {
-		close();
-		if (m_bs_allocated && m_block_storage)
-		{
-			delete m_block_storage;
-			m_block_storage = NULL;
-			m_bs_allocated = false;
-		}
-	}
+
+	virtual ~BTreeFileStorage();
 
 	static BTreeFileStorage* createStorage(tree_type* tree_, const std::string& pathname) {
 		BTreeFileStorage* storage = new BTreeFileStorage(pathname);
