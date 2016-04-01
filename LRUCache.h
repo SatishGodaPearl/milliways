@@ -88,6 +88,21 @@ public:
 	key_type invalid_key() const { return m_invalid_key; }
 	void invalid_key(const key_type& value) { m_invalid_key = value; }
 	void invalidate_key(key_type& key) const { key = m_invalid_key; }
+
+	void keys(std::vector<key_type>& dst) {
+		dst.clear();
+		typename ordered_map<key_type, mapped_type>::const_iterator it;
+		for (it = m_omap.begin(); it != m_omap.end(); ++it)
+			dst.push_back(it->first);
+	}
+
+	void values(std::vector<value_type>& dst) {
+		dst.clear();
+		typename ordered_map<key_type, mapped_type>::const_iterator it;
+		for (it = m_omap.begin(); it != m_omap.end(); ++it)
+			dst.push_back(*it);
+	}
+
 private:
 	LRUCache();
 	LRUCache(const LRUCache<SIZE, Key, T>& other);
