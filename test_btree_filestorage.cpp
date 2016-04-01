@@ -144,6 +144,7 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 
 			tree.close();
 			storage->detach();
+			REQUIRE(! storage->isOpen());
 			delete storage;
 		}
 
