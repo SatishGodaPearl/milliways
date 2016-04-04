@@ -49,7 +49,7 @@ static std::string random_string(int length)
 
 TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 	typedef milliways::KeyValueStore kv_t;
-	typedef kv_t::block_storage_type kv_blockstorage_t;
+	typedef XTYPENAME kv_t::block_storage_type kv_blockstorage_t;
 
 	SECTION( "freshly created kv store works" ) {
 		const std::string test_pathname("./test_kv");

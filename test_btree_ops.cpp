@@ -37,9 +37,9 @@ TEST_CASE( "BTree Operations", "[BTreeOps]" ) {
 	typedef milliways::BTree<B_TEST, seriously::Traits<std::string>, seriously::Traits<int32_t> > btree_t;
 	typedef milliways::BTreeMemoryStorage<B_TEST, seriously::Traits<std::string>, seriously::Traits<int32_t> > btree_mem_st_t;
 	typedef milliways::BTreeFileStorage< BLOCK_SIZE, B_TEST, seriously::Traits<std::string>, seriously::Traits<int32_t> > btree_fs_t;
-	typedef btree_t::node_type btree_node_t;
-	typedef milliways::shptr<btree_t::node_type> btree_node_ptr_t;
-	typedef btree_t::lookup_type btree_lookup_t;
+	typedef XTYPENAME btree_t::node_type btree_node_t;
+	typedef milliways::shptr<XTYPENAME btree_t::node_type> btree_node_ptr_t;
+	typedef XTYPENAME btree_t::lookup_type btree_lookup_t;
 	typedef milliways::node_id_t btree_node_id_t;
 
 	SECTION( "can search in a node" ) {
@@ -210,7 +210,7 @@ TEST_CASE( "BTree Operations", "[BTreeOps]" ) {
 		tree.insert("5", 5);
 		tree.insert("3", 3);
 
-		typedef btree_t::iterator btree_iterator_t;
+		typedef XTYPENAME btree_t::iterator btree_iterator_t;
 		btree_iterator_t it = tree.begin();
 
 		REQUIRE(it);
@@ -300,7 +300,7 @@ TEST_CASE( "BTree Operations", "[BTreeOps]" ) {
 		tree.insert("5", 5);
 		tree.insert("3", 3);
 
-		typedef btree_t::iterator btree_iterator_t;
+		typedef XTYPENAME btree_t::iterator btree_iterator_t;
 		btree_iterator_t it = tree.rbegin();
 
 		REQUIRE(it);
@@ -390,7 +390,7 @@ TEST_CASE( "BTree Operations", "[BTreeOps]" ) {
 		tree.insert("5", 5);
 		tree.insert("3", 3);
 
-		typedef btree_t::iterator btree_iterator_t;
+		typedef XTYPENAME btree_t::iterator btree_iterator_t;
 		btree_iterator_t it = tree.begin();
 
 		REQUIRE(it);
@@ -444,7 +444,7 @@ TEST_CASE( "BTree Operations", "[BTreeOps]" ) {
 		tree.insert("5", 5);
 		tree.insert("3", 3);
 
-		typedef btree_t::iterator btree_iterator_t;
+		typedef XTYPENAME btree_t::iterator btree_iterator_t;
 		btree_iterator_t it = tree.rbegin();
 
 		REQUIRE(it);

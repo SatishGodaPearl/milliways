@@ -32,6 +32,7 @@
 
 #include <string.h>
 #include <assert.h>
+#include <stdint.h>
 
 #ifdef _MSC_VER
 #include <WinSock.h>
@@ -476,6 +477,8 @@ inline ssize_t Traits<uint64_t>::deserialize(const char*& src, size_t& avail, ty
 	return (initial_avail - avail);
 }
 
+#if ALLOWS_TEMPLATED_SIZE_T
+
 /* -- size_t ------------------------------------------------------- */
 
 #ifdef __APPLE__
@@ -523,6 +526,8 @@ inline ssize_t Traits<size_t>::deserialize(const char*& src, size_t& avail, type
 	return (initial_avail - avail);
 }
 #endif
+
+#endif /* ALLOWS_TEMPLATED_SIZE_T */
 
 /* -- std::string -------------------------------------------------- */
 

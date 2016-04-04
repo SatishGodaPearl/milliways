@@ -34,10 +34,10 @@
 #endif /* MILLIWAYS_DEFAULT_B_FACTOR */
 
 #undef MILLIWAYS_DEFAULT_BLOCK_CACHE_SIZE
-#define MILLIWAYS_DEFAULT_BLOCK_CACHE_SIZE 4
+#define MILLIWAYS_DEFAULT_BLOCK_CACHE_SIZE 32
 
 #undef MILLIWAYS_DEFAULT_NODE_CACHE_SIZE
-#define MILLIWAYS_DEFAULT_NODE_CACHE_SIZE 4
+#define MILLIWAYS_DEFAULT_NODE_CACHE_SIZE 32
 
 #include "KeyValueStore.h"
 
@@ -63,7 +63,7 @@ static std::string random_string(int length)
 
 TEST_CASE( "KeyValue store II", "[KeyValueStoreII]" ) {
 	typedef milliways::KeyValueStore kv_t;
-	typedef kv_t::block_storage_type kv_blockstorage_t;
+	typedef XTYPENAME kv_t::block_storage_type kv_blockstorage_t;
 
 	SECTION( "alternate get/put" ) {
 		std::cerr << "T1\n";
@@ -226,7 +226,12 @@ TEST_CASE( "KeyValue store II", "[KeyValueStoreII]" ) {
 				}
 				REQUIRE(test_set.count(key) == 1);
 				std::string value;
-				REQUIRE(kv.get(*it, value));
+				bool ok = kv.get(*it, value);
+				if (! ok)
+				{
+					std::cerr << "FAILED iterating/getting key it:'" << (*it) << "' (key:'" << key << "' value:'" << test_set[key] << "')" << std::endl;
+				}
+				REQUIRE(ok);
 				REQUIRE(value == test_set[key]);
 			}
 

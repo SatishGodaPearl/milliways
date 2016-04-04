@@ -28,6 +28,9 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
+
+#include "config.h"
 
 #ifdef _MSC_VER
 #ifndef WIN32_LEAN_AND_MEAN
@@ -228,8 +231,6 @@ struct Traits<int64_t>
 	static int compare(const type& a, const type& b) { return static_cast<int>(a - b); }
 };
 
-#ifdef __APPLE__
-
 template <>
 struct Traits<uint64_t>
 {
@@ -250,7 +251,7 @@ struct Traits<uint64_t>
 	static int compare(const type& a, const type& b) { return static_cast<int>(a - b); }
 };
 
-#endif
+#if ALLOWS_TEMPLATED_SIZE_T
 
 template <>
 struct Traits<size_t>
@@ -271,6 +272,8 @@ struct Traits<size_t>
 
 	static int compare(const type& a, const type& b) { return static_cast<int>(static_cast<int64_t>(a) - static_cast<int64_t>(b)); }
 };
+
+#endif /* ALLOWS_TEMPLATED_SIZE_T */
 
 template <>
 struct Traits<std::string>
