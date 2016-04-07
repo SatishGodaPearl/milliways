@@ -80,9 +80,10 @@ bool LRUCache<SIZE, Key, T>::get(mapped_type& dst, key_type& key)
 			return true;
 		}
 
-	typename ordered_map<key_type, mapped_type>::const_iterator it = m_omap.find(key);
+	bool has_key = m_omap.has(key);
+	// typename ordered_map<key_type, mapped_type>::const_iterator it = m_omap.find(key);
 
-	if (it != m_omap.end())
+	if (has_key)
 	{
 		// fetch from its place...
 		typename ordered_map<key_type, mapped_type>::value_type item = m_omap.pop(key);
@@ -137,9 +138,10 @@ bool LRUCache<SIZE, Key, T>::set(key_type& key, mapped_type& value)
 			return true;
 		}
 
-	typename ordered_map<key_type, mapped_type>::const_iterator it = m_omap.find(key);
+	bool has_key = m_omap.has(key);
+	// typename ordered_map<key_type, mapped_type>::const_iterator it = m_omap.find(key);
 
-	if (it != m_omap.end())
+	if (has_key)
 	{
 		// remove existing from its place...
 		typename ordered_map<key_type, mapped_type>::value_type item = m_omap.pop(key);
@@ -184,9 +186,10 @@ bool LRUCache<SIZE, Key, T>::del(key_type& key)
 			// break;
 		}
 
-	typename ordered_map<key_type, mapped_type>::const_iterator it = m_omap.find(key);
+	bool has_key = m_omap.has(key);
+	// typename ordered_map<key_type, mapped_type>::const_iterator it = m_omap.find(key);
 
-	if (it != m_omap.end())
+	if (has_key)
 	{
 		// remove existing from its place...
 		/* typename ordered_map<key_type, mapped_type>::value_type item = */ m_omap.pop(key);
@@ -207,9 +210,10 @@ T& LRUCache<SIZE, Key, T>::operator[](const key_type& key)
 			return (*m_l1_mapped[i]);
 		}
 
-	typename ordered_map<key_type, mapped_type>::const_iterator it = m_omap.find(key);
+	bool has_key = m_omap.has(key);
+	// typename ordered_map<key_type, mapped_type>::const_iterator it = m_omap.find(key);
 
-	if (it != m_omap.end())
+	if (has_key)
 	{
 		// fetch from its place...
 		typename ordered_map<key_type, mapped_type>::value_type item = m_omap.pop(key);
