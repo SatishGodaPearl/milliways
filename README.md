@@ -6,8 +6,8 @@ _Milliways_ is a high-performance on-disk tree-based key-value store, used in (M
 
 _Milliways_ needs the followign dependencies:
 
-* (Seriously)[]
-* (Catch)[https://github.com/philsquared/Catch] 
+* [Seriously()
+* [Catch](https://github.com/philsquared/Catch) - C++ test framework (single header file) 
 * LZ4 ?
 
 ##### Milliways license
