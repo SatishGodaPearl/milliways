@@ -73,7 +73,7 @@ bool BTreeNode<B_, KeyTraits, TTraits, Compare>::search(lookup_type& res, const 
 		return bsearch(res, key_);
 	else
 	{
-		bool found = bsearch(res, key_);
+		/* bool found = */ bsearch(res, key_);
 		shptr<node_type> child( child_node(res.pos()) );
 		assert(child);
 		return child->search(res, key_);
