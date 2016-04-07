@@ -6,8 +6,9 @@ _Milliways_ is a high-performance on-disk tree-based key-value store, used in (M
 
 _Milliways_ needs the followign dependencies:
 
-* a
-* b
+* (Seriously)[]
+* (Catch)[https://github.com/philsquared/Catch] 
+* LZ4 ?
 
 ##### Milliways license
 
