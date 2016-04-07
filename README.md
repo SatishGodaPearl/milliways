@@ -1,4 +1,4 @@
-#### **Milliways** – _the storage at the back-end of the Multiverse_
+#### **Milliways** – _"The storage at the back-end of the Multiverse"_
 
 _Milliways_ is a high-performance on-disk tree-based key-value store, used in [Multiverse](https://github.com/j-cube/multiverse) as a pluggable back-end to [libgit2](https://libgit2.github.com).
 
