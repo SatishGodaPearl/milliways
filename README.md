@@ -1,6 +1,11 @@
 #### **Milliways** – _"The storage at the back-end of the Multiverse"_
 
-_Milliways_ is a high-performance on-disk tree-based key-value store, used in [Multiverse](https://github.com/j-cube/multiverse) as a pluggable back-end to [libgit2](https://libgit2.github.com).
+_Milliways_ is:
+
+1.A high-performance on-disk tree-based key-value store, used in [Multiverse](https://github.com/j-cube/multiverse) as a pluggable back-end to [libgit2](https://libgit2.github.com).
+
+2. The Restaurant at the End of the Universe. As described in "The Restaurant at the End of the Universe" by the late Douglas Adams, Milliways is built on the smoking ruins of Frogstar World B and encased in a time bubble that allows it survive the End of the Universe, turning Armageddon into dinner entertainment.
+
 
 ##### Milliways dependencies
 
