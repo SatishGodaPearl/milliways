@@ -7,7 +7,7 @@ _Milliways_ is:
 2. The Restaurant at the End of the Universe. As described in ["The Restaurant at the End of the Universe"](https://en.wikipedia.org/wiki/Places_in_The_Hitchhiker%27s_Guide_to_the_Galaxy#Milliways) by Douglas Adams, Milliways is built on the smoking ruins of Frogstar World B and encased in a time bubble that allows it survive the End of the Universe, turning Armageddon into dinner entertainment.
 
 > "Ladies and gentlemen", he said, "The Universe as we know it has now been in existence for over one hundred and seventy thousand million billion years and will be ending in a little over half an hour. So, welcome one and all to Milliways, the Restaurant at the End of the Universe!"
-> — Max Quordlepleen's introduction at Milliways
+> — Max Quordlepleen's introduction at [Milliways](http://hitchhikers.wikia.com/wiki/Milliways)
 
 
 ##### Milliways dependencies
