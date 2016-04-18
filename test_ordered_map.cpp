@@ -84,8 +84,8 @@ TEST_CASE( "Ordered map", "[ordered_map]" ) {
 		REQUIRE(it != omap.end());
 		++it;
 
-		REQUIRE(it == omap.end());
 		REQUIRE(!it);
+		REQUIRE(it == omap.end());
 	}
 
 	SECTION( "const iterator works too" ) {
@@ -132,14 +132,44 @@ TEST_CASE( "Ordered map", "[ordered_map]" ) {
 		item = omap.pop();
 		REQUIRE(item.first == "Abc");
 		REQUIRE(item.second == 3);
+		REQUIRE(omap.size() == 2);
 
 		item = omap.pop();
 		REQUIRE(item.first == "Something");
 		REQUIRE(item.second == 2);
+		REQUIRE(omap.size() == 1);
 
 		item = omap.pop();
 		REQUIRE(item.first == "Zed");
 		REQUIRE(item.second == 1);
+		REQUIRE(omap.size() == 0);
+
+		REQUIRE(omap.size() == 0);
+	}
+
+	SECTION( "pop_front() produces items in-order" ) {
+		omap["Zed"] = 1;
+		omap["Something"] = 2;
+		omap["Abc"] = 3;
+
+		REQUIRE(omap.size() == 3);
+
+		milliways::ordered_map<std::string, int>::value_type item;
+
+		item = omap.pop_front();
+		REQUIRE(item.first == "Zed");
+		REQUIRE(item.second == 1);
+		REQUIRE(omap.size() == 2);
+
+		item = omap.pop_front();
+		REQUIRE(item.first == "Something");
+		REQUIRE(item.second == 2);
+		REQUIRE(omap.size() == 1);
+
+		item = omap.pop_front();
+		REQUIRE(item.first == "Abc");
+		REQUIRE(item.second == 3);
+		REQUIRE(omap.size() == 0);
 
 		REQUIRE(omap.size() == 0);
 	}
