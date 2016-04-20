@@ -60,9 +60,9 @@ public:
 	typedef BTreeNode<B_, KeyTraits, TTraits, Compare> node_type;
 
 	BTreeLookup() :
-		m_node_ptr(NULL), m_found(false), m_pos(-1) {}
-	BTreeLookup(shptr<node_type>& node, bool found_, int pos_, const key_type& key_) :
-		m_node_ptr(node), m_found(found_), m_pos(pos_), m_key(key_) {}
+		m_node_ptr(), m_found(false), m_pos(-1), m_key() {}
+	BTreeLookup(shptr<node_type>& node_, bool found_, int pos_, const key_type& key_) :
+		m_node_ptr(node_), m_found(found_), m_pos(pos_), m_key(key_) {}
 	BTreeLookup(const BTreeLookup& other) :
 			m_node_ptr(other.m_node_ptr), m_found(other.m_found), m_pos(other.m_pos), m_key(other.m_key) {}
 	BTreeLookup& operator= (const BTreeLookup& other) { m_node_ptr = other.m_node_ptr; m_found = other.m_found; m_pos = other.m_pos; m_key = other.m_key; return *this; }
@@ -126,7 +126,7 @@ public:
 	typedef std::array<mapped_type, 2*B - 1> values_array_type;
 	typedef std::array<node_id_t, 2*B> children_array_type;
 
-	BTreeNode(tree_type* tree, node_id_t node_id, node_id_t parent_id = NODE_ID_INVALID);
+	BTreeNode(tree_type* tree_, node_id_t node_id, node_id_t parent_id = NODE_ID_INVALID);
 	BTreeNode(const BTreeNode& other);
 	~BTreeNode() {}
 
@@ -138,38 +138,38 @@ public:
 	const tree_type* tree() const { return m_tree; }
 
 	bool dirty() const { return m_dirty; }
-	bool dirty(bool value) { bool old = m_dirty; m_dirty = value; return old; }
+	bool dirty(bool value_) { bool old = m_dirty; m_dirty = value_; return old; }
 
 	bool hasId() const { return m_id != NODE_ID_INVALID; }
 	node_id_t id() const { return m_id; }
-	node_id_t id(node_id_t value) { node_id_t old = m_id; m_id = value; return old; }
+	node_id_t id(node_id_t value_) { node_id_t old = m_id; m_id = value_; return old; }
 
 	bool hasParent() const { return m_parent_id != NODE_ID_INVALID; }
 	node_id_t parentId() const { return m_parent_id; }
-	node_id_t parentId(node_id_t value) { node_id_t old = m_parent_id; m_parent_id = value; return old; }
-	shptr<BTreeNode> parent() { if (hasParent()) return m_tree->node_get(m_parent_id); else return shptr<BTreeNode>(); }
+	node_id_t parentId(node_id_t value_) { node_id_t old = m_parent_id; m_parent_id = value_; return old; }
+	shptr<BTreeNode> parent() { if (hasParent()) return m_tree->node_read(m_parent_id); else return shptr<BTreeNode>(); }
 	void parent(const shptr<node_type>& node) { assert(node); assert(node->id() != NODE_ID_INVALID); m_parent_id = node->id(); }
 
 	bool hasLeft() const { return m_left_id != NODE_ID_INVALID; }
 	node_id_t leftId() const { return m_left_id; }
-	node_id_t leftId(node_id_t value) { node_id_t old = m_left_id; m_left_id = value; return old; }
-	shptr<BTreeNode> left() { if (hasLeft()) return m_tree->node_get(m_left_id); else return shptr<BTreeNode>(); }
+	node_id_t leftId(node_id_t value_) { node_id_t old = m_left_id; m_left_id = value_; return old; }
+	shptr<BTreeNode> left() { if (hasLeft()) return m_tree->node_read(m_left_id); else return shptr<BTreeNode>(); }
 	void left(const shptr<node_type>& node) { assert(node); assert(node->id() != NODE_ID_INVALID); m_left_id = node->id(); }
 
 	bool hasRight() const { return m_right_id != NODE_ID_INVALID; }
 	node_id_t rightId() const { return m_right_id; }
-	node_id_t rightId(node_id_t value) { node_id_t old = m_right_id; m_right_id = value; return old; }
-	shptr<BTreeNode> right() { if (hasRight()) return m_tree->node_get(m_right_id); else return shptr<BTreeNode>(); }
+	node_id_t rightId(node_id_t value_) { node_id_t old = m_right_id; m_right_id = value_; return old; }
+	shptr<BTreeNode> right() { if (hasRight()) return m_tree->node_read(m_right_id); else return shptr<BTreeNode>(); }
 	void right(const shptr<node_type>& node) { assert(node); assert(node->id() != NODE_ID_INVALID); m_right_id = node->id(); }
 
 	bool leaf() const { return m_leaf; }
-	bool leaf(bool value) { bool old = m_leaf; m_leaf = value; return old; }
+	bool leaf(bool value_) { bool old = m_leaf; m_leaf = value_; return old; }
 
 	int n() const { return m_n; }
-	int n(int value) { int old = m_n; m_n = value; return old; }
+	int n(int value_) { int old = m_n; m_n = value_; return old; }
 
 	int rank() const { return m_rank; }
-	int rank(int value) { int old = m_rank; m_rank = value; return old; }
+	int rank(int value_) { int old = m_rank; m_rank = value_; return old; }
 
 	bool empty() const { return (m_n == 0); }
 	bool nonEmpty() const { return !empty(); }
@@ -196,7 +196,7 @@ public:
 	shptr<node_type> child_node(int i) const { node_id_t node_id = child(i); return (node_id != NODE_ID_INVALID) ? node_get(node_id) : shptr<node_type>(); }
 	void child_node(int i, const shptr<node_type>& node) { assert(node); assert(node->id() != NODE_ID_INVALID); m_children[i] = node->id(); }
 
-	lookup_type* create_lookup(bool found, int pos, const key_type& key) { return new lookup_type(this_node(), found, pos, key); }
+	lookup_type* create_lookup(bool found, int pos, const key_type& key_) { return new lookup_type(this_node(), found, pos, key_); }
 
 	bool search(lookup_type& res, const key_type& key_);
 	void truncate(int num);
@@ -208,7 +208,7 @@ public:
 	/* -- Node I/O ------------------------------------------------- */
 
 	shptr<node_type> node_alloc() { assert(m_tree); return m_tree->node_alloc(); }
-	shptr<node_type> node_child_alloc(shptr<node_type> parent) { assert(m_tree); return m_tree->node_child_alloc(parent); }
+	shptr<node_type> node_child_alloc(shptr<node_type> parent_) { assert(m_tree); return m_tree->node_child_alloc(parent_); }
 	void node_dispose(shptr<node_type>& node) { assert(m_tree); return m_tree->node_dispose(node); }
 	shptr<node_type> node_get(node_id_t node_id) const { assert(m_tree); return m_tree->node_get(node_id); }
 	shptr<node_type> node_get(shptr<node_type>& node) const { assert(m_tree); return m_tree->node_get(node); }

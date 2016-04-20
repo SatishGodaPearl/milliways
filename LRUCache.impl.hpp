@@ -40,31 +40,31 @@ namespace milliways {
 
 template <size_t SIZE, typename Key, typename T>
 LRUCache<SIZE, Key, T>::LRUCache(const key_type& invalid) :
-	m_l1_last(-1), m_current_age(0), m_invalid_key(invalid)
+	m_l1_last(-1), m_current_age(0), m_key2age(), m_age2key(), m_cache(), m_invalid_key(invalid)
 {
 	clear_l1();
 }
 
 template <size_t SIZE, typename Key, typename T>
-bool LRUCache<SIZE, Key, T>::on_miss(op_type op, const key_type& key, mapped_type& value)
+bool LRUCache<SIZE, Key, T>::on_miss(op_type /* op */, const key_type& /* key */, mapped_type& /* value */)
 {
 	return true;
 }
 
 template <size_t SIZE, typename Key, typename T>
-bool LRUCache<SIZE, Key, T>::on_set(const key_type& key, const mapped_type& value)
+bool LRUCache<SIZE, Key, T>::on_set(const key_type& /* key */, const mapped_type& /* value */)
 {
 	return true;
 }
 
 template <size_t SIZE, typename Key, typename T>
-bool LRUCache<SIZE, Key, T>::on_delete(const key_type& key)
+bool LRUCache<SIZE, Key, T>::on_delete(const key_type& /* key */)
 {
 	return true;
 }
 
 template <size_t SIZE, typename Key, typename T>
-bool LRUCache<SIZE, Key, T>::on_eviction(const key_type& key, mapped_type& value)
+bool LRUCache<SIZE, Key, T>::on_eviction(const key_type& /* key */, mapped_type& /* value */)
 {
 	return true;
 }
@@ -198,7 +198,7 @@ bool LRUCache<SIZE, Key, T>::del(key_type& key)
 
 	age_t age;
 	if (m_key2age.get(key, age)) {
-		age_t new_age = m_current_age++;
+		// age_t new_age = m_current_age++;
 		m_age2key.erase(age);
 		m_key2age.erase(key);
 		m_cache.erase(key);

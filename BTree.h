@@ -150,9 +150,9 @@ public:
 		typedef std::forward_iterator_tag iterator_category;
 		typedef int difference_type;
 
-		iterator(): m_tree(NULL), m_root(NULL), m_first_node(NULL), m_forward(true), m_end(true) { update_current(); }
-		iterator(bool end_): m_tree(NULL), m_root(NULL), m_first_node(NULL), m_forward(true), m_end(end_) { update_current(); }
-		iterator(tree_type* tree_, const shptr<node_type>& root_, bool forward_ = true, bool end_ = false) : m_tree(tree_), m_root(root_), m_first_node(NULL), m_forward(forward_), m_end(end_) { rewind(end_); }
+		iterator(): m_tree(NULL), m_root(), m_first_node(), m_forward(true), m_end(true), m_current() { update_current(); }
+		iterator(bool end_): m_tree(NULL), m_root(), m_first_node(), m_forward(true), m_end(end_), m_current() { update_current(); }
+		iterator(tree_type* tree_, const shptr<node_type>& root_, bool forward_ = true, bool end_ = false) : m_tree(tree_), m_root(root_), m_first_node(), m_forward(forward_), m_end(end_), m_current() { rewind(end_); }
 		iterator(const iterator& other) : m_tree(other.m_tree), m_root(other.m_root), m_first_node(other.m_first_node), m_forward(other.m_forward), m_end(other.m_end), m_current(other.m_current) { }
 		iterator& operator= (const iterator& other) { m_tree = other.m_tree; m_root = other.m_root; m_first_node = other.m_first_node; m_forward = other.m_forward; m_end = other.m_end; m_current = other.m_current; return *this; }
 
@@ -419,7 +419,7 @@ public:
 	static const int B = B_;
 
 	BTreeMemoryStorage() :
-		BTreeStorage<B_, KeyTraits, TTraits, Compare>(), m_next_id(1) {}
+		BTreeStorage<B_, KeyTraits, TTraits, Compare>(), m_next_id(1), m_nodes() {}
 	~BTreeMemoryStorage() { close(); }
 
 	static BTreeMemoryStorage* createStorage(tree_type* tree_) {

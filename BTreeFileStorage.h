@@ -72,6 +72,7 @@ public:
 			shptr<node_type> node( new node_type(m_storage->tree(), node_id) );
 			if (! node) return false;
 			assert(node->id() == node_id);
+			bool rv = false;
 			switch (op)
 			{
 			case base_type::op_get:
@@ -85,22 +86,26 @@ public:
 				break;
 			case base_type::op_sub:
 				//assert(value);
-				bool rv = m_storage->node_read(*node);
+				rv = m_storage->ll_node_read(*node);
 				assert(rv || node->dirty());
 				value = node;
 				return rv;
+				break;
+			default:
+				assert(false);
+				return false;
 				break;
 			}
 			return true;
 		}
 		return false;
 	}
-	bool on_set(const key_type& key, const mapped_type& value)
+	bool on_set(const key_type& /* key */, const mapped_type& /* value */)
 	{
 		return true;
 	}
 	//bool on_delete(const key_type& key);
-	bool on_eviction(const key_type& key, mapped_type& value)
+	bool on_eviction(const key_type& /* key */, mapped_type& value)
 	{
 		/* write back block */
 		/* node_id_t node_id = key; */
@@ -119,6 +124,9 @@ public:
 	}
 
 private:
+	LRUNodeCache(const LRUNodeCache& other) {}
+	LRUNodeCache& operator= (const LRUNodeCache& other) {}
+
 	storage_ptr_type m_storage;
 };
 

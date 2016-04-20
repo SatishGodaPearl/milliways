@@ -285,6 +285,10 @@ typename FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::size_type FileBlockStorage<BLO
 template <size_t BLOCKSIZE, int CACHE_SIZE>
 void FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::_updateCount()
 {
+#if STACK_PROTECTOR
+	char dummy[8]; UNUSED(dummy);	/* for -fstack-protector -Wstack-protector */
+#endif
+
 	if (! isOpen())
 		return;
 
@@ -327,7 +331,7 @@ block_id_t FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::allocId(int n_blocks)
 }
 
 template <size_t BLOCKSIZE, int CACHE_SIZE>
-bool FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::dispose(block_id_t block_id, int count)
+bool FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::dispose(block_id_t block_id, int count_)
 {
 	if (block_id == BLOCK_ID_INVALID)
 		return false;
@@ -335,8 +339,8 @@ bool FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::dispose(block_id_t block_id, int c
 	assert(block_id != BLOCK_ID_INVALID);
 
 	nextId();	// force update of m_next_block_id if necessary
-	if (m_next_block_id == (block_id + count))
-		m_next_block_id -= count;
+	if (m_next_block_id == (block_id + count_))
+		m_next_block_id -= count_;
 
 	return true;
 }
@@ -344,6 +348,10 @@ bool FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::dispose(block_id_t block_id, int c
 template <size_t BLOCKSIZE, int CACHE_SIZE>
 bool FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::read(block_t& dst)
 {
+#if STACK_PROTECTOR
+	char dummy[8]; UNUSED(dummy);	/* for -fstack-protector -Wstack-protector */
+#endif
+
 	// std::cerr << "bs.read(" << dst.index() << ")" << std::endl;
 	assert(dst.index() != BLOCK_ID_INVALID);
 
@@ -390,6 +398,10 @@ bool FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::read(block_t& dst)
 template <size_t BLOCKSIZE, int CACHE_SIZE>
 bool FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::write(block_t& src)
 {
+#if STACK_PROTECTOR
+	char dummy[8]; UNUSED(dummy);	/* for -fstack-protector -Wstack-protector */
+#endif
+
 	// std::cerr << "bs.write(" << src.index() << ")" << std::endl;
 	assert(src.index() != BLOCK_ID_INVALID);
 

@@ -248,15 +248,15 @@ bool BTreeFileStorage<BLOCKSIZE, B_, KeyTraits, TTraits, Compare>::header_read()
 
 	// std::cerr << "-> READ B:" << v_B << " BLOCKSIZE:" << v_BLOCKSIZE << " count:" << v_size << " rootId:" << v_root_id << std::endl;
 
-	if ((v_B != B) || (v_BLOCKSIZE != BLOCKSIZE))
+	if ((static_cast<int>(v_B) != B) || (static_cast<size_t>(v_BLOCKSIZE) != BLOCKSIZE))
 	{
 		std::cerr << "ERROR: '" << m_block_storage->pathname() << "' doesn't match with btree properties (B/BLOCKSIZE)" << std::endl;
 		return false;
 	}
 
-	assert(v_B == B);
-	assert(v_BLOCKSIZE == BLOCKSIZE);
-	this->rootId(v_root_id);
+	assert(static_cast<int>(v_B) == B);
+	assert(static_cast<size_t>(v_BLOCKSIZE) == BLOCKSIZE);
+	this->rootId(static_cast<node_id_t>(v_root_id));
 	this->size(v_size);
 
 	return true;
@@ -303,7 +303,7 @@ inline int BTreeFileStorage_Compute_Max_B()
 	// KeyValueStore leaf_B: 41       (MAX_SERIALIZED_KEYSIZE==44 for 40 byte *ASCII* + 4 length)
 	// KeyValueStore internal_B: 42   (MAX_SERIALIZED_KEYSIZE==44 for 40 byte *ASCII* + 4 length)
 
-	return (leaf_B < internal_B) ? leaf_B : internal_B;
+	return static_cast<int>((leaf_B < internal_B) ? leaf_B : internal_B);
 }
 
 template < size_t BLOCKSIZE, int B_, typename KeyTraits, typename TTraits, class Compare >

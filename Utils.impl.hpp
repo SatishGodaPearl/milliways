@@ -64,12 +64,12 @@ inline std::ostream& hexdump(std::ostream& out, const void* ptr, int buflen)
 	const unsigned char *buf = (const unsigned char*) ptr;
 	int i, j;
 
-	long oldw;
+	int oldw;
 	char oldfill;
 
 	for (i = 0; i < buflen; i += 16)
 	{
-		oldw = out.width();
+		oldw = static_cast<int>(out.width());
 		oldfill = out.fill();
 		out << std::setfill('0') << std::setw(6) << std::hex << i <<
 				std::setfill(oldfill) << std::setw(oldw) << std::dec << ": ";
@@ -163,7 +163,7 @@ inline std::string dehexify(const std::string& input)
 		if (++h_i >= hexlen)
 			break;
         ch = input[h_i];
-		output[b_i] = (output[b_i] & 0xF0) | static_cast<char>(hexdigit2value(ch));
+		output[b_i] = static_cast<char>((output[b_i] & 0xF0) | static_cast<char>(hexdigit2value(ch)));
 
 		++b_i;
 		if (++h_i >= hexlen)

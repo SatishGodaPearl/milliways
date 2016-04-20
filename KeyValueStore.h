@@ -65,8 +65,8 @@ public:
 
 	DataLocator() :
 		m_block_id(BLOCK_ID_INVALID), m_offset(0) {}
-	DataLocator(block_id_t block_id, offset_t offset) :
-		m_block_id(block_id), m_offset(offset) {}
+	DataLocator(block_id_t block_id_, offset_t offset_) :
+		m_block_id(block_id_), m_offset(offset_) {}
 	DataLocator(const DataLocator& other) :
 		m_block_id(other.m_block_id), m_offset(other.m_offset) {}
 	DataLocator(const DataLocator& other, offset_t delta_) :
@@ -147,8 +147,8 @@ public:
 		DataLocator(block_id_, offset_), m_size(size_) {}
 	SizedLocator(const SizedLocator& other) :
 		DataLocator(other.block_id(), other.offset()), m_size(other.m_size) {}
-	SizedLocator(const DataLocator& dataLocator, size_t size_) :
-		DataLocator(dataLocator), m_size(size_) {}
+	SizedLocator(const DataLocator& dataLocator_, size_t size_) :
+		DataLocator(dataLocator_), m_size(size_) {}
 	SizedLocator(const SizedLocator& other, offset_t delta_) :
 		DataLocator(other.block_id(), other.offset()), m_size(other.m_size) { delta(delta_); }
 	SizedLocator& operator=(const SizedLocator& other) { m_block_id = other.m_block_id; m_offset = other.m_offset; m_size = other.m_size; return *this; }
@@ -267,16 +267,16 @@ namespace milliways {
 class KeyValueStore
 {
 public:
-	static const int MAJOR_VERSION = 0;
-	static const int MINOR_VERSION = 1;
+	static const uint32_t MAJOR_VERSION = 0;
+	static const uint32_t MINOR_VERSION = 1;
 
 	static const size_t BLOCKSIZE = KV_BLOCKSIZE;
-	static const int NODE_CACHESIZE = KV_NODE_CACHESIZE;
-	static const int BLOCK_CACHESIZE = KV_BLOCK_CACHESIZE;
-	static const int B = KV_B;
-	static const int KEY_HASH_SIZE = 20;
+	static const size_t NODE_CACHESIZE = KV_NODE_CACHESIZE;
+	static const size_t BLOCK_CACHESIZE = KV_BLOCK_CACHESIZE;
+	static const int    B = KV_B;
+	static const size_t KEY_HASH_SIZE = 20;
 
-	static const int KEY_MAX_SIZE = 20;
+	static const size_t KEY_MAX_SIZE = 20;
 
 	/*
 	 * we use our B+Tree to map a hash of the original key to a value-locator
@@ -315,7 +315,7 @@ public:
 		typedef XTYPENAME SizedLocator::uoffset_t uoffset_t;
 		typedef XTYPENAME SizedLocator::size_type size_type;
 
-		Search() {}
+		Search() : m_lookup(), m_value_loc() {}
 		Search(const Search& other) : m_lookup(other.m_lookup), m_value_loc(SizedLocator(other.m_value_loc)) {}
 		Search& operator= (const Search& other) { m_lookup = other.m_lookup; m_value_loc = other.m_value_loc; return *this; }
 
@@ -329,7 +329,7 @@ public:
 
 		const SizedLocator& locator() const { return m_value_loc; }
 		SizedLocator& locator() { return m_value_loc; }
-		Search& locator(const SizedLocator& locator) { m_value_loc = locator; return *this; }
+		Search& locator(const SizedLocator& locator_) { m_value_loc = locator_; return *this; }
 
 		bool found() const { return m_lookup.found(); }
 		const std::string& key() const { return m_lookup.key(); }
@@ -413,8 +413,8 @@ public:
 		typedef std::forward_iterator_tag iterator_category;
 		typedef int difference_type;
 
-		base_iterator() : m_kv(NULL), m_tree(NULL), m_forward(true), m_end(true) {}
-		base_iterator(kv_type* kv, bool forward_ = true, bool end_ = false) : m_kv(kv), m_tree(NULL), m_forward(forward_), m_end(end_) { m_tree = m_kv->kv_tree(); kv_tree_iterator_type it(m_tree, m_tree->root(), forward_, end_); m_tree_it = it; rewind(end_); }
+		base_iterator() : m_kv(NULL), m_tree(NULL), m_tree_it(), m_forward(true), m_end(true), m_current_key() {}
+		base_iterator(kv_type* kv_, bool forward_ = true, bool end_ = false) : m_kv(kv_), m_tree(NULL), m_tree_it(), m_forward(forward_), m_end(end_), m_current_key() { m_tree = m_kv->kv_tree(); kv_tree_iterator_type it(m_tree, m_tree->root(), forward_, end_); m_tree_it = it; rewind(end_); }
 		base_iterator(const base_iterator& other) : m_kv(other.m_kv), m_tree(other.m_tree), m_tree_it(other.m_tree_it), m_forward(other.m_forward), m_end(other.m_end), m_current_key(other.m_current_key) { }
 		base_iterator& operator= (const base_iterator& other) { m_kv = other.m_kv; m_tree = other.m_tree; m_tree_it = other.m_tree_it; m_forward = other.m_forward; m_end = other.m_end; m_current_key = other.m_current_key; return *this; }
 
@@ -456,7 +456,7 @@ public:
 	class iterator : public base_iterator
 	{
 	public:
-		iterator(kv_type* kv, bool forward_ = true, bool end_ = false) : base_iterator(kv, forward_, end_) {}
+		iterator(kv_type* kv_, bool forward_ = true, bool end_ = false) : base_iterator(kv_, forward_, end_) {}
 		iterator(const iterator& other) : base_iterator(other) {}
 
 		reference operator*() { m_current_key = (*m_tree_it).key(); return m_current_key; }
@@ -466,7 +466,7 @@ public:
 	class const_iterator : public base_iterator
 	{
 	public:
-		const_iterator(kv_type* kv, bool forward_ = true, bool end_ = false) : base_iterator(kv, forward_, end_) {}
+		const_iterator(kv_type* kv_, bool forward_ = true, bool end_ = false) : base_iterator(kv_, forward_, end_) {}
 		const_iterator(const const_iterator& other) : base_iterator(other) {}
 	};
 

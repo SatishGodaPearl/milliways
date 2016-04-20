@@ -17,7 +17,80 @@ endif()
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  # using Clang
+  SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -Weffc++ -pedantic \
+  	-pedantic-errors -Wextra -Wcast-align \
+      -Wcast-qual  -Wchar-subscripts  -Wcomment -Wconversion \
+      -Wdisabled-optimization \
+      -Wfloat-equal  -Wformat  -Wformat=2 \
+      -Wformat-nonliteral -Wformat-security  \
+      -Wformat-y2k \
+      -Wimplicit  -Wimport  -Winit-self  -Winline \
+      -Winvalid-pch   \
+      -Wlong-long -Wmissing-braces \
+      -Wmissing-field-initializers -Wmissing-format-attribute   \
+      -Wmissing-include-dirs -Wmissing-noreturn \
+      -Wpacked -Wparentheses  -Wpointer-arith \
+      -Wredundant-decls -Wreturn-type \
+      -Wsequence-point  -Wshadow -Wsign-compare \
+      -Wstrict-aliasing -Wstrict-aliasing=2 -Wswitch  -Wswitch-default \
+      -Wswitch-enum -Wtrigraphs  -Wuninitialized \
+      -Wunknown-pragmas  -Wunused \
+      -Wunused-function  -Wunused-label  -Wunused-parameter \
+      -Wunused-value  -Wunused-variable  -Wvariadic-macros \
+      -Wvolatile-register-var  -Wwrite-strings" )
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  # using GCC
+  # SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -Weffc++ -pedantic" )
+
+  # SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -Weffc++ -pedantic \
+  # 	-pedantic-errors -Wextra -Waggregate-return -Wcast-align \
+  #     -Wcast-qual  -Wchar-subscripts  -Wcomment -Wconversion \
+  #     -Wdisabled-optimization \
+  #     -Werror -Wfloat-equal  -Wformat  -Wformat=2 \
+  #     -Wformat-nonliteral -Wformat-security  \
+  #     -Wformat-y2k \
+  #     -Wimplicit  -Wimport  -Winit-self  -Winline \
+  #     -Winvalid-pch   \
+  #     -Wunsafe-loop-optimizations  -Wlong-long -Wmissing-braces \
+  #     -Wmissing-field-initializers -Wmissing-format-attribute   \
+  #     -Wmissing-include-dirs -Wmissing-noreturn \
+  #     -Wpacked  -Wpadded -Wparentheses  -Wpointer-arith \
+  #     -Wredundant-decls -Wreturn-type \
+  #     -Wsequence-point  -Wshadow -Wsign-compare  -Wstack-protector \
+  #     -Wstrict-aliasing -Wstrict-aliasing=2 -Wswitch  -Wswitch-default \
+  #     -Wswitch-enum -Wtrigraphs  -Wuninitialized \
+  #     -Wunknown-pragmas  -Wunreachable-code -Wunused \
+  #     -Wunused-function  -Wunused-label  -Wunused-parameter \
+  #     -Wunused-value  -Wunused-variable  -Wvariadic-macros \
+  #     -Wvolatile-register-var  -Wwrite-strings" )
+
+  SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -Weffc++ -pedantic \
+  	-pedantic-errors -Wextra -Wcast-align \
+      -Wcast-qual  -Wchar-subscripts  -Wcomment -Wconversion \
+      -Wdisabled-optimization \
+      -Wfloat-equal  -Wformat  -Wformat=2 \
+      -Wformat-nonliteral -Wformat-security  \
+      -Wformat-y2k \
+      -Wimplicit  -Wimport  -Winit-self  -Winline \
+      -Winvalid-pch   \
+      -Wunsafe-loop-optimizations  -Wlong-long -Wmissing-braces \
+      -Wmissing-field-initializers -Wmissing-format-attribute   \
+      -Wmissing-include-dirs -Wmissing-noreturn \
+      -Wpacked -Wparentheses  -Wpointer-arith \
+      -Wredundant-decls -Wreturn-type \
+      -Wsequence-point  -Wshadow -Wsign-compare \
+      -Wstrict-aliasing -Wstrict-aliasing=2 -Wswitch  -Wswitch-default \
+      -Wswitch-enum -Wtrigraphs  -Wuninitialized \
+      -Wunknown-pragmas  -Wunused \
+      -Wunused-function  -Wunused-label  -Wunused-parameter \
+      -Wunused-value  -Wunused-variable  -Wvariadic-macros \
+      -Wvolatile-register-var  -Wwrite-strings" )
+endif()
+
 include(CheckCXXSourceCompiles)
+include(CheckCXXSourceRuns)
 include(CheckTypeSize)
 check_cxx_source_compiles("
     #include <memory>
@@ -63,6 +136,37 @@ check_cxx_source_compiles("
 " ALLOWS_TEMPLATED_SIZE_T)
 
 check_cxx_source_compiles("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <unistd.h>
+
+  template <typename T>
+  struct Traits;
+
+  template <>
+  struct Traits<uint8_t>
+  { typedef uint8_t type; static size_t size() { return sizeof(type); } };
+
+  template <>
+  struct Traits<uint16_t>
+  { typedef uint16_t type; static size_t size() { return sizeof(type); } };
+
+  template <>
+  struct Traits<uint32_t>
+  { typedef uint32_t type; static size_t size() { return sizeof(type); } };
+
+  template <>
+  struct Traits<uint64_t>
+  { typedef uint64_t type; static size_t size() { return sizeof(type); } };
+
+  template <>
+  struct Traits<ssize_t>
+  { typedef ssize_t type; static size_t size() { return sizeof(type); } };
+
+  int main() { ssize_t size = Traits<ssize_t>::size(); size++; }
+" ALLOWS_TEMPLATED_SSIZE_T)
+
+check_cxx_source_compiles("
 	#include <stdint.h>
 	#include <stddef.h>
 
@@ -89,10 +193,219 @@ check_cxx_source_compiles("
 " DOESNT_NEED_TEMPLATED_SIZE_T)
 
 check_cxx_source_compiles("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <unistd.h>
+
+  template <typename T>
+  struct Traits;
+
+  template <>
+  struct Traits<int8_t>
+  { typedef int8_t type; static size_t size() { return sizeof(type); } };
+
+  template <>
+  struct Traits<int16_t>
+  { typedef int16_t type; static size_t size() { return sizeof(type); } };
+
+  template <>
+  struct Traits<int32_t>
+  { typedef int32_t type; static size_t size() { return sizeof(type); } };
+
+  template <>
+  struct Traits<int64_t>
+  { typedef int64_t type; static size_t size() { return sizeof(type); } };
+
+  int main() { size_t size = Traits<ssize_t>::size(); size++; }
+" DOESNT_NEED_TEMPLATED_SSIZE_T)
+
+check_cxx_source_compiles("
 	#include <vector>
 
 	int main() { typename std::vector<int> v; v.push_back(1); }
 " ALLOWS_TYPENAME_OUTSIDE_TEMPLATES)
+
+check_cxx_source_runs("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <stdlib.h>
+ template<class T, class U>
+  struct is_same {
+      enum { value = 0 };
+  };
+  template<class T>
+  struct is_same<T, T> {
+      enum { value = 1 };
+  };
+  int main() { if (! is_same<uint32_t, unsigned long long>::value) abort(); }
+" UINT32_IS_ULL)
+
+check_cxx_source_runs("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <stdlib.h>
+  template<class T, class U>
+  struct is_same {
+      enum { value = 0 };
+  };
+  template<class T>
+  struct is_same<T, T> {
+      enum { value = 1 };
+  };
+  int main() { if (! is_same<uint32_t, unsigned long>::value) abort(); }
+" UINT32_IS_UL)
+
+check_cxx_source_runs("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <stdlib.h>
+  template<class T, class U>
+  struct is_same {
+      enum { value = 0 };
+  };
+  template<class T>
+  struct is_same<T, T> {
+      enum { value = 1 };
+  };
+  int main() { if (! is_same<uint32_t, unsigned int>::value) abort(); }
+" UINT32_IS_UI)
+
+check_cxx_source_runs("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <stdlib.h>
+  template<class T, class U>
+  struct is_same {
+      enum { value = 0 };
+  };
+  template<class T>
+  struct is_same<T, T> {
+      enum { value = 1 };
+  };
+  int main() { if (! is_same<uint64_t, unsigned long long>::value) abort(); }
+" UINT64_IS_ULL)
+
+check_cxx_source_runs("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <stdlib.h>
+  template<class T, class U>
+  struct is_same {
+      enum { value = 0 };
+  };
+  template<class T>
+  struct is_same<T, T> {
+      enum { value = 1 };
+  };
+  int main() { if (! is_same<uint64_t, unsigned long>::value) abort(); }
+" UINT64_IS_UL)
+
+check_cxx_source_runs("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <stdlib.h>
+  template<class T, class U>
+  struct is_same {
+      enum { value = 0 };
+  };
+  template<class T>
+  struct is_same<T, T> {
+      enum { value = 1 };
+  };
+  int main() { if (! is_same<uint64_t, unsigned int>::value) abort(); }
+" UINT64_IS_UI)
+
+check_cxx_source_runs("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <stdlib.h>
+  template<class T, class U>
+  struct is_same {
+      enum { value = 0 };
+  };
+  template<class T>
+  struct is_same<T, T> {
+      enum { value = 1 };
+  };
+  int main() { if (! is_same<size_t, unsigned long long>::value) abort(); }
+" SIZE_T_IS_ULL)
+
+check_cxx_source_runs("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <stdlib.h>
+  template<class T, class U>
+  struct is_same {
+      enum { value = 0 };
+  };
+  template<class T>
+  struct is_same<T, T> {
+      enum { value = 1 };
+  };
+  int main() { if (! is_same<size_t, unsigned long>::value) abort(); }
+" SIZE_T_IS_UL)
+
+check_cxx_source_runs("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <stdlib.h>
+  template<class T, class U>
+  struct is_same {
+      enum { value = 0 };
+  };
+  template<class T>
+  struct is_same<T, T> {
+      enum { value = 1 };
+  };
+  int main() { if (! is_same<size_t, unsigned int>::value) abort(); }
+" SIZE_T_IS_UI)
+
+check_cxx_source_runs("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <stdlib.h>
+  template<class T, class U>
+  struct is_same {
+      enum { value = 0 };
+  };
+  template<class T>
+  struct is_same<T, T> {
+      enum { value = 1 };
+  };
+  int main() { if (! is_same<ssize_t, long long>::value) abort(); }
+" SSIZE_T_IS_LL)
+
+check_cxx_source_runs("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <unistd.h>
+  #include <stdlib.h>
+  template<class T, class U>
+  struct is_same {
+      enum { value = 0 };
+  };
+  template<class T>
+  struct is_same<T, T> {
+      enum { value = 1 };
+  };
+  int main() { if (! is_same<ssize_t, long>::value) abort(); }
+" SSIZE_T_IS_L)
+
+check_cxx_source_runs("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <unistd.h>
+  #include <stdlib.h>
+  template<class T, class U>
+  struct is_same {
+      enum { value = 0 };
+  };
+  template<class T>
+  struct is_same<T, T> {
+      enum { value = 1 };
+  };
+  int main() { if (! is_same<ssize_t, int>::value) abort(); }
+" SSIZE_T_IS_I)
 
 SET(CMAKE_EXTRA_INCLUDE_FILES stdint.h)
 CHECK_TYPE_SIZE(size_t SIZEOF_SIZE_T LANGUAGE CXX)

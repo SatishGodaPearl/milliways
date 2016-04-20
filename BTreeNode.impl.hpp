@@ -32,9 +32,9 @@
 namespace milliways {
 
 template < int B_, typename KeyTraits, typename TTraits, class Compare >
-BTreeNode<B_, KeyTraits, TTraits, Compare>::BTreeNode(tree_type* tree, node_id_t node_id, node_id_t parent_id) :
-	m_tree(tree), m_id(node_id), m_parent_id(parent_id), m_left_id(NODE_ID_INVALID), m_right_id(NODE_ID_INVALID),
-	m_leaf(true), m_n(0), m_rank(0), m_dirty(false)
+BTreeNode<B_, KeyTraits, TTraits, Compare>::BTreeNode(tree_type* tree_, node_id_t node_id, node_id_t parent_id) :
+	m_tree(tree_), m_id(node_id), m_parent_id(parent_id), m_left_id(NODE_ID_INVALID), m_right_id(NODE_ID_INVALID),
+	m_leaf(true), m_n(0), m_rank(0), m_dirty(false), m_keys(), m_values(), m_children()
 {
 }
 
@@ -74,9 +74,9 @@ bool BTreeNode<B_, KeyTraits, TTraits, Compare>::search(lookup_type& res, const 
 	else
 	{
 		/* bool found = */ bsearch(res, key_);
-		shptr<node_type> child( child_node(res.pos()) );
-		assert(child);
-		return child->search(res, key_);
+		shptr<node_type> child_( child_node(res.pos()) );
+		assert(child_);
+		return child_->search(res, key_);
 	}
 #if 0
 	if (leaf())
@@ -366,10 +366,10 @@ inline std::ostream& BTreeNode<B_, KeyTraits, TTraits, Compare>::dotGraph(std::o
 	rankmap_type::const_iterator it;
 	for (it = rankmap.begin(); it != rankmap.end(); ++it)
 	{
-		int rank = it->first;
+		int rank_ = it->first;
 		std::string same_rank_s;
 
-		node_set_type& nodes_with_rank = rankmap[rank];
+		node_set_type& nodes_with_rank = rankmap[rank_];
 		node_set_type::const_iterator n_it;
 
 		for (n_it = nodes_with_rank.begin(); n_it != nodes_with_rank.end(); ++n_it)
@@ -408,9 +408,9 @@ inline void BTreeNode<B_, KeyTraits, TTraits, Compare>::dotGraph(const std::stri
 	std::cout << "graph generated at " << pathname_pdf << std::endl;
 	if (display)
 	{
-		std::ostringstream ss_cmd;
-		ss_cmd << "open " << pathname_pdf;
-		system(ss_cmd.str().c_str());
+		std::ostringstream ss_open_cmd;
+		ss_open_cmd << "open " << pathname_pdf;
+		system(ss_open_cmd.str().c_str());
 	}
 }
 

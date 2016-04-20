@@ -156,7 +156,7 @@ namespace milliways {
 
 inline KeyValueStore::KeyValueStore(block_storage_type* blockstorage) :
 	m_blockstorage(blockstorage), m_storage(NULL), m_kv_tree(NULL),
-	m_first_block_id(BLOCK_ID_INVALID),
+	m_first_block_id(BLOCK_ID_INVALID), m_next_location(),
 	m_kv_header_uid(-1)
 {
 	int max_B = BTreeFileStorage_Compute_Max_B< BLOCKSIZE, KEY_MAX_SIZE + 4, mapped_traits >();
@@ -623,7 +623,7 @@ inline bool KeyValueStore::read(std::string& dst, SizedLocator& location)
 		memcpy(dstp, src_block->data() + src_offset, amount);
 		dstp       += amount;
 		src_rem    -= amount;
-		src_offset += amount;
+		src_offset += static_cast<uint32_t>(amount);
 		nread      += amount;
 		if (src_offset >= BLOCKSIZE)
 		{
@@ -685,11 +685,12 @@ inline bool KeyValueStore::write(const std::string& src, SizedLocator& location)
 
 		size_t amount = min(dst_block_avail, src_rem);
 		assert(dst_offset + amount <= BLOCKSIZE);
+		assert(dst_avail >= amount);
 		memcpy(dst_block->data() + dst_offset, srcp, amount);
 		block_put(*dst_block);
 		srcp       += amount;
 		src_rem    -= amount;
-		dst_offset += amount;
+		dst_offset += static_cast<uint32_t>(amount);
 		dst_avail  -= amount;
 		nwritten   += amount;
 		if (dst_offset >= BLOCKSIZE)
@@ -700,7 +701,7 @@ inline bool KeyValueStore::write(const std::string& src, SizedLocator& location)
 		}
 	}
 	assert(src_rem == 0);
-	assert(dst_avail >= 0);
+	/* assert(dst_avail >= 0); */
 
 	location.consume(nwritten);				// move and shrink
 	return (nwritten == src.length()) ? true : false;
@@ -713,7 +714,7 @@ inline bool KeyValueStore::alloc_value_envelope(SizedLocator& dst)
 	{
 		size_t n_blocks = size_in_blocks(amount);
 		assert((n_blocks * BLOCKSIZE) >= amount);
-		m_next_location.block_id(block_alloc_id(n_blocks));
+		m_next_location.block_id(block_alloc_id(static_cast<int>(n_blocks)));
 		if (! block_id_valid(m_next_location.block_id()))
 			return false;
 		m_next_location.offset(0);
@@ -738,7 +739,7 @@ inline bool KeyValueStore::alloc_value_envelope(SizedLocator& dst)
 
 	// compute next block id / avail
 	m_next_location.consume(amount);		// move and shrink
-	assert(m_next_location.size() >= 0);
+	/* assert(m_next_location.size() >= 0); */
 	return true;
 }
 
@@ -811,14 +812,14 @@ inline bool KeyValueStore::header_read()
 		return false;
 	}
 
-	if ((v_B != B) || (v_BLOCKSIZE != BLOCKSIZE))
+	if ((static_cast<int>(v_B) != B) || (static_cast<size_t>(v_BLOCKSIZE) != BLOCKSIZE))
 	{
 		std::cerr << "ERROR: '" << m_blockstorage->pathname() << "' doesn't match with kv btree properties (B/BLOCKSIZE)" << std::endl;
 		return false;
 	}
 
-	assert(v_B == B);
-	assert(v_BLOCKSIZE == BLOCKSIZE);
+	assert(static_cast<int>(v_B) == B);
+	assert(static_cast<size_t>(v_BLOCKSIZE) == BLOCKSIZE);
 	assert(v_MAJOR <= MAJOR_VERSION);
 
 	block_id_t v_next_block_id;

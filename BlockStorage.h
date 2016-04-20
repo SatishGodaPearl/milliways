@@ -54,8 +54,8 @@ public:
 
 	typedef size_t size_type;
 
-	Block(block_id_t index) :
-			m_index(index), m_dirty(false) { memset(m_data, 0, sizeof(m_data)); }
+	Block(block_id_t index_) :
+			m_index(index_), m_dirty(false) { memset(m_data, 0, sizeof(m_data)); }
 	Block(const Block<BLOCKSIZE>& other) : m_index(other.m_index), m_data(other.m_data), m_dirty(other.m_dirty) { }
 	Block& operator= (const Block<BLOCKSIZE>& rhs) { assert(this != &rhs); m_index = rhs.index(); memcpy(m_data, rhs.m_data, sizeof(m_data)); m_dirty = rhs.m_dirty; return *this; }
 
@@ -95,7 +95,7 @@ public:
 	typedef size_t size_type;
 
 	BlockStorage() :
-		m_header_block_id(BLOCK_ID_INVALID) {}
+		m_header_block_id(BLOCK_ID_INVALID), m_user_header() {}
 	virtual ~BlockStorage() { /* call close() from the most derived class, and BEFORE destruction  */ }
 
 	/* -- General I/O ---------------------------------------------- */
@@ -118,7 +118,7 @@ public:
 	virtual bool readHeader();
 	virtual bool writeHeader();
 
-	int allocUserHeader() { int uid = m_user_header.size(); m_user_header.push_back(""); return uid; }
+	int allocUserHeader() { int uid = static_cast<int>(m_user_header.size()); m_user_header.push_back(""); return uid; }
 	void setUserHeader(int uid, const std::string& userHeader) { m_user_header[uid] = userHeader; }
 	std::string getUserHeader(int uid) { return m_user_header[uid]; }
 
@@ -174,6 +174,7 @@ public:
 			/* allocate block object and read block data from disk */
 			block_type* block = new block_type(block_id);
 			if (! block) return false;
+			bool rv = false;
 			switch (op)
 			{
 			case base_type::op_get:
@@ -187,22 +188,26 @@ public:
 				break;
 			case base_type::op_sub:
 				//assert(value);
-				bool rv = m_storage->read(*block);
+				rv = m_storage->read(*block);
 				assert(rv || block->dirty());
 				value.reset(block);
 				return rv;
+				break;
+			default:
+				assert(false);
+				return false;
 				break;
 			}
 			return true;
 		}
 		return false;
 	}
-	bool on_set(const key_type& key, const mapped_type& value)
+	bool on_set(const key_type& /* key */, const mapped_type& /* value */)
 	{
 		return true;
 	}
 	//bool on_delete(const key_type& key);
-	bool on_eviction(const key_type& key, mapped_type& value)
+	bool on_eviction(const key_type& /* key */, mapped_type& value)
 	{
 		/* write back block */
 		/* block_id_t block_id = key; */
@@ -223,6 +228,9 @@ public:
 	}
 
 private:
+	LRUBlockCache(const LRUBlockCache& other) {}
+	LRUBlockCache& operator= (const LRUBlockCache& other) {}
+
 	storage_ptr_type m_storage;
 };
 
@@ -240,9 +248,9 @@ public:
 
 	typedef LRUBlockCache<BLOCKSIZE, CACHE_SIZE> cache_t;
 
-	FileBlockStorage(const std::string& pathname) :
+	FileBlockStorage(const std::string& pathname_) :
 		BlockStorage<BLOCKSIZE>(),
-		m_pathname(pathname), m_created(false), m_count(-1), m_next_block_id(BLOCK_ID_INVALID), m_lru(this) {}
+		m_pathname(pathname_), m_stream(), m_created(false), m_count(-1), m_next_block_id(BLOCK_ID_INVALID), m_lru(this) {}
 	~FileBlockStorage(); 	/* call close() before destruction! */
 
 	/* -- General I/O ---------------------------------------------- */

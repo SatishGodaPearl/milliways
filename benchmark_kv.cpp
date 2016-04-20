@@ -39,13 +39,17 @@
  * ----------------------------------------------------------------- */
 
 static inline int rand_int(int lo, int hi);
+#if 0
 static std::string random_string(int length);
 static std::vector<std::string>& split(std::vector<std::string>& elems, const std::string& s, char delim);
 static std::vector<std::string> split(const std::string& s, char delim);
+#endif
 static std::string trim(const std::string& str );
 static bool startsWith(const std::string& s, const std::string& prefix);
+#if 0
 static bool endsWith(const std::string& s, const std::string& suffix);
 static bool contains(const std::string& s, const std::string& infix);
+#endif
 
 static inline double epoch_ms();
 static inline void chrono_clear();
@@ -66,6 +70,7 @@ static inline int rand_int(int lo, int hi)
 	return rand() % (hi - lo + 1) + lo;
 }
 
+#if 0
 static std::string random_string(int length)
 {
 	static const char alphanum[] =
@@ -80,7 +85,9 @@ static std::string random_string(int length)
 
 	return r;
 }
+#endif
 
+#if 0
 static std::vector<std::string>& split(std::vector<std::string>& elems, const std::string& s, char delim)
 {
 	std::stringstream ss(s);
@@ -96,6 +103,7 @@ static std::vector<std::string> split(const std::string& s, char delim)
     split(elems, s, delim);
     return elems;
 }
+#endif
 
 static std::string trim(const std::string& str )
 {
@@ -111,7 +119,8 @@ static bool startsWith(const std::string& s, const std::string& prefix)
 	return (s.size() >= prefix.size()) && (s.substr(0, prefix.size()) == prefix);
 }
 
-static bool endsWith(const std::string& s, const std::string& suffix)
+#if 0
+qstatic bool endsWith(const std::string& s, const std::string& suffix)
 {
 	return (s.size() >= suffix.size()) && (s.substr(s.size() - suffix.size(), suffix.size()) == suffix);
 }
@@ -120,6 +129,7 @@ static bool contains(const std::string& s, const std::string& infix)
 {
 	return s.find(infix) != std::string::npos;
 }
+#endif
 
 static inline double epoch_ms()
 {

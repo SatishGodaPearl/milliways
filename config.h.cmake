@@ -68,8 +68,14 @@
 /* Define to 1 if an explicit template for size_t is not needed if all the uint*_t types are there */
 #cmakedefine DOESNT_NEED_TEMPLATED_SIZE_T 1
 
+/* Define to 1 if an explicit template for ssize_t is not needed if all the int*_t types are there */
+#cmakedefine DOESNT_NEED_TEMPLATED_SSIZE_T 1
+
 /* Define to 1 if an explicit template for size_t is allowed even if all the uint*_t types are there */
 #cmakedefine ALLOWS_TEMPLATED_SIZE_T 1
+
+/* Define to 1 if an explicit template for ssize_t is allowed even if all the int*_t types are there */
+#cmakedefine ALLOWS_TEMPLATED_SSIZE_T 1
 
 /* Define to 1 if "typename" keyword is allowed outside templates (it is not in C++03) */
 #cmakedefine ALLOWS_TYPENAME_OUTSIDE_TEMPLATES 1
@@ -79,5 +85,41 @@
 #else /* ! ALLOWS_TYPENAME_OUTSIDE_TEMPLATES */
 #define XTYPENAME
 #endif /* ! ALLOWS_TYPENAME_OUTSIDE_TEMPLATES */
+
+/* Define to 1 if uint32_t is same as unsigned long long */
+#cmakedefine UINT32_IS_ULL 1
+
+/* Define to 1 if uint32_t is same as unsigned long */
+#cmakedefine UINT32_IS_UL 1
+
+/* Define to 1 if uint32_t is same as unsigned int */
+#cmakedefine UINT32_IS_UI 1
+
+/* Define to 1 if uint64_t is same as unsigned long long */
+#cmakedefine UINT64_IS_ULL 1
+
+/* Define to 1 if uint64_t is same as unsigned long */
+#cmakedefine UINT64_IS_UL 1
+
+/* Define to 1 if uint64_t is same as unsigned int */
+#cmakedefine UINT64_IS_UI 1
+
+/* Define to 1 if size_t is same as unsigned long long */
+#cmakedefine SIZE_T_IS_ULL 1
+
+/* Define to 1 if size_t is same as unsigned long */
+#cmakedefine SIZE_T_IS_UL 1
+
+/* Define to 1 if size_t is same as unsigned int */
+#cmakedefine SIZE_T_IS_UI 1
+
+/* Define to 1 if ssize_t is same as long long */
+#cmakedefine SSIZE_T_IS_LL 1
+
+/* Define to 1 if ssize_t is same as long */
+#cmakedefine SSIZE_T_IS_L 1
+
+/* Define to 1 if ssize_t is same as int */
+#cmakedefine SSIZE_T_IS_I 1
 
 #endif /* MILLIWAYS_CONFIG_H */

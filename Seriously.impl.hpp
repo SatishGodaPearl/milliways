@@ -517,6 +517,56 @@ inline ssize_t Traits<size_t>::deserialize(const char*& src, size_t& avail, type
 
 #endif /* ALLOWS_TEMPLATED_SIZE_T */
 
+#if ALLOWS_TEMPLATED_SSIZE_T
+
+/* -- size_t ------------------------------------------------------- */
+
+inline ssize_t Traits<ssize_t>::serialize(char*& dst, size_t& avail, const type& v)
+{
+	typedef int64_t serialized_type;
+
+	char* dstp = dst;
+	size_t initial_avail = avail;
+
+	if (sizeof(serialized_type) > avail)
+		return -1;
+	assert(sizeof(serialized_type) <= avail);
+
+	serialized_type n_value = htonll(static_cast<serialized_type>(v));
+	memcpy(dstp, &n_value, sizeof(serialized_type));
+	dstp += sizeof(serialized_type);
+	avail -= sizeof(serialized_type);
+
+	if (avail > 0)
+		*dstp = '\0';
+
+	dst = dstp;
+	return (initial_avail - avail);
+}
+
+inline ssize_t Traits<ssize_t>::deserialize(const char*& src, size_t& avail, type& v)
+{
+	typedef int64_t serialized_type;
+
+	const char* srcp = src;
+	size_t initial_avail = avail;
+
+	if (avail < sizeof(serialized_type))
+		return -1;
+	assert(avail >= sizeof(serialized_type));
+
+	serialized_type n_value = 0;
+	memcpy(&n_value, srcp, sizeof(serialized_type));
+	v = static_cast<type>(ntohll(n_value));
+	srcp += sizeof(serialized_type);
+	avail -= sizeof(serialized_type);
+
+	src = srcp;
+	return (initial_avail - avail);
+}
+
+#endif /* ALLOWS_TEMPLATED_SSIZE_T */
+
 /* -- std::string -------------------------------------------------- */
 
 inline ssize_t Traits<std::string>::serialize(char*& dst, size_t& avail, const type& v)

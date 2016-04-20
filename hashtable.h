@@ -56,9 +56,9 @@ public:
 	class iterator;
 	class const_iterator;
 
-	const size_type DEFAULT_CAPACITY = 256;
-	const size_type MAX_LOAD_FACTOR = 30;
-	const size_type EXPANSION_FACTOR = 2;
+	static const size_type DEFAULT_CAPACITY = 256;
+	static const size_type MAX_LOAD_FACTOR = 30;
+	static const size_type EXPANSION_FACTOR = 2;
 
 private:
 	class bucket
@@ -66,7 +66,7 @@ private:
 	public:
 		enum state_t { FREE, USED, DELETED };
 
-		bucket() : m_state(FREE) {}
+		bucket() : m_key(), m_value(), m_state(FREE) {}
 		bucket(const key_type& key_, const mapped_type& value_, state_t state_ = FREE) : m_key(key_), m_value(value_), m_state(state_) {}
 		bucket(const bucket& other) : m_key(other.m_key), m_value(other.m_value), m_state(other.m_state) {}
 		bucket& operator= (const bucket& other) { if (this == &other) return *this; m_key = other.m_key; m_value = other.m_value; m_state = other.m_state; return *this; }
