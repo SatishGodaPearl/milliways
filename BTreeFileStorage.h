@@ -76,7 +76,7 @@ public:
 			switch (op)
 			{
 			case base_type::op_get:
-				if (! m_storage->node_read(*node)) return false;
+				if (! m_storage->ll_node_read(*node)) return false;
 				node->dirty(false);
 				value = node;
 				break;
@@ -114,7 +114,7 @@ public:
 		{
 			if (node->id() != NODE_ID_INVALID)
 			{
-				bool ok = m_storage->node_write(*node);
+				bool ok = m_storage->ll_node_write(*node);
 				assert(ok);
 			}
 			// node->id(NODE_ID_INVALID);
@@ -199,15 +199,15 @@ public:
 	node_id_t node_alloc_id() { assert(m_block_storage); assert(m_block_storage->isOpen()); return static_cast<node_id_t>(m_block_storage->allocId()); }
 	void node_dispose_id_helper(node_id_t node_id);
 
-	bool node_read(node_type& node);
-	bool node_write(node_type& node);
+	bool ll_node_read(node_type& node);
+	bool ll_node_write(node_type& node);
 
 	/* -- Node I/O - hight level (cached) -------------------------- */
 
 	shptr<node_type> node_alloc(node_id_t node_id);
 	void node_dealloc(shptr<node_type>& node);
-	shptr<node_type> node_get(node_id_t node_id);
-	shptr<node_type> node_put(shptr<node_type>& node);
+	shptr<node_type> node_read(node_id_t node_id);
+	shptr<node_type> node_write(shptr<node_type>& node);
 
 	/* -- Header I/O ----------------------------------------------- */
 

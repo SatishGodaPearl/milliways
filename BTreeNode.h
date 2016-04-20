@@ -193,7 +193,7 @@ public:
 	const node_id_t& child(int i) const { return m_children[i]; }
 	bool hasChild(int i) const { return ((! leaf()) && (i >= 0) && (i <= n()) && node_id_valid(m_children[i])); }
 
-	shptr<node_type> child_node(int i) const { node_id_t node_id = child(i); return (node_id != NODE_ID_INVALID) ? node_get(node_id) : shptr<node_type>(); }
+	shptr<node_type> child_node(int i) const { node_id_t node_id = child(i); return (node_id != NODE_ID_INVALID) ? node_read(node_id) : shptr<node_type>(); }
 	void child_node(int i, const shptr<node_type>& node) { assert(node); assert(node->id() != NODE_ID_INVALID); m_children[i] = node->id(); }
 
 	lookup_type* create_lookup(bool found, int pos, const key_type& key_) { return new lookup_type(this_node(), found, pos, key_); }
@@ -210,13 +210,13 @@ public:
 	shptr<node_type> node_alloc() { assert(m_tree); return m_tree->node_alloc(); }
 	shptr<node_type> node_child_alloc(shptr<node_type> parent_) { assert(m_tree); return m_tree->node_child_alloc(parent_); }
 	void node_dispose(shptr<node_type>& node) { assert(m_tree); return m_tree->node_dispose(node); }
-	shptr<node_type> node_get(node_id_t node_id) const { assert(m_tree); return m_tree->node_get(node_id); }
-	shptr<node_type> node_get(shptr<node_type>& node) const { assert(m_tree); return m_tree->node_get(node); }
-	shptr<node_type> node_put(shptr<node_type>& node) const { assert(m_tree); return m_tree->node_put(node); }
+	shptr<node_type> node_read(node_id_t node_id) const { assert(m_tree); return m_tree->node_read(node_id); }
+	shptr<node_type> node_read(shptr<node_type>& node) const { assert(m_tree); return m_tree->node_read(node); }
+	shptr<node_type> node_write(shptr<node_type>& node) const { assert(m_tree); return m_tree->node_write(node); }
 
 	shptr<BTreeNode> child_alloc() { shptr<BTreeNode> self( this_node() ); return node_child_alloc(self); }
 
-	shptr<node_type> this_node() const { assert(m_tree); assert(node_id_valid(id())); return m_tree->node_get(id()); }
+	shptr<node_type> this_node() const { assert(m_tree); assert(node_id_valid(id())); return m_tree->node_read(id()); }
 
 	/* -- Output --------------------------------------------------- */
 

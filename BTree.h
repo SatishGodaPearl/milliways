@@ -123,9 +123,9 @@ public:
 	shptr<node_type> node_alloc() { assert(m_io); return m_io->node_alloc(); }
 	shptr<node_type> node_child_alloc(shptr<node_type> parent) { assert(m_io); return m_io->node_child_alloc(parent); }
 	void node_dispose(shptr<node_type>& node) { assert(m_io); return m_io->node_dispose(node); }
-	shptr<node_type> node_get(node_id_t node_id) { assert(m_io); return m_io->node_get(node_id); }
-	shptr<node_type> node_get(shptr<node_type>& node) { assert(m_io); return m_io->node_get(node); }
-	shptr<node_type> node_put(shptr<node_type>& node) { assert(m_io); return m_io->node_put(node); }
+	shptr<node_type> node_read(node_id_t node_id) { assert(m_io); return m_io->node_read(node_id); }
+	shptr<node_type> node_read(shptr<node_type>& node) { assert(m_io); return m_io->node_read(node); }
+	shptr<node_type> node_write(shptr<node_type>& node) { assert(m_io); return m_io->node_write(node); }
 
 	/* -- Output --------------------------------------------------- */
 
@@ -286,7 +286,7 @@ public:
 	bool hasRoot() const { return m_root_id != NODE_ID_INVALID; }
 	node_id_t rootId() const { return m_root_id; }
 	node_id_t rootId(node_id_t value) { node_id_t old = m_root_id; m_root_id = value; return old; }
-	shptr<node_type> root(bool create = true) { if (hasRoot()) return node_get(m_root_id); else return (create ? node_alloc() : shptr<node_type>()); }
+	shptr<node_type> root(bool create = true) { if (hasRoot()) return node_read(m_root_id); else return (create ? node_alloc() : shptr<node_type>()); }
 	void root(const shptr<node_type>& new_root) { assert(new_root); assert(node_id_valid(new_root->id())); rootId(new_root->id()); }
 
 	/* -- Misc ----------------------------------------------------- */
@@ -321,16 +321,16 @@ public:
 	}
 	virtual void node_dispose_id_helper(node_id_t node_id) = 0;
 
-	virtual bool node_read(node_type& node) = 0;
-	virtual bool node_write(node_type& node) = 0;
+	virtual bool ll_node_read(node_type& node) = 0;
+	virtual bool ll_node_write(node_type& node) = 0;
 
-	/* -- Node I/O - hight level (cached) -------------------------- */
+	/* -- Node I/O - high level (cached) --------------------------- */
 
 	virtual shptr<node_type> node_alloc() { return node_child_alloc(shptr<node_type>()); }
 	virtual shptr<node_type> node_child_alloc(shptr<node_type> parent)
 	{
 		node_id_t node_id = node_alloc_id();
-		shptr<node_type> child( node_alloc(node_id) );		// node_alloc(node_id_t) also puts into cache (is equal to alloc + node_put)
+		shptr<node_type> child( node_alloc(node_id) );		// node_alloc(node_id_t) also puts into cache (is equal to alloc + node_write)
 		assert(child);
 		m_n_nodes++;
 		if (! hasRoot())
@@ -340,11 +340,11 @@ public:
 			child->parentId(parent->id());
 			parent->leaf(false);
 			child->rank(parent->rank() + 1);
-			node_put(parent);
-			node_put(child);
+			node_write(parent);
+			node_write(child);
 		}
 		assert(child->leaf());
-		// node_put(child);
+		// node_write(child);
 		return child;
 	}
 
@@ -355,7 +355,7 @@ public:
 		node_dealloc(node);
 	}
 
-	virtual shptr<node_type> node_alloc(node_id_t node_id) = 0;		// this must also perform a node_put() (put into cache)
+	virtual shptr<node_type> node_alloc(node_id_t node_id) = 0;		// this must also perform a node_write() (put into cache)
 	virtual void node_dealloc(shptr<node_type>& node)
 	{
 		if (node) {
@@ -365,12 +365,12 @@ public:
 			// delete node;
 		}
 	}
-	virtual shptr<node_type> node_get(node_id_t node_id) = 0;
-	virtual shptr<node_type> node_get(shptr<node_type>& node)
+	virtual shptr<node_type> node_read(node_id_t node_id) = 0;
+	virtual shptr<node_type> node_read(shptr<node_type>& node)
 	{
 		assert(node);
 		assert(node->id() != NODE_ID_INVALID);
-		shptr<node_type> src( node_get(node->id()) );
+		shptr<node_type> src( node_read(node->id()) );
 		if (src)
 		{
 			assert(src->id() == node->id());
@@ -379,7 +379,7 @@ public:
 		}
 		return shptr<node_type>();
 	}
-	virtual shptr<node_type> node_put(shptr<node_type>& node) = 0;
+	virtual shptr<node_type> node_write(shptr<node_type>& node) = 0;
 
 	/* -- Header I/O ----------------------------------------------- */
 
@@ -451,7 +451,7 @@ public:
 			this->rootId(NODE_ID_INVALID);
 	}
 
-	bool node_read(node_type& node)
+	bool ll_node_read(node_type& node)
 	{
 		assert(node.id() != NODE_ID_INVALID);
 		shptr<node_type> node_ptr( m_nodes[node.id()] );
@@ -464,7 +464,7 @@ public:
 		node.dirty(true);
 		return false;
 	}
-	bool node_write(node_type& node)
+	bool ll_node_write(node_type& node)
 	{
 		assert(node.id() != NODE_ID_INVALID);
 		shptr<node_type> node_ptr( m_nodes[node.id()] );
@@ -481,11 +481,11 @@ public:
 		return true;
 	}
 
-	/* -- Node I/O - hight level (cached) -------------------------- */
+	/* -- Node I/O - high level (cached) --------------------------- */
 
 	shptr<node_type> node_alloc(node_id_t node_id)
 	{
-		// this must also perform a node_put() (put into cache)
+		// this must also perform a node_write() (put into cache)
 		assert(node_id != NODE_ID_INVALID);
 		shptr<node_type> node_ptr( new node_type(this->tree(), node_id) );
 		assert(node_ptr && (node_ptr->id() == node_id));
@@ -501,7 +501,7 @@ public:
 		base_type::node_dealloc(node);
 	}
 
-	shptr<node_type> node_get(node_id_t node_id)
+	shptr<node_type> node_read(node_id_t node_id)
 	{
 		typename node_map_type::const_iterator it = m_nodes.find(node_id);
 		if (it != m_nodes.end())
@@ -512,7 +512,7 @@ public:
 		return shptr<node_type>();
 	}
 
-	shptr<node_type> node_put(shptr<node_type>& node)
+	shptr<node_type> node_write(shptr<node_type>& node)
 	{
 		assert(node);
 		assert(node->id() != NODE_ID_INVALID);

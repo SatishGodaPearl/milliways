@@ -138,9 +138,9 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 
 			root_id = root->id();
 
-			// storage->node_put(root);
-			// storage->node_put(child1);
-			// storage->node_put(child2);
+			// storage->node_write(root);
+			// storage->node_write(child1);
+			// storage->node_write(child2);
 
 			tree.close();
 			storage->detach();
@@ -160,7 +160,7 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 
 			REQUIRE(tree.rootId() == root_id);
 
-			btree_node_ptr_t root = storage->node_get(tree.rootId());
+			btree_node_ptr_t root = storage->node_read(tree.rootId());
 
 			REQUIRE(root);
 			REQUIRE(root->n() == 1);

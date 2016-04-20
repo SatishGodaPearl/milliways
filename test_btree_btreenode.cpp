@@ -119,25 +119,25 @@ TEST_CASE( "BTree Memory Storage", "[BTreeMemoryStorage]" ) {
 		btree_node_ptr_t child3_1 = tree.node_child_alloc(child3);
 		btree_node_ptr_t child3_2 = tree.node_child_alloc(child3);
 
-		btree_node_ptr_t node = tree.node_get(root->id());
+		btree_node_ptr_t node = tree.node_read(root->id());
 		REQUIRE(node->id() == root->id());
 
-		node = tree.node_get(child1->id());
+		node = tree.node_read(child1->id());
 		REQUIRE(node->id() == child1->id());
 
-		node = tree.node_get(child2->id());
+		node = tree.node_read(child2->id());
 		REQUIRE(node->id() == child2->id());
 
-		node = tree.node_get(child3->id());
+		node = tree.node_read(child3->id());
 		REQUIRE(node->id() == child3->id());
 
-		node = tree.node_get(child1_1->id());
+		node = tree.node_read(child1_1->id());
 		REQUIRE(node->id() == child1_1->id());
 
-		node = tree.node_get(child3_1->id());
+		node = tree.node_read(child3_1->id());
 		REQUIRE(node->id() == child3_1->id());
 
-		node = tree.node_get(child3_2->id());
+		node = tree.node_read(child3_2->id());
 		REQUIRE(node->id() == child3_2->id());
 	}
 }

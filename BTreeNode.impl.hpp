@@ -187,7 +187,7 @@ void BTreeNode<B_, KeyTraits, TTraits, Compare>::split_child(int i)
 	{
 		shptr<node_type> z_right( z->right() );
 		z_right->leftId(z->id());
-		node_put(z_right);
+		node_write(z_right);
 	}
 	y->rightId(z->id());
 
@@ -226,10 +226,10 @@ void BTreeNode<B_, KeyTraits, TTraits, Compare>::split_child(int i)
 	// NOTE: since we keep values only in leafs, we keep B keys and not B-1
 	y->truncate(B);
 
-	node_put(y);
-	node_put(z);
+	node_write(y);
+	node_write(z);
 	shptr<node_type> self( this_node() );
-	node_put(self);
+	node_write(self);
 }
 
 template < int B_, typename KeyTraits, typename TTraits, class Compare >
@@ -255,7 +255,7 @@ shptr<typename BTreeNode<B_, KeyTraits, TTraits, Compare>::node_type> BTreeNode<
 		value(where.pos()) = value_;
 		n(n() + 1);
 		shptr<node_type> self( this_node() );
-		node_put(self);
+		node_write(self);
 		return self;
 	} else
 	{
@@ -305,7 +305,7 @@ bool BTreeNode<B_, KeyTraits, TTraits, Compare>::remove(lookup_type& res, const 
 		}
 		n(n() - 1);
 		shptr<node_type> self( this_node() );
-		node_put(self);
+		node_write(self);
 		return true;
 	} else
 	{
