@@ -132,6 +132,8 @@ bool LRUCache<SIZE, Key, T>::get(mapped_type& dst, key_type& key)
 		m_l1_key[m_l1_last] = key;
 		m_l1_mapped[m_l1_last] = mptr;
 
+		dst = *mptr;
+
 		return success;
 	}
 
