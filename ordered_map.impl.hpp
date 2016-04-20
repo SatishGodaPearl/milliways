@@ -49,7 +49,7 @@ void ordered_map<Key, T>::set(const Key& key, const T & value)
 {
 	order_type pos = 0;
 	if (! m_key2pos.get(key, pos)) {
-		order_type pos = m_tail++;
+		pos = m_tail++;
 		m_key2pos.set(key, pos);
 		m_pos2key.set(pos, key);
 		// std::cerr << "OM::set[" << key << "] := " << value << "   new pos := " << pos << "\n";
@@ -64,7 +64,7 @@ T & ordered_map<Key, T>::operator[](const Key& key)
 {
 	order_type pos = 0;
 	if (! m_key2pos.get(key, pos)) {
-		order_type pos = m_tail++;
+		pos = m_tail++;
 		m_key2pos.set(key, pos);
 		m_pos2key.set(pos, key);
 		// std::cerr << "OM::[" << key << "]   new pos := " << pos << "\n";
