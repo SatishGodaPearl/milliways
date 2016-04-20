@@ -69,26 +69,35 @@ public:
 		node_id_t node_id = key;
 		if (m_storage->has_id(node_id)) {
 			/* allocate node object and read node data from disk */
-			shptr<node_type> node( new node_type(m_storage->tree(), node_id) );
-			if (! node) return false;
-			assert(node->id() == node_id);
+			// shptr<node_type> node( new node_type(m_storage->tree(), node_id) );
+			shptr<node_type> node_ptr( m_storage->manager().get_object(node_id) );
+			assert(node_ptr && (node_ptr->id() == node_id));
+			if (! node_ptr) return false;
 			bool rv = false;
+			assert(node_ptr->id() == node_id);
 			switch (op)
 			{
 			case base_type::op_get:
-				if (! m_storage->ll_node_read(*node)) return false;
-				node->dirty(false);
-				value = node;
+				rv = m_storage->ll_node_read(*node_ptr);
+				assert(rv || node_ptr->dirty());
+				if (rv) {
+					node_ptr->dirty(false);
+					value = node_ptr;
+				}
+				// std::cerr << "op GET rv:" << (rv ? "OK" : "NO") << "  ptr:" << node_ptr <<  " value:" << value << "\n";
+				return rv;
 				break;
 			case base_type::op_set:
 				assert(value);
-				*node = *value;
+				*node_ptr = *value;
+				// std::cerr << "op SET rv:" << (true ? "OK" : "NO") << "  ptr:" << node_ptr <<  " value:" << value << "\n";
 				break;
 			case base_type::op_sub:
 				//assert(value);
-				rv = m_storage->ll_node_read(*node);
-				assert(rv || node->dirty());
-				value = node;
+				rv = m_storage->ll_node_read(*node_ptr);
+				assert(rv || node_ptr->dirty());
+				value = node_ptr;
+				// std::cerr << "op [] rv:" << (rv ? "OK" : "NO") << "  ptr:" << node_ptr <<  " value:" << value << "\n";
 				return rv;
 				break;
 			default:
@@ -109,16 +118,18 @@ public:
 	{
 		/* write back block */
 		/* node_id_t node_id = key; */
-		node_type* node = value.get();
-		if (node)
-		{
-			if (node->id() != NODE_ID_INVALID)
+		if (value) {
+			node_type* node = value.get();
+			if (node)
 			{
-				bool ok = m_storage->ll_node_write(*node);
-				assert(ok);
+				if (node->id() != NODE_ID_INVALID)
+				{
+					bool ok = m_storage->ll_node_write(*node);
+					assert(ok);
+				}
+				// node->id(NODE_ID_INVALID);
+				// value.reset();
 			}
-			// node->id(NODE_ID_INVALID);
-			// value.reset();
 		}
 		return true;
 	}

@@ -134,10 +134,12 @@ shptr<typename BTreeFileStorage<BLOCKSIZE, B_, KeyTraits, TTraits, Compare>::nod
 	assert(m_block_storage->isOpen());
 
 	assert (! m_lru.has(node_id));
-	shptr<node_type> node_ptr( new node_type(this->tree(), node_id) );
+	// shptr<node_type> node_ptr( new node_type(this->tree(), node_id) );
+	shptr<node_type> node_ptr( this->manager().get_object(node_id) );
 	assert(node_ptr && (node_ptr->id() == node_id));
 	m_lru.set(node_id, node_ptr);
 	assert(! node_ptr->dirty());
+	// std::cerr << "nFS::node_alloc(" << node_id << ") <- " << node_ptr << "\n";
 	return node_ptr;
 }
 
@@ -173,7 +175,12 @@ shptr<typename BTreeFileStorage<BLOCKSIZE, B_, KeyTraits, TTraits, Compare>::nod
 	// assert(node->id() == node_id);
 	// return node;
 
-	return m_lru[node_id];
+	shptr<node_type> result;
+	bool ok = m_lru.get(result, node_id);
+	assert(ok);
+	// std::cerr << "nFS::node_read(" << node_id << ") <- " << (ok ? "OK" : "NO") << "  result:" << result << std::endl;
+	return ok ? result : shptr<node_type>();
+	// return m_lru[node_id];
 }
 
 template < size_t BLOCKSIZE, int B_, typename KeyTraits, typename TTraits, class Compare >

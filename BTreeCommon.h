@@ -77,6 +77,9 @@ template < int B_, typename KeyTraits, typename TTraits, class Compare >
 class BTree;
 
 template < int B_, typename KeyTraits, typename TTraits, class Compare >
+class BTreeNodeManager;
+
+template < int B_, typename KeyTraits, typename TTraits, class Compare >
 class BTreeStorage;
 
 template < int B_, typename KeyTraits, typename TTraits, class Compare >

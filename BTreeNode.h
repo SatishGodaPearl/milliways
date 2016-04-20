@@ -30,6 +30,9 @@
 #include <string>
 #include <functional>
 #include <array>
+#include <map>
+#include <unordered_map>
+#include <memory>
 
 #include <stdint.h>
 #include <assert.h>
@@ -126,10 +129,6 @@ public:
 	typedef std::array<mapped_type, 2*B - 1> values_array_type;
 	typedef std::array<node_id_t, 2*B> children_array_type;
 
-	BTreeNode(tree_type* tree_, node_id_t node_id, node_id_t parent_id = NODE_ID_INVALID);
-	BTreeNode(const BTreeNode& other);
-	~BTreeNode() {}
-
 	BTreeNode& operator= (const BTreeNode& other);
 
 	bool valid() const { return hasId(); }
@@ -225,6 +224,14 @@ public:
 	std::ostream& dotGraph(std::ostream& out, std::map<node_id_t, bool>& visitedMap, int level = 0, int indent_ = 1);
 
 private:
+	/* lifetime managed by BTreeStorage */
+	BTreeNode(tree_type* tree, node_id_t node_id, node_id_t parent_id = NODE_ID_INVALID);
+	BTreeNode(const BTreeNode& other);
+	~BTreeNode() {}
+
+	friend class BTreeNodeManager<B_, KeyTraits, TTraits, Compare>;
+	friend class BTreeNodeManager<B_, KeyTraits, TTraits, Compare>::node_deleter;
+
 	tree_type* m_tree;
 	node_id_t m_id;
 	node_id_t m_parent_id;
@@ -239,6 +246,103 @@ private:
 	values_array_type m_values;
 	children_array_type m_children;
 };
+
+
+/* ----------------------------------------------------------------- *
+ *   BTreeNodeManager                                                *
+ * ----------------------------------------------------------------- */
+
+/*
+ * Based on http://stackoverflow.com/a/15708286
+ *   http://stackoverflow.com/questions/15707991/good-design-pattern-for-manager-handler
+ */
+template < int B_, typename KeyTraits, typename TTraits, class Compare = std::less<typename KeyTraits::type> >
+class BTreeNodeManager
+{
+public:
+	typedef BTreeNode<B_, KeyTraits, TTraits, Compare> node_type;
+	typedef BTree<B_, KeyTraits, TTraits, Compare> tree_type;
+	typedef BTreeNodeManager<B_, KeyTraits, TTraits, Compare> handler_type;
+
+	BTreeNodeManager() : m_objects(), m_tree(NULL) {}
+	BTreeNodeManager(tree_type* tree_) : m_objects(), m_tree(tree_) {}
+	~BTreeNodeManager() {
+		typename std::unordered_map< node_id_t, std::weak_ptr<node_type> >::iterator it;
+		for (it = m_objects.begin(); it != m_objects.end(); ++it) {
+			std::weak_ptr<node_type> wp = it->second;
+			if ((wp.use_count() > 0) && wp.expired()) {
+				std::cerr << "WARNING: weak pointer expired BUT use count not zero for managed node! (in use:" << wp.use_count() << ")" << std::endl;
+			} else if (wp.use_count() > 0) {
+				std::cerr << "WARNING: use count not zero for managed node (in use:" << wp.use_count() << ")" << std::endl;
+			}
+		}
+		m_objects.clear();
+	}
+
+	handler_type& tree(tree_type* tree_) { m_tree = tree_; return *this; }
+	tree_type* tree() { return m_tree; }
+
+	std::shared_ptr<node_type> get_object(node_id_t id, bool createIfNotFound = true)
+	{
+		typename std::unordered_map< node_id_t, std::weak_ptr<node_type> >::const_iterator it = m_objects.find(id);
+		if (it != m_objects.end()) {
+			assert(it->first == id);
+			return it->second.lock();
+		} else if (createIfNotFound) {
+			return make_object(id);
+		} else
+			return std::shared_ptr<node_type>();
+	}
+
+	bool has(node_type id) {
+		typename std::unordered_map< node_id_t, std::weak_ptr<node_type> >::const_iterator it = m_objects.find(id);
+		return (it != m_objects.end()) ? true : false;
+	}
+
+	size_t count() const { return m_objects.size(); }
+
+private:
+	typedef std::unordered_map< node_id_t, std::weak_ptr<node_type> > weak_map_t;
+
+	friend class BTreeNode<B_, KeyTraits, TTraits, Compare>;
+
+	class node_deleter;
+	friend class node_deleter;
+
+	std::shared_ptr<node_type> make_object(node_id_t id)
+	{
+		assert(m_tree);
+		assert(m_objects.count(id) == 0);
+		std::shared_ptr<node_type> sp(new node_type(m_tree, id), node_deleter(this, id));
+
+		m_objects[id] = sp;
+
+		return sp;
+	}
+
+	/* custom node deleter */
+	class node_deleter
+	{
+	public:
+		node_deleter(handler_type* handler, node_id_t id) :
+			m_handler(handler), m_id(id) {}
+
+		void operator()(node_type* p) {
+			assert(m_handler);
+			assert(p);
+			assert(p->id() == m_id);
+			m_handler->m_objects.erase(m_id);
+			delete p;
+		}
+	private:
+		handler_type* m_handler;
+		node_id_t m_id;
+	};
+
+	std::unordered_map< node_id_t, std::weak_ptr<node_type> > m_objects;
+	tree_type* m_tree;
+};
+
 
 } /* end of namespace milliways */
 

@@ -80,6 +80,10 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 			btree_node_ptr_t root = tree.root();
 
 			root_id = root->id();
+
+			// remove dangling references to node ptrs
+			root.reset();
+
 			tree.close();
 			storage->detach();
 			delete storage;
@@ -119,6 +123,7 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 
 			if (!tree.hasRoot())
 				tree.node_alloc();
+			REQUIRE(tree.hasRoot());
 			btree_node_ptr_t root = tree.root();
 
 			btree_node_ptr_t child1 = root->child_alloc();
@@ -142,6 +147,9 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 			// storage->node_write(child1);
 			// storage->node_write(child2);
 
+			// remove dangling references to node ptrs
+			root.reset(); child1.reset(); child2.reset();
+
 			tree.close();
 			storage->detach();
 			REQUIRE(! storage->isOpen());
@@ -159,12 +167,14 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 			REQUIRE(tree.isOpen());
 
 			REQUIRE(tree.rootId() == root_id);
-
 			btree_node_ptr_t root = storage->node_read(tree.rootId());
 
 			REQUIRE(root);
 			REQUIRE(root->n() == 1);
-			std::cerr << "root n:" << root->n() << " leaf:" << (root->leaf() ? "T" : "F") << " left:" << root->leftId() << " right:" << root->rightId() << "\n";
+			// std::cerr << "root n:" << root->n() << " leaf:" << (root->leaf() ? "T" : "F") << " left:" << root->leftId() << " right:" << root->rightId() << "\n";
+
+			// remove dangling references to node ptrs
+			root.reset();
 
 			tree.close();
 			storage->detach();
@@ -205,6 +215,9 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 			root_id = root->id();
 			REQUIRE(milliways::node_id_valid(root_id));
 
+			// remove dangling references to node ptrs
+			root.reset();
+
 			tree.close();
 			REQUIRE(! bs->isOpen());
 			REQUIRE(! storage->isOpen());
@@ -238,7 +251,11 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 
 			btree_node_ptr_t root = tree.root();
 
+			REQUIRE(root);
 			REQUIRE(root->id() == root_id);
+
+			// remove dangling references to node ptrs
+			root.reset();
 
 			tree.close();
 			REQUIRE(! bs->isOpen());

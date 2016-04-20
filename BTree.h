@@ -228,12 +228,13 @@ public:
 
 	typedef BTree<B_, KeyTraits, TTraits, Compare> tree_type;
 	typedef BTreeNode<B_, KeyTraits, TTraits, Compare> node_type;
+	typedef BTreeNodeManager<B_, KeyTraits, TTraits, Compare> manager_type;
 	typedef BTreeStorage<B_, KeyTraits, TTraits, Compare> self_type;
 
 	static const int B = B_;
 
 	BTreeStorage() :
-			m_tree(NULL), m_root_id(NODE_ID_INVALID), m_n_nodes(0), m_created(false) {}
+			m_tree(NULL), m_root_id(NODE_ID_INVALID), m_n_nodes(0), m_created(false), m_manager() {}
 	virtual ~BTreeStorage() { /* call close from the most derived class */ }
 
 	/* -- Tree ----------------------------------------------------- */
@@ -259,6 +260,7 @@ public:
 
 		m_root_id = NODE_ID_INVALID;
 		m_n_nodes = 0;
+		m_manager.tree(m_tree);
 		return true;
 	}
 
@@ -278,6 +280,7 @@ public:
 
 		m_root_id = NODE_ID_INVALID;
 		m_n_nodes = 0;
+		m_manager.tree(NULL);
 		return true;
 	}
 
@@ -386,11 +389,16 @@ public:
 	virtual bool header_write() { return true; }
 	virtual bool header_read()  { return true; }
 
+	/* -- Node Manager --------------------------------------------- */
+
+	manager_type& manager() { return m_manager; }
+
 protected:
 	tree_type* m_tree;
 	node_id_t m_root_id;
 	size_type m_n_nodes;
 	bool m_created;
+	manager_type m_manager;
 
 	size_type size(size_type n) { size_type old = m_n_nodes; m_n_nodes = n; return old; }
 
@@ -454,10 +462,10 @@ public:
 	bool ll_node_read(node_type& node)
 	{
 		assert(node.id() != NODE_ID_INVALID);
-		shptr<node_type> node_ptr( m_nodes[node.id()] );
-		if (node_ptr)
-		{
-			if (node_ptr != &node)
+		if (m_nodes.count(node.id()) > 0) {
+			shptr<node_type> node_ptr( m_nodes[node.id()] );
+			assert(node_ptr);
+			if (node_ptr.get() != &node)
 				node = *node_ptr;
 			return true;
 		}
@@ -467,14 +475,17 @@ public:
 	bool ll_node_write(node_type& node)
 	{
 		assert(node.id() != NODE_ID_INVALID);
-		shptr<node_type> node_ptr( m_nodes[node.id()] );
-		if (node_ptr)
+		if (m_nodes.count(node.id()) > 0)
 		{
-			if (node_ptr != &node)
+			shptr<node_type> node_ptr( m_nodes[node.id()] );
+			assert(node_ptr);
+			if (node_ptr.get() != &node)
 				*node_ptr = node;
 		} else
 		{
-			node_ptr.reset( new node_type(this->tree(), node.id()) );
+			// node_ptr.reset( new node_type(this->tree(), node.id()) );
+			shptr<node_type> node_ptr( this->manager().get_object(node.id()) );
+			assert(node_ptr && (node_ptr->id() == node.id()));
 			*node_ptr = node;
 			m_nodes[node.id()] = node_ptr;
 		}
@@ -487,7 +498,8 @@ public:
 	{
 		// this must also perform a node_write() (put into cache)
 		assert(node_id != NODE_ID_INVALID);
-		shptr<node_type> node_ptr( new node_type(this->tree(), node_id) );
+		// shptr<node_type> node_ptr( new node_type(this->tree(), node_id) );
+		shptr<node_type> node_ptr( this->manager().get_object(node_id) );
 		assert(node_ptr && (node_ptr->id() == node_id));
 		assert(! node_ptr->dirty());
 		m_nodes[node_id] = node_ptr;
