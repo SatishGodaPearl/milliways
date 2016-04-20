@@ -153,8 +153,8 @@ public:
 		iterator(const iterator& other) : m_parent(other.m_parent), m_pos(other.m_pos), m_bucket(other.m_bucket), m_has_value(false) { }
 		iterator& operator= (const iterator& other) { m_parent = other.m_parent; m_pos = other.m_pos; m_bucket = other.m_bucket; m_has_value = false; return *this; }
 
-		self_type operator++() { self_type i = *this; advance(); return i; }
-		self_type operator++(int junk) { advance(); return *this; }
+		self_type& operator++() { advance(); return *this; }										/* prefix  */
+		self_type operator++(int junk) { self_type i = *this; advance(); return i; }				/* postfix */
 		reference operator*() { update_value(); return m_value; }
 		pointer operator->() { update_value(); return &m_value; }
 		bool operator==(const self_type& rhs) { return (m_parent == rhs.m_parent) && (m_pos == rhs.m_pos) && (m_bucket == rhs.m_bucket); }
@@ -207,8 +207,8 @@ public:
 		const_iterator(const const_iterator& other) : m_parent(other.m_parent), m_pos(other.m_pos), m_bucket(other.m_bucket), m_has_value(false) { }
 		const_iterator& operator= (const const_iterator& other) { m_parent = other.m_parent; m_pos = other.m_pos; m_bucket = other.m_bucket; m_has_value = false; return *this; }
 
-		self_type operator++() { self_type i = *this; advance(); return i; }
-		self_type operator++(int junk) { advance(); return *this; }
+		self_type& operator++() { advance(); return *this; }										/* prefix  */
+		self_type operator++(int junk) { self_type i = *this; advance(); return i; }				/* postfix */
 		reference operator*() { update_value(); return m_value; }
 		pointer operator->() { update_value(); return &m_value; }
 		bool operator==(const self_type& rhs) { return (m_parent == rhs.m_parent) && (m_pos == rhs.m_pos) && (m_bucket == rhs.m_bucket); }

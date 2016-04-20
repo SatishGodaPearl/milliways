@@ -418,10 +418,10 @@ public:
 		base_iterator(const base_iterator& other) : m_kv(other.m_kv), m_tree(other.m_tree), m_tree_it(other.m_tree_it), m_forward(other.m_forward), m_end(other.m_end), m_current_key(other.m_current_key) { }
 		base_iterator& operator= (const base_iterator& other) { m_kv = other.m_kv; m_tree = other.m_tree; m_tree_it = other.m_tree_it; m_forward = other.m_forward; m_end = other.m_end; m_current_key = other.m_current_key; return *this; }
 
-		self_type& operator++() { next(); return *this; }
-		self_type& operator++(int junk) { next(); return *this; }
+		self_type& operator++() { next(); return *this; }									/* prefix  */
+		self_type operator++(int) { self_type i = *this; next(); return i; }				/* postfix */
 		self_type& operator--() { prev(); return *this; }
-		self_type& operator--(int junk) { prev(); return *this; }
+		self_type operator--(int) { self_type i = *this; prev(); return i; }
 		// reference operator*() { m_current_key = (*m_tree_it).key(); return m_current_key; }
 		const_reference operator*() const { m_current_key = (*m_tree_it).key(); return m_current_key; }
 		// pointer operator->() { m_current_key = (*m_tree_it).key(); return &m_current_key; }

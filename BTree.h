@@ -156,10 +156,10 @@ public:
 		iterator(const iterator& other) : m_tree(other.m_tree), m_root(other.m_root), m_first_node(other.m_first_node), m_forward(other.m_forward), m_end(other.m_end), m_current(other.m_current) { }
 		iterator& operator= (const iterator& other) { m_tree = other.m_tree; m_root = other.m_root; m_first_node = other.m_first_node; m_forward = other.m_forward; m_end = other.m_end; m_current = other.m_current; return *this; }
 
-		self_type& operator++() { next(); return *this; }
-		self_type& operator++(int junk) { next(); return *this; }
+		self_type& operator++() { next(); return *this; }									/* prefix  */
+		self_type operator++(int) { self_type i = *this; next(); return i; }				/* postfix */
 		self_type& operator--() { prev(); return *this; }
-		self_type& operator--(int junk) { prev(); return *this; }
+		self_type operator--(int) { self_type i = *this; prev(); return i; }
 		reference operator*() { return m_current; }
 		pointer operator->() { return &m_current; }
 		bool operator== (const self_type& rhs) {
