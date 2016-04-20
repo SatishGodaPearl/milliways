@@ -56,7 +56,7 @@ static inline void chrono_clear();
 static inline void chrono_start();
 static inline double chrono_stop();
 
-static void benchmark_1();
+static void benchmark_1(const std::string& words_pathname);
 
 int main(int argc, char* argv[]);
 
@@ -170,12 +170,12 @@ static inline double chrono_stop()
 
 static const int MAX_WORDS = 1000000;
 
-static void benchmark_1()
+static void benchmark_1(const std::string& words_pathname)
 {
 	typedef milliways::KeyValueStore kv_t;
 	typedef XTYPENAME kv_t::block_storage_type kv_blockstorage_t;
 
-	const std::string words_pathname("/usr/share/dict/words");
+	// const std::string words_pathname("/usr/share/dict/words");
 
 	std::ifstream f(words_pathname.c_str());
 	if(!f.is_open())
@@ -237,5 +237,10 @@ static void benchmark_1()
 
 int main(int argc, char* argv[])
 {
-	benchmark_1();
+	if (argc < 2) {
+		std::cerr << "usage: " << argv[0] << " WORDS-FILE" << std::endl;
+		return 1;
+	}
+	std::string words_pathname(argv[1]);
+	benchmark_1(words_pathname);
 }
