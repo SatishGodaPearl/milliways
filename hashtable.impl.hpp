@@ -106,7 +106,7 @@ static inline uint32_t s_hash32(const char *str)
 {
 	const unsigned char *s = (const unsigned char *)str;
     uint32_t hash = 5381;
-    char c;
+    unsigned char c;
 
     while ((c = *s++))
         hash = ((hash << 5) + hash) + static_cast<uint32_t>(c); /* hash * 33 + c */
@@ -131,7 +131,7 @@ static inline uint64_t s_hash64(const char *str)
 {
 	const unsigned char *s = (const unsigned char *)str;
     uint64_t hash = 5381;
-    char c;
+    unsigned char c;
 
     while ((c = *s++))
         hash = ((hash << 5) + hash) ^ static_cast<uint64_t>(c); /* hash * 33 xor c */

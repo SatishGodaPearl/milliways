@@ -34,15 +34,16 @@ static inline int rand_int(int lo, int hi)
 
 static std::string random_string(int length)
 {
+	typedef std::string::size_type s_size_t;
 	static const char alphanum[] =
 		"0123456789"
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		"abcdefghijklmnopqrstuvwxyz";
 
-	std::string r(length, '\0');
+	std::string r(static_cast<s_size_t>(length), '\0');
 
 	for (int i = 0; i < length; ++i)
-		r[i] = alphanum[rand_int(0, sizeof(alphanum) - 1)];
+		r[static_cast<s_size_t>(i)] = alphanum[rand_int(0, sizeof(alphanum) - 1)];
 
 	return r;
 }
@@ -212,9 +213,9 @@ TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 		REQUIRE(it == it_end);
 		std::cerr << it << std::endl;
 
-		for (kv_t::iterator it = kv.begin(); it != kv.end(); ++it)
+		for (kv_t::iterator l_it = kv.begin(); l_it != kv.end(); ++l_it)
 		{
-			std::cerr << (*it) << std::endl;
+			std::cerr << (*l_it) << std::endl;
 		}
 
 		kv.close();

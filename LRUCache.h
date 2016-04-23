@@ -107,7 +107,7 @@ public:
 		typename std::map<age_t, key_type>::const_iterator it;
 		for (it = m_age2key.begin(); it != m_age2key.end(); ++it)
 		{
-			age_t age = it->first;
+			/* age_t age = it->first; */
 			key_type key = it->second;
 			value_type& value = m_cache[key];
 			dst.push_back(value_type(key, value));

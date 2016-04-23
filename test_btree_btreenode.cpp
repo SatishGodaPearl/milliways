@@ -34,7 +34,7 @@
 TEST_CASE( "BTree", "[BTree]" ) {
 	typedef milliways::BTree<B_TEST, seriously::Traits<std::string>, seriously::Traits<int32_t> > btree_t;
 	typedef XTYPENAME btree_t::node_type btree_node_t;
-	typedef milliways::shptr<XTYPENAME btree_t::node_type> btree_node_ptr_t;
+	typedef MW_SHPTR<XTYPENAME btree_t::node_type> btree_node_ptr_t;
 
 	SECTION( "starts empty" ) {
 		btree_t tree;
@@ -94,7 +94,7 @@ TEST_CASE( "BTree Memory Storage", "[BTreeMemoryStorage]" ) {
 	typedef milliways::BTree<B_TEST, seriously::Traits<std::string>, seriously::Traits<int32_t> > btree_t;
 	typedef milliways::BTreeMemoryStorage<B_TEST, seriously::Traits<std::string>, seriously::Traits<int32_t> > btree_mem_st_t;
 	typedef XTYPENAME btree_t::node_type btree_node_t;
-	typedef milliways::shptr<XTYPENAME btree_t::node_type> btree_node_ptr_t;
+	typedef MW_SHPTR<XTYPENAME btree_t::node_type> btree_node_ptr_t;
 
 	SECTION( "is present by default" )
 	{

@@ -103,7 +103,7 @@ public:
 		iterator& operator= (const iterator& other) { m_parent = other.m_parent; m_pos = other.m_pos; m_has_value = false; return *this; }
 
 		self_type& operator++() { next_(); m_has_value = false; return *this; }									/* prefix  */
-		self_type operator++(int junk) { self_type i = *this; next_(); m_has_value = false; return i; }			/* postfix */
+		self_type operator++(int) { self_type i = *this; next_(); m_has_value = false; return i; }				/* postfix */
 		reference operator*() { update_value(); return m_value; }
 		pointer operator->() { update_value(); return &m_value; }
 		bool operator==(const self_type& rhs) {
@@ -155,7 +155,7 @@ public:
 		const_iterator& operator= (const const_iterator& other) { m_parent = other.m_parent; m_pos = other.m_pos; m_has_value = false; return *this; }
 
 		self_type& operator++() { next_(); m_has_value = false; return *this; }									/* prefix  */
-		self_type operator++(int junk) { self_type i = *this; next_(); m_has_value = false; return i; }			/* postfix */
+		self_type operator++(int) { self_type i = *this; next_(); m_has_value = false; return i; }				/* postfix */
 		const_reference operator*() { update_value(); return m_value; }
 		const_pointer operator->() { update_value(); return &m_value; }
 		bool operator==(const self_type& rhs) {

@@ -71,6 +71,7 @@ public:
 		m_block_id(other.m_block_id), m_offset(other.m_offset) {}
 	DataLocator(const DataLocator& other, offset_t delta_) :
 			m_block_id(other.m_block_id), m_offset(other.m_offset) { delta(delta_); }
+	~DataLocator() {}
 	DataLocator& operator= (const DataLocator& other) { m_block_id = other.m_block_id; m_offset = other.m_offset; return *this; }
 
 	bool operator== (const DataLocator& rhs) const { return (((! block_id_valid(m_block_id)) && (! block_id_valid(rhs.m_block_id))) || ((m_block_id == rhs.m_block_id) && (m_offset == rhs.m_offset))); }
@@ -181,7 +182,7 @@ public:
 	SizedLocator& shrink(size_type value) { m_size -= value; return *this; }
 	SizedLocator& grow(size_type value) { m_size += value; return *this; }
 
-	SizedLocator& consume(size_type value) { shrink(value); delta(value); return *this; }
+	SizedLocator& consume(size_type value) { shrink(value); delta(static_cast<offset_t>(value)); return *this; }
 
 	size_type envelope_size() const { return size(); }
 	size_type envelope_size(size_type value) { return size(value); }
@@ -333,7 +334,7 @@ public:
 
 		bool found() const { return m_lookup.found(); }
 		const std::string& key() const { return m_lookup.key(); }
-		shptr<kv_tree_node_type> node() const { return m_lookup.node(); }
+		MW_SHPTR<kv_tree_node_type> node() const { return m_lookup.node(); }
 		int pos() const { return m_lookup.pos(); }
 		node_id_t nodeId() const { return m_lookup.nodeId(); }
 
@@ -350,7 +351,7 @@ public:
 
 		const SizedLocator& headLocator() const { return locator(); }
 		SizedLocator& headLocator() { return locator(); }
-		SizedLocator contentsLocator() const { size_t off = sizeof(serialized_value_size_type); SizedLocator cl = SizedLocator(locator()); cl.delta(off); cl.shrink(off); return cl; }
+		SizedLocator contentsLocator() const { size_t off = sizeof(serialized_value_size_type); SizedLocator cl = SizedLocator(locator()); cl.delta(static_cast<offset_t>(off)); cl.shrink(off); return cl; }
 
 		DataLocator headDataLocator() const { return headLocator().dataLocator(); }
 		DataLocator contentsDataLocator() const { return contentsLocator().dataLocator(); }
@@ -417,6 +418,7 @@ public:
 		base_iterator(kv_type* kv_, bool forward_ = true, bool end_ = false) : m_kv(kv_), m_tree(NULL), m_tree_it(), m_forward(forward_), m_end(end_), m_current_key() { m_tree = m_kv->kv_tree(); kv_tree_iterator_type it(m_tree, m_tree->root(), forward_, end_); m_tree_it = it; rewind(end_); }
 		base_iterator(const base_iterator& other) : m_kv(other.m_kv), m_tree(other.m_tree), m_tree_it(other.m_tree_it), m_forward(other.m_forward), m_end(other.m_end), m_current_key(other.m_current_key) { }
 		base_iterator& operator= (const base_iterator& other) { m_kv = other.m_kv; m_tree = other.m_tree; m_tree_it = other.m_tree_it; m_forward = other.m_forward; m_end = other.m_end; m_current_key = other.m_current_key; return *this; }
+		~base_iterator() { m_kv = NULL; m_tree = NULL; m_end = true; }
 
 		self_type& operator++() { next(); return *this; }									/* prefix  */
 		self_type operator++(int) { self_type i = *this; next(); return i; }				/* postfix */
@@ -493,7 +495,7 @@ protected:
 
 	block_id_t block_alloc_id(int n_blocks = 1) { assert(m_blockstorage); return m_blockstorage->allocId(n_blocks); }
 	bool block_dispose(block_id_t block_id, int count = 1) { assert(m_blockstorage); return m_blockstorage->dispose(block_id, count); }
-	shptr<block_type> block_get(block_id_t block_id) { assert(m_blockstorage); return m_blockstorage->get(block_id); }
+	MW_SHPTR<block_type> block_get(block_id_t block_id) { assert(m_blockstorage); return m_blockstorage->get(block_id); }
 	bool block_put(const block_type& src) { assert(m_blockstorage); return m_blockstorage->put(src); }
 
 	/* -- Tree access ---------------------------------------------- */

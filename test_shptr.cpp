@@ -51,8 +51,8 @@ long Counted::s_count = 0;
 long Counted::s_creations = 0;
 long Counted::s_destructions = 0;
 
-TEST_CASE( "shptr shared pointer", "[shptr]" ) {
-	typedef milliways::shptr<Counted> counted_sptr_t;
+TEST_CASE( "MILLIWAYS_SHPTR shared pointer", "[MILLIWAYS_SHPTR]" ) {
+	typedef MILLIWAYS_SHPTR<Counted> counted_sptr_t;
 
 	SECTION( "basics work as expected" ) {
 		REQUIRE(Counted::Existing() == 0);
@@ -62,7 +62,7 @@ TEST_CASE( "shptr shared pointer", "[shptr]" ) {
 		{
 			Counted* counted = new Counted();
 
-			milliways::shptr<Counted> sptr1(counted);
+			MILLIWAYS_SHPTR<Counted> sptr1(counted);
 
 			REQUIRE(Counted::Existing() == 1);
 			REQUIRE(Counted::Created() == 1);
@@ -74,8 +74,10 @@ TEST_CASE( "shptr shared pointer", "[shptr]" ) {
 
 			REQUIRE(sptr1);
 			REQUIRE(sptr1.get() == counted);
+#if defined(USE_MILLIWAYS_SHPTR)
 			REQUIRE((void*)sptr1 != NULL);
 			REQUIRE((void*)sptr1 == (void*)counted);
+#endif
 #if defined(USE_MILLIWAYS_SHPTR)
 			REQUIRE(sptr1.count() == 1);
 #endif
@@ -83,7 +85,7 @@ TEST_CASE( "shptr shared pointer", "[shptr]" ) {
 			REQUIRE(sptr1->callme() == 42);
 			REQUIRE((*sptr1).callme() == 42);
 
-			milliways::shptr<Counted> sptr2(sptr1);
+			MILLIWAYS_SHPTR<Counted> sptr2(sptr1);
 
 			REQUIRE(Counted::Existing() == 1);
 			REQUIRE(Counted::Created() == 1);
@@ -91,7 +93,9 @@ TEST_CASE( "shptr shared pointer", "[shptr]" ) {
 
 			REQUIRE(sptr2);
 			REQUIRE(sptr2.get() == counted);
+#if defined(USE_MILLIWAYS_SHPTR)
 			REQUIRE((void*)sptr2 == (void*)counted);
+#endif
 #if defined(USE_MILLIWAYS_SHPTR)
 			REQUIRE(sptr1.count() == 2);
 			REQUIRE(sptr2.count() == 2);
@@ -116,7 +120,7 @@ TEST_CASE( "shptr shared pointer", "[shptr]" ) {
 		{
 			Counted* counted = new Counted();
 
-			milliways::shptr<Counted> sptr1(counted);
+			MILLIWAYS_SHPTR<Counted> sptr1(counted);
 
 			REQUIRE(Counted::Existing() == 1);
 			REQUIRE(Counted::Created() == 1);
@@ -128,14 +132,16 @@ TEST_CASE( "shptr shared pointer", "[shptr]" ) {
 
 			REQUIRE(sptr1);
 			REQUIRE(sptr1.get() == counted);
+#if defined(USE_MILLIWAYS_SHPTR)
 			REQUIRE((void*)sptr1 != NULL);
 			REQUIRE((void*)sptr1 == (void*)counted);
+#endif
 			REQUIRE(sptr1.count() == 1);
 
 			REQUIRE(sptr1->callme() == 42);
 			REQUIRE((*sptr1).callme() == 42);
 
-			milliways::shptr<Counted> sptr2(counted);
+			MILLIWAYS_SHPTR<Counted> sptr2(counted);
 
 			REQUIRE(Counted::Existing() == 1);
 			REQUIRE(Counted::Created() == 1);
@@ -143,7 +149,9 @@ TEST_CASE( "shptr shared pointer", "[shptr]" ) {
 
 			REQUIRE(sptr2);
 			REQUIRE(sptr2.get() == counted);
+#if defined(USE_MILLIWAYS_SHPTR)
 			REQUIRE((void*)sptr2 == (void*)counted);
+#endif
 			REQUIRE(sptr1.count() == 2);
 			REQUIRE(sptr2.count() == 2);
 
@@ -166,7 +174,7 @@ TEST_CASE( "shptr shared pointer", "[shptr]" ) {
 		{
 			Counted* counted = new Counted();
 
-			milliways::shptr<Counted> sptr1(counted);
+			MILLIWAYS_SHPTR<Counted> sptr1(counted);
 
 			REQUIRE(Counted::Existing() == 1);
 			REQUIRE(Counted::Created() == 1);
@@ -176,7 +184,7 @@ TEST_CASE( "shptr shared pointer", "[shptr]" ) {
 			REQUIRE(sptr1.count() == 1);
 #endif
 
-			milliways::shptr<Counted> sptr2(sptr1);
+			MILLIWAYS_SHPTR<Counted> sptr2(sptr1);
 
 			REQUIRE(Counted::Existing() == 1);
 			REQUIRE(Counted::Created() == 1);
@@ -189,7 +197,7 @@ TEST_CASE( "shptr shared pointer", "[shptr]" ) {
 
 			std::cerr << "shared ptr: " << sptr2 << std::endl;
 
-			milliways::shptr<Counted> sptr3 = sptr1;
+			MILLIWAYS_SHPTR<Counted> sptr3 = sptr1;
 
 			REQUIRE(Counted::Existing() == 1);
 			REQUIRE(Counted::Created() == 1);
@@ -215,7 +223,7 @@ TEST_CASE( "shptr shared pointer", "[shptr]" ) {
 		{
 			Counted* counted = new Counted();
 
-			milliways::shptr<Counted> sptr1(counted);
+			MILLIWAYS_SHPTR<Counted> sptr1(counted);
 
 			REQUIRE(Counted::Existing() == 1);
 			REQUIRE(Counted::Created() == 1);
@@ -229,7 +237,9 @@ TEST_CASE( "shptr shared pointer", "[shptr]" ) {
 			sptr1.reset();
 
 			REQUIRE(! sptr1);
+#if defined(USE_MILLIWAYS_SHPTR)
 			REQUIRE((void*)sptr1 == NULL);
+#endif
 #if defined(USE_MILLIWAYS_SHPTR)
 			REQUIRE(sptr1.count() == 0);
 #endif
@@ -252,7 +262,7 @@ TEST_CASE( "shptr shared pointer", "[shptr]" ) {
 		{
 			Counted* counted = new Counted();
 
-			milliways::shptr<Counted> sptr1(counted);
+			MILLIWAYS_SHPTR<Counted> sptr1(counted);
 
 			REQUIRE(Counted::Existing() == 1);
 			REQUIRE(Counted::Created() == 1);
@@ -263,7 +273,7 @@ TEST_CASE( "shptr shared pointer", "[shptr]" ) {
 			REQUIRE(sptr1.count() == 1);
 #endif
 
-			milliways::shptr<Counted> sptr2(sptr1);
+			MILLIWAYS_SHPTR<Counted> sptr2(sptr1);
 
 			REQUIRE(Counted::Existing() == 1);
 			REQUIRE(Counted::Created() == 1);
@@ -276,7 +286,9 @@ TEST_CASE( "shptr shared pointer", "[shptr]" ) {
 			sptr1.reset();
 
 			REQUIRE(! sptr1);
+#if defined(USE_MILLIWAYS_SHPTR)
 			REQUIRE((void*)sptr1 == NULL);
+#endif
 #if defined(USE_MILLIWAYS_SHPTR)
 			REQUIRE(sptr1.count() == 0);
 #endif
@@ -306,7 +318,7 @@ TEST_CASE( "shptr shared pointer", "[shptr]" ) {
 		{
 			Counted* counted = new Counted();
 
-			milliways::shptr<Counted> sptr1(counted);
+			MILLIWAYS_SHPTR<Counted> sptr1(counted);
 
 			REQUIRE(Counted::Existing() == 1);
 			REQUIRE(Counted::Created() == 1);
@@ -315,7 +327,7 @@ TEST_CASE( "shptr shared pointer", "[shptr]" ) {
 			REQUIRE(sptr1);
 			REQUIRE(sptr1.count() == 1);
 
-			milliways::shptr<Counted> sptr2(sptr1);
+			MILLIWAYS_SHPTR<Counted> sptr2(sptr1);
 
 			REQUIRE(Counted::Existing() == 1);
 			REQUIRE(Counted::Created() == 1);
@@ -326,7 +338,9 @@ TEST_CASE( "shptr shared pointer", "[shptr]" ) {
 			sptr1.reset();
 
 			REQUIRE(! sptr1);
+#if defined(USE_MILLIWAYS_SHPTR)
 			REQUIRE((void*)sptr1 == NULL);
+#endif
 			REQUIRE(sptr1.count() == 0);
 
 			REQUIRE(sptr2);

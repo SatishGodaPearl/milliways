@@ -59,7 +59,7 @@ inline ssize_t Traits<milliways::DataLocator>::serialize(char*& dst, size_t& ava
 		*dstp = '\0';
 
 	dst = dstp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 inline ssize_t Traits<milliways::DataLocator>::deserialize(const char*& src, size_t& avail, type& v)
@@ -84,7 +84,7 @@ inline ssize_t Traits<milliways::DataLocator>::deserialize(const char*& src, siz
 	v.offset(static_cast<XTYPENAME type::offset_t>(v_offset));
 
 	src = srcp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 inline ssize_t Traits<milliways::SizedLocator>::serialize(char*& dst, size_t& avail, const type& v)
@@ -113,7 +113,7 @@ inline ssize_t Traits<milliways::SizedLocator>::serialize(char*& dst, size_t& av
 		*dstp = '\0';
 
 	dst = dstp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 inline ssize_t Traits<milliways::SizedLocator>::deserialize(const char*& src, size_t& avail, type& v)
@@ -142,7 +142,7 @@ inline ssize_t Traits<milliways::SizedLocator>::deserialize(const char*& src, si
 	v.size(static_cast<XTYPENAME type::size_type>(v_size));
 
 	src = srcp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 } /* end of namespace seriously */
@@ -245,7 +245,7 @@ inline bool KeyValueStore::find(const std::string& key, Search& result)
 	{
 		assert(where.found());
 
-		shptr<kv_tree_node_type> node( where.node() );
+		MW_SHPTR<kv_tree_node_type> node( where.node() );
 		assert(node);
 
 		result.dataLocator(node->value(where.pos()));
@@ -260,7 +260,7 @@ inline bool KeyValueStore::find(const std::string& key, Search& result)
 
 	assert(result.valid());
 
-	shptr<block_type> block(block_get(result.block_id()));
+	MW_SHPTR<block_type> block(block_get(result.block_id()));
 	assert(block);
 
 	/*
@@ -282,7 +282,7 @@ inline bool KeyValueStore::find(const std::string& key, Search& result)
 	assert((result.offset() >= 0) && (result.offset() < static_cast<SizedLocator::offset_t>(BLOCKSIZE)));
 	const char* block_data = block->data();
 	const char* srcp = block_data + result.offset();
-	size_t avail = BLOCKSIZE - result.offset();
+	size_t avail = BLOCKSIZE - static_cast<size_t>(result.offset());
 
 #if 0
 	uint32_t v_key_length = 0;
@@ -401,7 +401,7 @@ inline bool KeyValueStore::put(const std::string& key, const std::string& value,
 	Search result;
 	bool present = find(key, result);
 
-	shptr<block_type> head_block;
+	MW_SHPTR<block_type> head_block;
 	bool do_allocate = true;
 
 	if (present)
@@ -443,7 +443,7 @@ inline bool KeyValueStore::put(const std::string& key, const std::string& value,
 		head_block = block_get(result.block_id());
 	assert(head_block);
 	char *dstp = head_block->data() + result.offset();
-	size_t avail = static_cast<size_t>(BLOCKSIZE - result.offset());
+	size_t avail = BLOCKSIZE - static_cast<size_t>(result.offset());
 	serialized_value_size_type v_value_length = static_cast<serialized_value_size_type>(value.length());
 	seriously::Traits<serialized_value_size_type>::serialize(dstp, avail, v_value_length);
 
@@ -489,7 +489,7 @@ inline bool KeyValueStore::find(const std::string& key, DataLocator& data_pos)
 	{
 		assert(where.found());
 
-		shptr<kv_tree_node_type> node( where.node() );
+		MW_SHPTR<kv_tree_node_type> node( where.node() );
 		assert(node);
 
 		data_pos = node->value(where.pos());
@@ -519,7 +519,7 @@ inline bool KeyValueStore::find(const std::string& key, SizedLocator& sized_pos)
 	{
 		assert(where.found());
 
-		shptr<kv_tree_node_type> node( where.node() );
+		MW_SHPTR<kv_tree_node_type> node( where.node() );
 		assert(node);
 
 		sized_pos.dataLocator(node->value(where.pos()));
@@ -533,7 +533,7 @@ inline bool KeyValueStore::find(const std::string& key, SizedLocator& sized_pos)
 
 	assert(sized_pos.valid());
 
-	shptr<block_type> block(block_get(sized_pos.block_id()));
+	MW_SHPTR<block_type> block(block_get(sized_pos.block_id()));
 	assert(block);
 
 	/*
@@ -555,7 +555,7 @@ inline bool KeyValueStore::find(const std::string& key, SizedLocator& sized_pos)
 	assert((sized_pos.offset() >= 0) && (sized_pos.offset() < static_cast<SizedLocator::offset_t>(BLOCKSIZE)));
 	const char* block_data = block->data();
 	const char* srcp = block_data + sized_pos.offset();
-	size_t avail = BLOCKSIZE - sized_pos.offset();
+	size_t avail = BLOCKSIZE - static_cast<size_t>(sized_pos.offset());
 
 #if 0
 	uint32_t v_key_length = 0;
@@ -606,7 +606,7 @@ inline bool KeyValueStore::read(std::string& dst, SizedLocator& location)
 	block_id_t  src_block_id = location.block_id();
 	uint32_t    src_offset   = static_cast<uint32_t>(location.uoffset());
 	size_t      src_rem      = length;
-	shptr<block_type> src_block;
+	MW_SHPTR<block_type> src_block;
 	//uint32_t    dst_offset   = 0;
 	size_t      nread        = 0;
 
@@ -665,7 +665,7 @@ inline bool KeyValueStore::write(const std::string& src, SizedLocator& location)
 	location.normalize();
 	block_id_t  dst_block_id = location.block_id();
 	uint32_t    dst_offset   = static_cast<uint32_t>(location.uoffset());
-	shptr<block_type> dst_block;
+	MW_SHPTR<block_type> dst_block;
 	const char *srcp         = src.data();
 	size_t      src_rem      = src.length();
 	size_t      nwritten     = 0;
@@ -826,7 +826,7 @@ inline bool KeyValueStore::header_read()
 	size_t v_offset, v_avail;
 	packer >> m_first_block_id >> v_next_block_id >> v_offset >> v_avail;
 	m_next_location.block_id(v_next_block_id);
-	m_next_location.offset(v_offset);
+	m_next_location.offset(static_cast<SizedLocator::offset_t>(v_offset));
 	m_next_location.size(v_avail);
 
 	return true;

@@ -38,7 +38,7 @@ TEST_CASE( "BTree Operations", "[BTreeOps]" ) {
 	typedef milliways::BTreeMemoryStorage<B_TEST, seriously::Traits<std::string>, seriously::Traits<int32_t> > btree_mem_st_t;
 	typedef milliways::BTreeFileStorage< BLOCK_SIZE, B_TEST, seriously::Traits<std::string>, seriously::Traits<int32_t> > btree_fs_t;
 	typedef XTYPENAME btree_t::node_type btree_node_t;
-	typedef milliways::shptr<XTYPENAME btree_t::node_type> btree_node_ptr_t;
+	typedef MILLIWAYS_SHPTR<XTYPENAME btree_t::node_type> btree_node_ptr_t;
 	typedef XTYPENAME btree_t::lookup_type btree_lookup_t;
 	typedef milliways::node_id_t btree_node_id_t;
 
@@ -266,9 +266,9 @@ TEST_CASE( "BTree Operations", "[BTreeOps]" ) {
 		REQUIRE(! it);
 		REQUIRE(! ((*it).found()));
 
-		for (btree_iterator_t it = tree.begin(); it != tree.end(); ++it)
+		for (btree_iterator_t l_it = tree.begin(); l_it != tree.end(); ++l_it)
 		{
-			btree_t::lookup_type& l = *it;
+			btree_t::lookup_type& l = *l_it;
 
 			REQUIRE(l.found());
 			REQUIRE(l.node());
@@ -356,9 +356,9 @@ TEST_CASE( "BTree Operations", "[BTreeOps]" ) {
 		REQUIRE(! it);
 		REQUIRE(! ((*it).found()));
 
-		for (btree_iterator_t it = tree.rbegin(); it != tree.rend(); ++it)
+		for (btree_iterator_t l_it = tree.rbegin(); l_it != tree.rend(); ++l_it)
 		{
-			btree_t::lookup_type& l = *it;
+			btree_t::lookup_type& l = *l_it;
 
 			REQUIRE(l.found());
 			REQUIRE(l.node());

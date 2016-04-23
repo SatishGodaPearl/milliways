@@ -59,7 +59,7 @@ public:
 	Block(const Block<BLOCKSIZE>& other) : m_index(other.m_index), m_data(other.m_data), m_dirty(other.m_dirty) { }
 	Block& operator= (const Block<BLOCKSIZE>& rhs) { assert(this != &rhs); m_index = rhs.index(); memcpy(m_data, rhs.m_data, sizeof(m_data)); m_dirty = rhs.m_dirty; return *this; }
 
-	virtual ~Block() {}
+	~Block() {}
 
 	block_id_t index() const { return m_index; }
 	block_id_t index(block_id_t value) { block_id_t old = m_index; m_index = value; return old; }
@@ -119,8 +119,8 @@ public:
 	virtual bool writeHeader();
 
 	int allocUserHeader() { int uid = static_cast<int>(m_user_header.size()); m_user_header.push_back(""); return uid; }
-	void setUserHeader(int uid, const std::string& userHeader) { m_user_header[uid] = userHeader; }
-	std::string getUserHeader(int uid) { return m_user_header[uid]; }
+	void setUserHeader(int uid, const std::string& userHeader) { m_user_header[static_cast<size_type>(uid)] = userHeader; }
+	std::string getUserHeader(int uid) { return m_user_header[static_cast<size_type>(uid)]; }
 
 	/* -- Block I/O ------------------------------------------------ */
 
@@ -145,16 +145,16 @@ private:
 };
 
 template <size_t BLOCKSIZE, size_t CACHESIZE>
-class LRUBlockCache : public LRUCache< CACHESIZE, block_id_t, shptr< Block<BLOCKSIZE> > >
+class LRUBlockCache : public LRUCache< CACHESIZE, block_id_t, MW_SHPTR< Block<BLOCKSIZE> > >
 {
 public:
 	typedef block_id_t key_type;
 	typedef Block<BLOCKSIZE> block_type;
-	typedef shptr<block_type> block_ptr_type;
+	typedef MW_SHPTR<block_type> block_ptr_type;
 	typedef block_ptr_type mapped_type;
 	typedef std::pair<key_type, mapped_type> value_type;
 	typedef ordered_map<key_type, mapped_type> ordered_map_type;
-	typedef LRUCache< CACHESIZE, block_id_t, shptr<block_type> > base_type;
+	typedef LRUCache< CACHESIZE, block_id_t, MW_SHPTR<block_type> > base_type;
 	typedef typename base_type::size_type size_type;
 
 	typedef BlockStorage<BLOCKSIZE>* storage_ptr_type;
@@ -228,8 +228,8 @@ public:
 	}
 
 private:
-	LRUBlockCache(const LRUBlockCache& other) {}
-	LRUBlockCache& operator= (const LRUBlockCache& other) {}
+	LRUBlockCache(const LRUBlockCache&) {}
+	LRUBlockCache& operator= (const LRUBlockCache&) {}
 
 	storage_ptr_type m_storage;
 };
@@ -284,7 +284,7 @@ public:
 	bool write(block_t& src);
 
 	/* cached I/O */
-	shptr<block_t> get(block_id_t block_id);
+	MW_SHPTR<block_t> get(block_id_t block_id);
 	bool put(const block_t& src);
 
 protected:

@@ -97,7 +97,7 @@ template <typename Key, typename T>
 std::pair<Key, T> ordered_map<Key, T>::pop_front()
 {
 	// std::cerr << "pop_front m_head:" << m_head << "  m_tail:" << m_tail << "\n";
-	size_t size_ = m_pos2key.size();
+	/* size_t size_ = m_pos2key.size(); */
 	order_type pos;
 	key_type key;
 	bool has_pos = false;

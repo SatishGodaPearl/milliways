@@ -109,7 +109,7 @@ inline ssize_t Traits<bool>::serialize(char*& dst, size_t& avail, const type& v)
 		*dstp = '\0';
 
 	dst = dstp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 inline ssize_t Traits<bool>::deserialize(const char*& src, size_t& avail, type& v)
@@ -128,7 +128,7 @@ inline ssize_t Traits<bool>::deserialize(const char*& src, size_t& avail, type& 
 	avail -= sizeof(char);
 
 	src = srcp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 /* -- int8_t ------------------------------------------------------- */
@@ -151,7 +151,7 @@ inline ssize_t Traits<int8_t>::serialize(char*& dst, size_t& avail, const type& 
 		*dstp = '\0';
 
 	dst = dstp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 inline ssize_t Traits<int8_t>::deserialize(const char*& src, size_t& avail, type& v)
@@ -170,7 +170,7 @@ inline ssize_t Traits<int8_t>::deserialize(const char*& src, size_t& avail, type
 	avail -= sizeof(type);
 
 	src = srcp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 /* -- uint8_t ------------------------------------------------------ */
@@ -193,7 +193,7 @@ inline ssize_t Traits<uint8_t>::serialize(char*& dst, size_t& avail, const type&
 		*dstp = '\0';
 
 	dst = dstp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 inline ssize_t Traits<uint8_t>::deserialize(const char*& src, size_t& avail, type& v)
@@ -212,7 +212,7 @@ inline ssize_t Traits<uint8_t>::deserialize(const char*& src, size_t& avail, typ
 	avail -= sizeof(type);
 
 	src = srcp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 /* -- int16_t ------------------------------------------------------ */
@@ -226,7 +226,7 @@ inline ssize_t Traits<int16_t>::serialize(char*& dst, size_t& avail, const type&
 		return -1;
 	assert(sizeof(type) <= avail);
 
-	type n_value = htons(static_cast<type>(v));
+	type n_value = static_cast<type>(htons(static_cast<type>(v)));
 	memcpy(dstp, &n_value, sizeof(type));
 	dstp += sizeof(type);
 	avail -= sizeof(type);
@@ -235,7 +235,7 @@ inline ssize_t Traits<int16_t>::serialize(char*& dst, size_t& avail, const type&
 		*dstp = '\0';
 
 	dst = dstp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 inline ssize_t Traits<int16_t>::deserialize(const char*& src, size_t& avail, type& v)
@@ -249,12 +249,12 @@ inline ssize_t Traits<int16_t>::deserialize(const char*& src, size_t& avail, typ
 
 	type n_value = 0;
 	memcpy(&n_value, srcp, sizeof(type));
-	v = ntohs(n_value);
+	v = static_cast<type>(ntohs(n_value));
 	srcp += sizeof(type);
 	avail -= sizeof(type);
 
 	src = srcp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 /* -- uint16_t ----------------------------------------------------- */
@@ -277,7 +277,7 @@ inline ssize_t Traits<uint16_t>::serialize(char*& dst, size_t& avail, const type
 		*dstp = '\0';
 
 	dst = dstp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 inline ssize_t Traits<uint16_t>::deserialize(const char*& src, size_t& avail, type& v)
@@ -296,7 +296,7 @@ inline ssize_t Traits<uint16_t>::deserialize(const char*& src, size_t& avail, ty
 	avail -= sizeof(type);
 
 	src = srcp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 /* -- int32_t ------------------------------------------------------ */
@@ -310,7 +310,7 @@ inline ssize_t Traits<int32_t>::serialize(char*& dst, size_t& avail, const type&
 		return -1;
 	assert(sizeof(type) <= avail);
 
-	type n_value = htonl(static_cast<type>(v));
+	type n_value = static_cast<type>(htonl(static_cast<type>(v)));
 	memcpy(dstp, &n_value, sizeof(type));
 	dstp += sizeof(type);
 	avail -= sizeof(type);
@@ -319,7 +319,7 @@ inline ssize_t Traits<int32_t>::serialize(char*& dst, size_t& avail, const type&
 		*dstp = '\0';
 
 	dst = dstp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 inline ssize_t Traits<int32_t>::deserialize(const char*& src, size_t& avail, type& v)
@@ -333,12 +333,12 @@ inline ssize_t Traits<int32_t>::deserialize(const char*& src, size_t& avail, typ
 
 	type n_value = 0;
 	memcpy(&n_value, srcp, sizeof(type));
-	v = ntohl(n_value);
+	v = static_cast<type>(ntohl(n_value));
 	srcp += sizeof(type);
 	avail -= sizeof(type);
 
 	src = srcp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 /* -- uint32_t ----------------------------------------------------- */
@@ -361,7 +361,7 @@ inline ssize_t Traits<uint32_t>::serialize(char*& dst, size_t& avail, const type
 		*dstp = '\0';
 
 	dst = dstp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 inline ssize_t Traits<uint32_t>::deserialize(const char*& src, size_t& avail, type& v)
@@ -380,7 +380,7 @@ inline ssize_t Traits<uint32_t>::deserialize(const char*& src, size_t& avail, ty
 	avail -= sizeof(type);
 
 	src = srcp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 /* -- int64_t ------------------------------------------------------ */
@@ -403,7 +403,7 @@ inline ssize_t Traits<int64_t>::serialize(char*& dst, size_t& avail, const type&
 		*dstp = '\0';
 
 	dst = dstp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 inline ssize_t Traits<int64_t>::deserialize(const char*& src, size_t& avail, type& v)
@@ -422,7 +422,7 @@ inline ssize_t Traits<int64_t>::deserialize(const char*& src, size_t& avail, typ
 	avail -= sizeof(type);
 
 	src = srcp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 /* -- uint64_t ----------------------------------------------------- */
@@ -445,7 +445,7 @@ inline ssize_t Traits<uint64_t>::serialize(char*& dst, size_t& avail, const type
 		*dstp = '\0';
 
 	dst = dstp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 inline ssize_t Traits<uint64_t>::deserialize(const char*& src, size_t& avail, type& v)
@@ -464,7 +464,7 @@ inline ssize_t Traits<uint64_t>::deserialize(const char*& src, size_t& avail, ty
 	avail -= sizeof(type);
 
 	src = srcp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 #if ALLOWS_TEMPLATED_SIZE_T
@@ -491,7 +491,7 @@ inline ssize_t Traits<size_t>::serialize(char*& dst, size_t& avail, const type& 
 		*dstp = '\0';
 
 	dst = dstp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 inline ssize_t Traits<size_t>::deserialize(const char*& src, size_t& avail, type& v)
@@ -512,7 +512,7 @@ inline ssize_t Traits<size_t>::deserialize(const char*& src, size_t& avail, type
 	avail -= sizeof(serialized_type);
 
 	src = srcp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 #endif /* ALLOWS_TEMPLATED_SIZE_T */
@@ -532,7 +532,7 @@ inline ssize_t Traits<ssize_t>::serialize(char*& dst, size_t& avail, const type&
 		return -1;
 	assert(sizeof(serialized_type) <= avail);
 
-	serialized_type n_value = htonll(static_cast<serialized_type>(v));
+	serialized_type n_value = static_cast<serialized_type>(htonll(static_cast<uint64_t>(v)));
 	memcpy(dstp, &n_value, sizeof(serialized_type));
 	dstp += sizeof(serialized_type);
 	avail -= sizeof(serialized_type);
@@ -541,7 +541,7 @@ inline ssize_t Traits<ssize_t>::serialize(char*& dst, size_t& avail, const type&
 		*dstp = '\0';
 
 	dst = dstp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 inline ssize_t Traits<ssize_t>::deserialize(const char*& src, size_t& avail, type& v)
@@ -557,12 +557,12 @@ inline ssize_t Traits<ssize_t>::deserialize(const char*& src, size_t& avail, typ
 
 	serialized_type n_value = 0;
 	memcpy(&n_value, srcp, sizeof(serialized_type));
-	v = static_cast<type>(ntohll(n_value));
+	v = static_cast<type>(ntohll(static_cast<uint64_t>(n_value)));
 	srcp += sizeof(serialized_type);
 	avail -= sizeof(serialized_type);
 
 	src = srcp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 #endif /* ALLOWS_TEMPLATED_SSIZE_T */
@@ -590,7 +590,7 @@ inline ssize_t Traits<std::string>::serialize(char*& dst, size_t& avail, const t
 		*dstp = '\0';
 
 	dst = dstp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 #define FAST_BUFFER_SIZE    4096
@@ -628,7 +628,7 @@ inline ssize_t Traits<std::string>::deserialize(const char*& src, size_t& avail,
 	}
 
 	src = srcp;
-	return (initial_avail - avail);
+	return static_cast<ssize_t>(initial_avail - avail);
 }
 
 } /* end of namespace seriously */

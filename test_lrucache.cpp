@@ -189,13 +189,13 @@ public:
 		}
 		return true;
 	}
-	bool on_set(const key_type& key, const mapped_type& value)
+	bool on_set(const key_type& /* key */, const mapped_type& /* value */)
 	{
 		m_n_set++;
 		return true;
 	}
 	//bool on_delete(const key_type& key);
-	bool on_eviction(const key_type& key, mapped_type& value)
+	bool on_eviction(const key_type& /* key */, mapped_type& /* value */)
 	{
 		m_n_eviction++;
 		return true;

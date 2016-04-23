@@ -297,8 +297,8 @@ void FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::_updateCount()
 	m_stream.seekg(0, std::ios_base::end);
 	std::ifstream::pos_type pos = m_stream.tellg();
 	assert(pos != static_cast<std::ifstream::pos_type>(-1));
-	assert((pos % BlockSize) == 0);
-	m_count = static_cast<ssize_t>(pos / BlockSize);
+	assert((pos % static_cast<std::ifstream::pos_type>(BlockSize)) == 0);
+	m_count = static_cast<ssize_t>(pos / static_cast<std::ifstream::pos_type>(BlockSize));
 //	std::cout << "block count:" << m_count << std::endl;
 
 	if (m_next_block_id == BLOCK_ID_INVALID)
@@ -326,7 +326,7 @@ block_id_t FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::allocId(int n_blocks)
 	// if (block_id == BLOCK_ID_INVALID)
 	// 	block_id = static_cast<block_id_t>(count());
 	block_id_t block_id = nextId();
-	m_next_block_id = block_id + n_blocks;
+	m_next_block_id = block_id + static_cast<block_id_t>(n_blocks);
 	return block_id;
 }
 
@@ -339,8 +339,8 @@ bool FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::dispose(block_id_t block_id, int c
 	assert(block_id != BLOCK_ID_INVALID);
 
 	nextId();	// force update of m_next_block_id if necessary
-	if (m_next_block_id == (block_id + count_))
-		m_next_block_id -= count_;
+	if (m_next_block_id == (block_id + static_cast<block_id_t>(count_)))
+		m_next_block_id -= static_cast<block_id_t>(count_);
 
 	return true;
 }
@@ -437,7 +437,7 @@ bool FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::write(block_t& src)
 	assert(! m_stream.fail());
 
 	pos += BlockSize;
-	if (pos >= (m_count * BlockSize))
+	if (pos >= (static_cast<size_t>(m_count) * BlockSize))
 		m_count = static_cast<ssize_t>(pos / BlockSize);
 
 	// std::cerr << "FBS::write(" << src.index() << ") block dump:" << std::endl << s_hexdump(src.data(), 128) << std::endl;
@@ -447,7 +447,7 @@ bool FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::write(block_t& src)
 /* cached I/O */
 
 template <size_t BLOCKSIZE, int CACHE_SIZE>
-shptr<typename FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::block_t> FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::get(block_id_t block_id)
+MW_SHPTR<typename FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::block_t> FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::get(block_id_t block_id)
 {
 	// std::cerr << "bs.get(" << block_id << ")\n";
 	return m_lru[block_id];
@@ -457,7 +457,7 @@ template <size_t BLOCKSIZE, int CACHE_SIZE>
 bool FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::put(const block_t& src)
 {
 	// std::cerr << "bs.put(" << src.index() << ")\n";
-	shptr<block_t> cached( m_lru[src.index()] );
+	MW_SHPTR<block_t> cached( m_lru[src.index()] );
 	if (cached)
 	{
 		if (cached.get() != &src)
@@ -470,7 +470,7 @@ bool FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::put(const block_t& src)
 	} else
 	{
 		block_id_t bid = src.index();
-		shptr<block_t> src_ptr( new block_t(bid) );
+		MW_SHPTR<block_t> src_ptr( new block_t(bid) );
 		*src_ptr = src;
 		return m_lru.set(bid, src_ptr) ? true : false;
 	}

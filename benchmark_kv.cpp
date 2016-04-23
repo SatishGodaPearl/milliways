@@ -38,8 +38,8 @@
  *   PROTOTYPES                                                      *
  * ----------------------------------------------------------------- */
 
-static inline int rand_int(int lo, int hi);
 #if 0
+static inline int rand_int(int lo, int hi);
 static std::string random_string(int length);
 static std::vector<std::string>& split(std::vector<std::string>& elems, const std::string& s, char delim);
 static std::vector<std::string> split(const std::string& s, char delim);
@@ -51,8 +51,10 @@ static bool endsWith(const std::string& s, const std::string& suffix);
 static bool contains(const std::string& s, const std::string& infix);
 #endif
 
+#if 0
 static inline double epoch_ms();
 static inline void chrono_clear();
+#endif
 static inline void chrono_start();
 static inline double chrono_stop();
 
@@ -65,12 +67,12 @@ int main(int argc, char* argv[]);
  *   IMPLEMENTATION                                                  *
  * ----------------------------------------------------------------- */
 
+#if 0
 static inline int rand_int(int lo, int hi)
 {
 	return rand() % (hi - lo + 1) + lo;
 }
 
-#if 0
 static std::string random_string(int length)
 {
 	static const char alphanum[] =
@@ -129,7 +131,6 @@ static bool contains(const std::string& s, const std::string& infix)
 {
 	return s.find(infix) != std::string::npos;
 }
-#endif
 
 static inline double epoch_ms()
 {
@@ -141,14 +142,17 @@ static inline double epoch_ms()
     	);
     return ms;
 }
+#endif
 
 static struct timeval chrono_tm_start, chrono_tm_end;
 
+#if 0
 static inline void chrono_clear()
 {
 	memset(&chrono_tm_start, 0, sizeof(chrono_tm_start));
 	memset(&chrono_tm_end, 0, sizeof(chrono_tm_end));
 }
+#endif
 
 static inline void chrono_start()
 {

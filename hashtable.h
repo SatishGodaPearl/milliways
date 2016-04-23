@@ -154,7 +154,7 @@ public:
 		iterator& operator= (const iterator& other) { m_parent = other.m_parent; m_pos = other.m_pos; m_bucket = other.m_bucket; m_has_value = false; return *this; }
 
 		self_type& operator++() { advance(); return *this; }										/* prefix  */
-		self_type operator++(int junk) { self_type i = *this; advance(); return i; }				/* postfix */
+		self_type operator++(int) { self_type i = *this; advance(); return i; }						/* postfix */
 		reference operator*() { update_value(); return m_value; }
 		pointer operator->() { update_value(); return &m_value; }
 		bool operator==(const self_type& rhs) { return (m_parent == rhs.m_parent) && (m_pos == rhs.m_pos) && (m_bucket == rhs.m_bucket); }
@@ -181,7 +181,7 @@ public:
 		void advance() {
 			m_has_value = false;
 			do {
-				if (++m_pos >= m_parent->m_capacity) {
+				if (++m_pos >= static_cast<int64_t>(m_parent->m_capacity)) {
 					m_bucket = NULL;
 					m_pos = -1;
 					return;
@@ -208,7 +208,7 @@ public:
 		const_iterator& operator= (const const_iterator& other) { m_parent = other.m_parent; m_pos = other.m_pos; m_bucket = other.m_bucket; m_has_value = false; return *this; }
 
 		self_type& operator++() { advance(); return *this; }										/* prefix  */
-		self_type operator++(int junk) { self_type i = *this; advance(); return i; }				/* postfix */
+		self_type operator++(int) { self_type i = *this; advance(); return i; }						/* postfix */
 		reference operator*() { update_value(); return m_value; }
 		pointer operator->() { update_value(); return &m_value; }
 		bool operator==(const self_type& rhs) { return (m_parent == rhs.m_parent) && (m_pos == rhs.m_pos) && (m_bucket == rhs.m_bucket); }
@@ -272,8 +272,8 @@ public:
 
 private:
 	/* disable copy and assignment */
-	hashtable(const hashtable& other) {}
-	hashtable& operator= (const hashtable& other) {}
+	hashtable(const hashtable&) {}
+	hashtable& operator= (const hashtable&) {}
 
 	bucket* m_buckets;
 	size_type m_capacity;

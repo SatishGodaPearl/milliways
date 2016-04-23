@@ -41,12 +41,12 @@
 namespace milliways {
 
 template < size_t CACHESIZE, size_t BLOCKSIZE, int B_, typename KeyTraits, typename TTraits, class Compare = std::less<typename KeyTraits::type> >
-class LRUNodeCache : public LRUCache< CACHESIZE, node_id_t, shptr< BTreeNode<B_, KeyTraits, TTraits, Compare> > >
+class LRUNodeCache : public LRUCache< CACHESIZE, node_id_t, MW_SHPTR< BTreeNode<B_, KeyTraits, TTraits, Compare> > >
 {
 public:
 	typedef node_id_t key_type;
 	typedef BTreeNode<B_, KeyTraits, TTraits, Compare> node_type;
-	typedef shptr<node_type> node_ptr_type;
+	typedef MW_SHPTR<node_type> node_ptr_type;
 	typedef node_ptr_type mapped_type;
 	typedef std::pair<key_type, mapped_type> value_type;
 	typedef ordered_map<key_type, mapped_type> ordered_map_type;
@@ -69,8 +69,8 @@ public:
 		node_id_t node_id = key;
 		if (m_storage->has_id(node_id)) {
 			/* allocate node object and read node data from disk */
-			// shptr<node_type> node( new node_type(m_storage->tree(), node_id) );
-			shptr<node_type> node_ptr( m_storage->manager().get_object(node_id) );
+			// MW_SHPTR<node_type> node( new node_type(m_storage->tree(), node_id) );
+			MW_SHPTR<node_type> node_ptr( m_storage->manager().get_object(node_id) );
 			assert(node_ptr && (node_ptr->id() == node_id));
 			if (! node_ptr) return false;
 			bool rv = false;
@@ -135,8 +135,8 @@ public:
 	}
 
 private:
-	LRUNodeCache(const LRUNodeCache& other) {}
-	LRUNodeCache& operator= (const LRUNodeCache& other) {}
+	LRUNodeCache(const LRUNodeCache&) {}
+	LRUNodeCache& operator= (const LRUNodeCache&) {}
 
 	storage_ptr_type m_storage;
 };
@@ -215,10 +215,10 @@ public:
 
 	/* -- Node I/O - hight level (cached) -------------------------- */
 
-	shptr<node_type> node_alloc(node_id_t node_id);
-	void node_dealloc(shptr<node_type>& node);
-	shptr<node_type> node_read(node_id_t node_id);
-	shptr<node_type> node_write(shptr<node_type>& node);
+	MW_SHPTR<node_type> node_alloc(node_id_t node_id);
+	void node_dealloc(MW_SHPTR<node_type>& node);
+	MW_SHPTR<node_type> node_read(node_id_t node_id);
+	MW_SHPTR<node_type> node_write(MW_SHPTR<node_type>& node);
 
 	/* -- Header I/O ----------------------------------------------- */
 
