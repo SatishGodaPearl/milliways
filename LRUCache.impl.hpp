@@ -83,7 +83,7 @@ bool LRUCache<SIZE, Key, T>::has(const key_type& key) const
 }
 
 template <size_t SIZE, typename Key, typename T>
-bool LRUCache<SIZE, Key, T>::get(mapped_type& dst, key_type& key)
+bool LRUCache<SIZE, Key, T>::get(mapped_type& dst, const key_type& key)
 {
 	for (int i = 0; i < L1_SIZE; i++)
 		if (key == m_l1_key[i])
@@ -141,7 +141,7 @@ bool LRUCache<SIZE, Key, T>::get(mapped_type& dst, key_type& key)
 }
 
 template <size_t SIZE, typename Key, typename T>
-bool LRUCache<SIZE, Key, T>::set(key_type& key, mapped_type& value)
+bool LRUCache<SIZE, Key, T>::set(const key_type& key, mapped_type& value)
 {
 	for (int i = 0; i < L1_SIZE; i++)
 		if (key == m_l1_key[i])

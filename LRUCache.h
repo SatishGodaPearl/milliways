@@ -79,8 +79,8 @@ public:
 	void clear_l1();
 
 	bool has(const key_type& key) const;
-	bool get(mapped_type& dst, key_type& key);
-	bool set(key_type& key, mapped_type& value);
+	bool get(mapped_type& dst, const key_type& key);
+	bool set(const key_type& key, mapped_type& value);
 	bool del(key_type& key);
 
 	size_type count(const key_type& key) const { return has(key) ? 1 : 0; }
