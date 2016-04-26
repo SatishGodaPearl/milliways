@@ -377,7 +377,7 @@ void hashtable<Key, T, KeyCompare>::clear()
 		{
 			bk.key(Key());
 			bk.value(T());
-			bk->state(bucket::FREE);
+			bk.state(bucket::FREE);
 			m_size--;
 		}
 	}
