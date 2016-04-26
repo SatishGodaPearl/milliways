@@ -169,7 +169,7 @@ protected:
 
 private:
 	shptr_manager() {}
-	shptr_manager(const shptr_manager& other) {}
+	shptr_manager(const shptr_manager&) {}
 	~shptr_manager() {
 		refcnt_map_t::const_iterator it;
 		for (it = m_refcnt_map.begin(); it != m_refcnt_map.end(); ++it) {

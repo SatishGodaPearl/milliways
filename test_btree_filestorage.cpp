@@ -39,7 +39,7 @@ TEST_CASE( "BTree File Storage", "[BTreeFileStorage]" ) {
 	typedef milliways::BTreeFileStorage< BLOCK_SIZE, B_TEST, seriously::Traits<std::string>, seriously::Traits<int32_t> > btree_fs_t;
 	typedef XTYPENAME btree_fs_t::block_storage_t btree_blockstorage_t;
 	typedef XTYPENAME btree_t::node_type btree_node_t;
-	typedef MW_SHPTR<XTYPENAME btree_t::node_type> btree_node_ptr_t;
+	typedef MILLIWAYS_SHPTR<XTYPENAME btree_t::node_type> btree_node_ptr_t;
 	typedef milliways::node_id_t btree_node_id_t;
 
 	SECTION( "can be plugged in" )
