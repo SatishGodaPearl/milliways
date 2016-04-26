@@ -134,9 +134,19 @@ public:
 
 	const_iterator begin() const { return const_iterator(this, 0); }
 	const_iterator end() const { return const_iterator(this, -1); }
+	const_iterator cbegin() const { return const_iterator(this, 0); }
+	const_iterator cend() const { return const_iterator(this, -1); }
 
-	iterator find(const key_type& key) { return std::find(begin(), end(), key); }
-	const_iterator find(const key_type& key) const { return std::find(begin(), end(), key); }
+	iterator find(const key_type& key) {
+		ssize_t pos = -1;
+		find_bucket(key, pos);
+		return iterator(this, static_cast<int64_t>(pos));
+	}
+	const_iterator find(const key_type& key) const {
+		ssize_t pos = -1;
+		find_bucket(key, pos);
+		return const_iterator(this, static_cast<int64_t>(pos));
+	}
 
 	class iterator
 	{
@@ -151,6 +161,7 @@ public:
 		iterator() : m_parent(NULL), m_pos(-1), m_bucket(NULL), m_has_value(false) { }
 		iterator(hashtable* parent, int64_t bucket_pos) : m_parent(parent), m_pos(bucket_pos), m_bucket(NULL), m_has_value(false) { if (m_pos >= 0) { m_pos--; advance(); } }
 		iterator(const iterator& other) : m_parent(other.m_parent), m_pos(other.m_pos), m_bucket(other.m_bucket), m_has_value(false) { }
+		iterator(const const_iterator& other) : m_parent(other.m_parent), m_pos(other.m_pos), m_bucket(other.m_bucket), m_has_value(false) { }
 		iterator& operator= (const iterator& other) { m_parent = other.m_parent; m_pos = other.m_pos; m_bucket = other.m_bucket; m_has_value = false; return *this; }
 
 		self_type& operator++() { advance(); return *this; }										/* prefix  */
@@ -203,8 +214,9 @@ public:
 		typedef int difference_type;
 
 		const_iterator() : m_parent(NULL), m_pos(-1), m_bucket(NULL), m_has_value(false) { }
-		const_iterator(hashtable* parent, int64_t bucket_pos) : m_parent(parent), m_pos(bucket_pos), m_bucket(NULL), m_has_value(false) { if (m_pos >= 0) { m_pos--; advance(); } }
+		const_iterator(const hashtable* parent, int64_t bucket_pos) : m_parent(parent), m_pos(bucket_pos), m_bucket(NULL), m_has_value(false) { if (m_pos >= 0) { m_pos--; advance(); } }
 		const_iterator(const const_iterator& other) : m_parent(other.m_parent), m_pos(other.m_pos), m_bucket(other.m_bucket), m_has_value(false) { }
+		const_iterator(const iterator& other) : m_parent(other.m_parent), m_pos(other.m_pos), m_bucket(other.m_bucket), m_has_value(false) { }
 		const_iterator& operator= (const const_iterator& other) { m_parent = other.m_parent; m_pos = other.m_pos; m_bucket = other.m_bucket; m_has_value = false; return *this; }
 
 		self_type& operator++() { advance(); return *this; }										/* prefix  */
@@ -230,7 +242,7 @@ public:
 		void advance() {
 			m_has_value = false;
 			do {
-				if (++m_pos >= m_parent->m_capacity) {
+				if (++m_pos >= static_cast<int64_t>(m_parent->m_capacity)) {
 					m_bucket = NULL;
 					m_pos = -1;
 					return;
@@ -248,7 +260,9 @@ protected:
 
 	bucket* set_(const key_type& key, const mapped_type& value);
 
+	const bucket* find_bucket(const key_type& key, ssize_t& pos_) const;
 	const bucket* find_bucket(const key_type& key) const;
+	bucket* find_bucket(const key_type& key, ssize_t& pos_);
 	bucket* find_bucket(const key_type& key);
 
 public:

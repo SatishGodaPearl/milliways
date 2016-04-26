@@ -429,6 +429,33 @@ bool hashtable<Key, T, KeyCompare>::expand()
 }
 
 template < typename Key, typename T, class KeyCompare >
+const typename hashtable<Key, T, KeyCompare>::bucket* hashtable<Key, T, KeyCompare>::find_bucket(const key_type& key, ssize_t& pos_) const
+{
+	size_t i = 0;
+	hash_type h1 = Hasher<Key>::hash(key);
+	hash_type h2, hf = h1;
+	size_t pos = h1 % m_capacity;
+
+	while (m_buckets[pos].notFree())
+	{
+		if (m_buckets[pos].isUsed() && KeyCompare()(key, m_buckets[pos].key())) {
+			pos_ = static_cast<ssize_t>(pos);
+			return &m_buckets[pos];
+		}
+
+		if (i == 0)
+			h2 = compute_hash2(key);
+
+		hf += h2;								/* hf = h1 + i * h2; */
+		pos = hf % m_capacity;
+		i++;
+	}
+
+	pos_ = -1;
+	return NULL;
+}
+
+template < typename Key, typename T, class KeyCompare >
 const typename hashtable<Key, T, KeyCompare>::bucket* hashtable<Key, T, KeyCompare>::find_bucket(const key_type& key) const
 {
 	size_t i = 0;
@@ -450,6 +477,33 @@ const typename hashtable<Key, T, KeyCompare>::bucket* hashtable<Key, T, KeyCompa
 		i++;
 	}
 
+	return NULL;
+}
+
+template < typename Key, typename T, class KeyCompare >
+typename hashtable<Key, T, KeyCompare>::bucket* hashtable<Key, T, KeyCompare>::find_bucket(const key_type& key, ssize_t& pos_)
+{
+	size_t i = 0;
+	hash_type h1 = Hasher<Key>::hash(key);
+	hash_type h2, hf = h1;
+	size_t pos = h1 % m_capacity;
+
+	while (m_buckets[pos].notFree())
+	{
+		if (m_buckets[pos].isUsed() && KeyCompare()(key, m_buckets[pos].key())) {
+			pos_ = static_cast<ssize_t>(pos);
+			return &m_buckets[pos];
+		}
+
+		if (i == 0)
+			h2 = compute_hash2(key);
+
+		hf += h2;								/* hf = h1 + i * h2; */
+		pos = hf % m_capacity;
+		i++;
+	}
+
+	pos_ = -1;
 	return NULL;
 }
 
