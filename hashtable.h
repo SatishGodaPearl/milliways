@@ -285,6 +285,8 @@ public:
 	}
 
 private:
+	void compute_prime_lt_capacity();
+
 	/* disable copy and assignment */
 	hashtable(const hashtable&) {}
 	hashtable& operator= (const hashtable&) {}
@@ -292,6 +294,7 @@ private:
 	bucket* m_buckets;
 	size_type m_capacity;
 	size_type m_size;
+	size_type m_prime_lt_capacity;
 
 	friend class iterator;
 	friend class const_iterator;
