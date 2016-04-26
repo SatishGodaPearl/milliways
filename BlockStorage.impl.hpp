@@ -89,14 +89,16 @@ template <size_t BLOCKSIZE>
 bool BlockStorage<BLOCKSIZE>::readHeader()
 {
 	assert(m_header_block_id != BLOCK_ID_INVALID);
-	block_t headerBlock(m_header_block_id);
-	if (! read(headerBlock))
+	// block_t headerBlock(m_header_block_id);
+	MW_SHPTR<block_t> headerBlock( manager().get_object(m_header_block_id) );
+	assert(headerBlock);
+	if (! read(*headerBlock))
 		return false;
 //	std::cerr << "read header block " << m_header_block_id << " dump:" << std::endl << s_hexdump(headerBlock.data(), 256);
 
 	// deserialize header
 
-	seriously::Packer<BLOCKSIZE> packer(headerBlock.data(), headerBlock.size());
+	seriously::Packer<BLOCKSIZE> packer(headerBlock->data(), headerBlock->size());
 	int32_t v_major, v_minor, v_n_user_headers;
 	packer >> v_major >> v_minor >> v_n_user_headers;
 	m_user_header.clear();
@@ -126,7 +128,9 @@ template <size_t BLOCKSIZE>
 bool BlockStorage<BLOCKSIZE>::writeHeader()
 {
 	assert(m_header_block_id != BLOCK_ID_INVALID);
-	block_t headerBlock(m_header_block_id);
+	// block_t headerBlock(m_header_block_id);
+	MW_SHPTR<block_t> headerBlock( manager().get_object(m_header_block_id) );
+	assert(headerBlock);
 
 	// serialize header
 
@@ -156,10 +160,10 @@ bool BlockStorage<BLOCKSIZE>::writeHeader()
 	if (packer.error())
 		return false;
 
-	assert(packer.size() <= headerBlock.size());
-	memcpy(headerBlock.data(), packer.data(), packer.size());
+	assert(packer.size() <= headerBlock->size());
+	memcpy(headerBlock->data(), packer.data(), packer.size());
 
-	if (! write(headerBlock))
+	if (! write(*headerBlock))
 		return false;
 //	std::cerr << "wrote header block " << headerBlock.index() << " dump:" << std::endl << s_hexdump(headerBlock.data(), 256);
 
@@ -447,30 +451,40 @@ bool FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::write(block_t& src)
 /* cached I/O */
 
 template <size_t BLOCKSIZE, int CACHE_SIZE>
-MW_SHPTR<typename FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::block_t> FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::get(block_id_t block_id)
+MW_SHPTR<typename FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::block_t> FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::get(block_id_t block_id, bool createIfNotFound)
 {
-	// std::cerr << "bs.get(" << block_id << ")\n";
-	return m_lru[block_id];
+	MW_SHPTR<block_t> cached_ptr;
+	if (m_lru.get(cached_ptr, block_id))
+		return cached_ptr;
+	else {
+		if (createIfNotFound) {
+			cached_ptr = this->manager().get_object(block_id);
+			assert(cached_ptr);
+			m_lru.set(block_id, cached_ptr);
+		}
+		return cached_ptr;
+
+	}
 }
 
 template <size_t BLOCKSIZE, int CACHE_SIZE>
 bool FileBlockStorage<BLOCKSIZE, CACHE_SIZE>::put(const block_t& src)
 {
-	// std::cerr << "bs.put(" << src.index() << ")\n";
-	MW_SHPTR<block_t> cached( m_lru[src.index()] );
-	if (cached)
+	MW_SHPTR<block_t> cached_ptr;
+	if (m_lru.get(cached_ptr, src.index()))
 	{
-		if (cached.get() != &src)
+		if (cached_ptr.get() != &src)
 		{
-			assert(cached->index() == src.index());
-			*cached = src;
-			assert(src.dirty() == (*cached).dirty());
+			assert(cached_ptr->index() == src.index());
+			*cached_ptr = src;
+			assert(src.dirty() == (*cached_ptr).dirty());
 		}
 		return true;
 	} else
 	{
 		block_id_t bid = src.index();
-		MW_SHPTR<block_t> src_ptr( new block_t(bid) );
+		MW_SHPTR<block_t> src_ptr( this->manager().get_object(bid) );
+		assert(src_ptr);
 		*src_ptr = src;
 		return m_lru.set(bid, src_ptr) ? true : false;
 	}

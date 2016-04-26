@@ -32,6 +32,10 @@
 #include <vector>
 #include <functional>
 
+#include <map>
+#include <unordered_map>
+#include <memory>
+
 #include <stdint.h>
 #include <assert.h>
 
@@ -47,6 +51,9 @@ static const block_id_t BLOCK_ID_INVALID = static_cast<block_id_t>(-1);
 inline bool block_id_valid(block_id_t block_id) { return (block_id != BLOCK_ID_INVALID); }
 
 template <size_t BLOCKSIZE>
+class BlockManager;
+
+template <size_t BLOCKSIZE>
 class Block
 {
 public:
@@ -54,12 +61,13 @@ public:
 
 	typedef size_t size_type;
 
-	Block(block_id_t index_) :
-			m_index(index_), m_dirty(false) { memset(m_data, 0, sizeof(m_data)); }
-	Block(const Block<BLOCKSIZE>& other) : m_index(other.m_index), m_data(other.m_data), m_dirty(other.m_dirty) { }
-	Block& operator= (const Block<BLOCKSIZE>& rhs) { assert(this != &rhs); m_index = rhs.index(); memcpy(m_data, rhs.m_data, sizeof(m_data)); m_dirty = rhs.m_dirty; return *this; }
+	// Block(block_id_t index_) :
+	// 		m_index(index_), m_dirty(false) { memset(m_data, 0, sizeof(m_data)); }
+	// Block(const Block<BLOCKSIZE>& other) : m_index(other.m_index), m_data(other.m_data), m_dirty(other.m_dirty) { }
+	// Block& operator= (const Block<BLOCKSIZE>& rhs) { assert(this != &rhs); m_index = rhs.index(); memcpy(m_data, rhs.m_data, sizeof(m_data)); m_dirty = rhs.m_dirty; return *this; }
+	// ~Block() {}
 
-	~Block() {}
+	Block& operator= (const Block<BLOCKSIZE>& rhs) { assert(this != &rhs); m_index = rhs.index(); memcpy(m_data, rhs.m_data, sizeof(m_data)); m_dirty = rhs.m_dirty; return *this; }
 
 	block_id_t index() const { return m_index; }
 	block_id_t index(block_id_t value) { block_id_t old = m_index; m_index = value; return old; }
@@ -75,11 +83,110 @@ public:
 	bool dirty(bool value) { bool old = m_dirty; m_dirty = value; return old; }
 
 private:
-	Block();
+	/* lifetime managed by BlockManager */
+	Block() {}
+	Block(block_id_t index_) :
+			m_index(index_), m_dirty(false) { memset(m_data, 0, sizeof(m_data)); }
+	Block(const Block<BLOCKSIZE>& other) : m_index(other.m_index), m_data(other.m_data), m_dirty(other.m_dirty) { }
+	~Block() {}
+
+	friend class BlockManager<BLOCKSIZE>;
+	friend class BlockManager<BLOCKSIZE>::block_deleter;
+	template < size_t BLOCKSIZE_, int B_, typename KeyTraits, typename TTraits, class Compare >
+		friend class BTreeFileStorage;
 
 	block_id_t m_index;
 	char m_data[BlockSize];
 	bool m_dirty;
+};
+
+/* ----------------------------------------------------------------- *
+ *   BlockManager                                                    *
+ * ----------------------------------------------------------------- */
+
+/*
+ * Based on http://stackoverflow.com/a/15708286
+ *   http://stackoverflow.com/questions/15707991/good-design-pattern-for-manager-handler
+ */
+template <size_t BLOCKSIZE>
+class BlockManager
+{
+public:
+	typedef Block<BLOCKSIZE> block_type;
+	typedef BlockManager<BLOCKSIZE> handler_type;
+	typedef std::unordered_map< block_id_t, std::weak_ptr<block_type> > weak_map_t;
+	typedef typename weak_map_t::iterator weak_map_iter;
+	typedef typename weak_map_t::const_iterator weak_map_citer;
+
+	BlockManager() : m_objects() {}
+	~BlockManager() {
+		weak_map_iter it;
+		for (it = m_objects.begin(); it != m_objects.end(); ++it) {
+			std::weak_ptr<block_type> wp = it->second;
+			if ((wp.use_count() > 0) && wp.expired()) {
+				std::cerr << "WARNING: block weak pointer expired BUT use count not zero for managed block! (in use:" << wp.use_count() << ")" << std::endl;
+			} else if (wp.use_count() > 0) {
+				std::cerr << "WARNING: block use count not zero for managed block (in use:" << wp.use_count() << ")" << std::endl;
+			}
+		}
+		m_objects.clear();
+	}
+
+	std::shared_ptr<block_type> get_object(block_id_t id, bool createIfNotFound = true)
+	{
+		weak_map_citer it = m_objects.find(id);
+		if (it != m_objects.end()) {
+			assert(it->first == id);
+			return it->second.lock();
+		} else if (createIfNotFound) {
+			return make_object(id);
+		} else
+			return std::shared_ptr<block_type>();
+	}
+
+	bool has(block_type id) {
+		weak_map_citer it = m_objects.find(id);
+		return (it != m_objects.end()) ? true : false;
+	}
+
+	size_t count() const { return m_objects.size(); }
+
+private:
+	friend class Block<BLOCKSIZE>;
+
+	class block_deleter;
+	friend class block_deleter;
+
+	std::shared_ptr<block_type> make_object(block_id_t id)
+	{
+		assert(m_objects.count(id) == 0);
+		std::shared_ptr<block_type> sp(new block_type(id), block_deleter(this, id));
+
+		m_objects[id] = sp;
+
+		return sp;
+	}
+
+	/* custom block deleter */
+	class block_deleter
+	{
+	public:
+		block_deleter(handler_type* handler, block_id_t id) :
+			m_handler(handler), m_id(id) {}
+
+		void operator()(block_type* p) {
+			assert(m_handler);
+			assert(p);
+			assert(p->index() == m_id);
+			m_handler->m_objects.erase(m_id);
+			delete p;
+		}
+	private:
+		handler_type* m_handler;
+		block_id_t m_id;
+	};
+
+	weak_map_t m_objects;
 };
 
 template <size_t BLOCKSIZE>
@@ -93,9 +200,10 @@ public:
 	static const size_t BlockSize = BLOCKSIZE;
 	typedef Block<BLOCKSIZE> block_t;
 	typedef size_t size_type;
+	typedef BlockManager<BLOCKSIZE> manager_type;
 
 	BlockStorage() :
-		m_header_block_id(BLOCK_ID_INVALID), m_user_header() {}
+		m_header_block_id(BLOCK_ID_INVALID), m_user_header(), m_manager() {}
 	virtual ~BlockStorage() { /* call close() from the most derived class, and BEFORE destruction  */ }
 
 	/* -- General I/O ---------------------------------------------- */
@@ -136,12 +244,17 @@ public:
 	virtual bool read(block_t& dst) = 0;
 	virtual bool write(block_t& src) = 0;
 
+	/* -- Node Manager --------------------------------------------- */
+
+	manager_type& manager() { return m_manager; }
+
 private:
 	BlockStorage(const BlockStorage& other);
 	BlockStorage& operator= (const BlockStorage& other);
 
 	block_id_t m_header_block_id;
 	std::vector<std::string> m_user_header;
+	manager_type m_manager;
 };
 
 template <size_t BLOCKSIZE, size_t CACHESIZE>
@@ -172,25 +285,35 @@ public:
 		block_id_t block_id = key;
 		if (m_storage->hasId(block_id)) {
 			/* allocate block object and read block data from disk */
-			block_type* block = new block_type(block_id);
-			if (! block) return false;
+			MW_SHPTR<block_type> block_ptr;
+			// if (! block) return false;
 			bool rv = false;
 			switch (op)
 			{
 			case base_type::op_get:
-				if (! m_storage->read(*block)) return false;
-				block->dirty(false);
-				value.reset(block);
+				block_ptr = m_storage->manager().get_object(block_id);
+				assert(block_ptr && (block_ptr->index() == block_id));
+				if (! block_ptr) return false;
+				rv = m_storage->read(*block_ptr);
+				assert(rv || block_ptr->dirty());
+				value = block_ptr;
+				return rv;
+				// if (! m_storage->read(*block)) return false;
+				// block->dirty(false);
+				// value.reset(block);
 				break;
 			case base_type::op_set:
-				assert(value);
-				*block = *value;
+				// *block = *value;
+				rv = true;
 				break;
 			case base_type::op_sub:
+				block_ptr = m_storage->manager().get_object(block_id);
+				assert(block_ptr && (block_ptr->index() == block_id));
+				if (! block_ptr) return false;
 				//assert(value);
-				rv = m_storage->read(*block);
-				assert(rv || block->dirty());
-				value.reset(block);
+				rv = m_storage->read(*block_ptr);
+				assert(rv || block_ptr->dirty());
+				value = block_ptr;
 				return rv;
 				break;
 			default:
@@ -284,7 +407,7 @@ public:
 	bool write(block_t& src);
 
 	/* cached I/O */
-	MW_SHPTR<block_t> get(block_id_t block_id);
+	MW_SHPTR<block_t> get(block_id_t block_id, bool createIfNotFound = true);
 	bool put(const block_t& src);
 
 protected:

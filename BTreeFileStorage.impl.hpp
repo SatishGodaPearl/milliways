@@ -175,11 +175,10 @@ MW_SHPTR<typename BTreeFileStorage<BLOCKSIZE, B_, KeyTraits, TTraits, Compare>::
 	// assert(node->id() == node_id);
 	// return node;
 
-	MW_SHPTR<node_type> result;
-	bool ok = m_lru.get(result, node_id);
-	assert(ok);
-	// std::cerr << "nFS::node_read(" << node_id << ") <- " << (ok ? "OK" : "NO") << "  result:" << result << std::endl;
-	return ok ? result : MW_SHPTR<node_type>();
+	MW_SHPTR<node_type> node_ptr( this->manager().get_object(node_id) );
+	if (m_lru.get(node_ptr, node_id))
+		return node_ptr;
+	return MW_SHPTR<node_type>();
 	// return m_lru[node_id];
 }
 
@@ -201,14 +200,16 @@ MW_SHPTR<typename BTreeFileStorage<BLOCKSIZE, B_, KeyTraits, TTraits, Compare>::
 	node_id_t node_id = node->id();
 	assert(node_id != NODE_ID_INVALID);
 	assert(! node->dirty());
-	MW_SHPTR<node_type> node_ptr( m_lru[node_id] );
-	if (! node_ptr)
+	MW_SHPTR<node_type> node_ptr;
+	if (m_lru.get(node_ptr, node_id))
+	{
+		assert(node_ptr);
+		if (node_ptr != node)
+			*node_ptr = *node;
+	} else
 	{
 		node_ptr = node;
-		m_lru[node_id] = node;
-	} else if (node_ptr != node)
-	{
-		*node_ptr = *node;
+		m_lru.set(node_id, node);
 	}
 	assert(! node_ptr->dirty());
 	return node_ptr;
