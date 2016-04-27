@@ -75,11 +75,13 @@ bool LRUCache<SIZE, Key, T>::has(const key_type& key) const
 	for (int i = 0; i < L1_SIZE; i++)
 		if (key == m_l1_key[i])
 		{
-			assert(m_l1_mapped[i]);
+			if (m_l1_mapped[i] == m_cache.end())
+				break;
+			// assert(m_l1_mapped[i]);
 			return true;
 		}
 
-	return m_key2age.has(key);
+	return (m_key2age.count(key) > 0) ? true : false;
 }
 
 template <size_t SIZE, typename Key, typename T>
@@ -88,25 +90,31 @@ bool LRUCache<SIZE, Key, T>::get(mapped_type& dst, const key_type& key)
 	for (int i = 0; i < L1_SIZE; i++)
 		if (key == m_l1_key[i])
 		{
-			assert(m_l1_mapped[i]);
-			dst = *m_l1_mapped[i];
+			if (m_l1_mapped[i] == m_cache.end())
+				break;
+			// assert(m_l1_mapped[i]);
+			map_iter_t m_it = m_l1_mapped[i];
+			dst = m_it->second;
 			return true;
 		}
 
-	age_t age;
-	if (m_key2age.get(key, age)) {
+	typename key_to_age_t::iterator ka_it = m_key2age.find(key);
+	if (ka_it != m_key2age.end()) {
+		age_t age = ka_it->second;
 		age_t new_age = m_current_age++;
-		m_key2age.set(key, new_age);
+		m_key2age[key] = new_age;
 		m_age2key.erase(age);
 		m_age2key[new_age] = key;
 
-		mapped_type* mptr = &m_cache[key];
+		map_iter_t m_it = m_cache.find(key);
+
+		// mapped_type* mptr = &m_it;
 
 		m_l1_last = (m_l1_last + 1) % L1_SIZE;
 		m_l1_key[m_l1_last] = key;
-		m_l1_mapped[m_l1_last] = mptr;
+		m_l1_mapped[m_l1_last] = m_it;
 
-		dst = *mptr;
+		dst = m_it->second;
 
 		return true;
 	}
@@ -122,19 +130,21 @@ bool LRUCache<SIZE, Key, T>::get(mapped_type& dst, const key_type& key)
 	if (success)
 	{
 		age_t new_age = m_current_age++;
-		m_key2age.set(key, new_age);
+		m_key2age[key] = new_age;
 		m_age2key[new_age] = key;
+
 		m_cache[key] = value;
 
-		mapped_type* mptr = &m_cache[key];
+		map_iter_t m_it = m_cache.find(key);
+		// mapped_type* mptr = &m_cache[key];
 
 		m_l1_last = (m_l1_last + 1) % L1_SIZE;
 		m_l1_key[m_l1_last] = key;
-		m_l1_mapped[m_l1_last] = mptr;
+		m_l1_mapped[m_l1_last] = m_it;
 
-		dst = *mptr;
+		dst = m_it->second;
 
-		return success;
+		return true;
 	}
 
 	return false;
@@ -146,23 +156,31 @@ bool LRUCache<SIZE, Key, T>::set(const key_type& key, mapped_type& value)
 	for (int i = 0; i < L1_SIZE; i++)
 		if (key == m_l1_key[i])
 		{
-			assert(m_l1_mapped[i]);
-			(*m_l1_mapped[i]) = value;
+			if (m_l1_mapped[i] == m_cache.end())
+				break;
+			// assert(m_l1_mapped[i]);
+			map_iter_t m_it = m_l1_mapped[i];
+			m_it->second = value;
 			return true;
 		}
 
-	age_t age;
-	if (m_key2age.get(key, age)) {
+	typename key_to_age_t::iterator ka_it = m_key2age.find(key);
+	if (ka_it != m_key2age.end()) {
+		age_t age = ka_it->second;
 		age_t new_age = m_current_age++;
-		m_key2age.set(key, new_age);
+		m_key2age[key] = new_age;
 		m_age2key.erase(age);
 		m_age2key[new_age] = key;
 
-		mapped_type* mptr = &m_cache[key];
+		map_iter_t m_it = m_cache.find(key);
+
+		// mapped_type* mptr = &m_it;
 
 		m_l1_last = (m_l1_last + 1) % L1_SIZE;
 		m_l1_key[m_l1_last] = key;
-		m_l1_mapped[m_l1_last] = mptr;
+		m_l1_mapped[m_l1_last] = m_it;
+
+		m_it->second = value;
 
 		return true;
 	}
@@ -174,15 +192,19 @@ bool LRUCache<SIZE, Key, T>::set(const key_type& key, mapped_type& value)
 	/* bool success = */ on_miss(op_set, key, value);
 
 	age_t new_age = m_current_age++;
-	m_key2age.set(key, new_age);
+	m_key2age[key] = new_age;
 	m_age2key[new_age] = key;
+
 	m_cache[key] = value;
 
-	mapped_type* mptr = &m_cache[key];
+	map_iter_t m_it = m_cache.find(key);
+	// mapped_type* mptr = &m_cache[key];
 
 	m_l1_last = (m_l1_last + 1) % L1_SIZE;
 	m_l1_key[m_l1_last] = key;
-	m_l1_mapped[m_l1_last] = mptr;
+	m_l1_mapped[m_l1_last] = m_it;
+
+	m_it->second = value;
 
 	return true;
 }
@@ -194,15 +216,15 @@ bool LRUCache<SIZE, Key, T>::del(key_type& key)
 		if (key == m_l1_key[i])
 		{
 			invalidate_key(m_l1_key[i]);
-			m_l1_mapped[i] = NULL;
+			m_l1_mapped[i] = m_cache.end();
 			// break;
 		}
 
-	age_t age;
-	if (m_key2age.get(key, age)) {
-		// age_t new_age = m_current_age++;
+	typename key_to_age_t::iterator ka_it = m_key2age.find(key);
+	if (ka_it != m_key2age.end()) {
+		age_t age = ka_it->second;
 		m_age2key.erase(age);
-		m_key2age.erase(key);
+		m_key2age.erase(ka_it);
 		m_cache.erase(key);
 
 		return true;
@@ -217,24 +239,30 @@ T& LRUCache<SIZE, Key, T>::operator[](const key_type& key)
 	for (int i = 0; i < L1_SIZE; i++)
 		if (key == m_l1_key[i])
 		{
-			assert(m_l1_mapped[i]);
-			return (*m_l1_mapped[i]);
+			if (m_l1_mapped[i] == m_cache.end())
+				break;
+			// assert(m_l1_mapped[i]);
+			map_iter_t m_it = m_l1_mapped[i];
+			return m_it->second;
 		}
 
-	age_t age;
-	if (m_key2age.get(key, age)) {
+	typename key_to_age_t::iterator ka_it = m_key2age.find(key);
+	if (ka_it != m_key2age.end()) {
+		age_t age = ka_it->second;
 		age_t new_age = m_current_age++;
-		m_key2age.set(key, new_age);
+		m_key2age[key] = new_age;
 		m_age2key.erase(age);
 		m_age2key[new_age] = key;
 
-		mapped_type* mptr = &m_cache[key];
+		map_iter_t m_it = m_cache.find(key);
+
+		// mapped_type* mptr = &m_it;
 
 		m_l1_last = (m_l1_last + 1) % L1_SIZE;
 		m_l1_key[m_l1_last] = key;
-		m_l1_mapped[m_l1_last] = mptr;
+		m_l1_mapped[m_l1_last] = m_it;
 
-		return *mptr;
+		return m_it->second;
 	}
 
 	// miss - use overridable function
@@ -248,17 +276,19 @@ T& LRUCache<SIZE, Key, T>::operator[](const key_type& key)
 	/* bool success = */ on_miss(op_sub, key, value);
 
 	age_t new_age = m_current_age++;
-	m_key2age.set(key, new_age);
+	m_key2age[key] = new_age;
 	m_age2key[new_age] = key;
+
 	m_cache[key] = value;
 
-	mapped_type* mptr = &m_cache[key];
+	map_iter_t m_it = m_cache.find(key);
+	// mapped_type* mptr = &m_cache[key];
 
 	m_l1_last = (m_l1_last + 1) % L1_SIZE;
 	m_l1_key[m_l1_last] = key;
-	m_l1_mapped[m_l1_last] = mptr;
+	m_l1_mapped[m_l1_last] = m_it;
 
-	return *mptr;
+	return m_it->second;
 }
 
 template <size_t SIZE, typename Key, typename T>
@@ -276,8 +306,7 @@ bool LRUCache<SIZE, Key, T>::evict(bool force)
 		if (! oldest(age))
 			return false;
 		key_type key = m_age2key[age];
-		mapped_type mapped;
-		m_cache.get(key, mapped);
+		mapped_type mapped = m_cache[key];
 		m_age2key.erase(age);
 		m_key2age.erase(key);
 		m_cache.erase(key);
@@ -290,8 +319,7 @@ bool LRUCache<SIZE, Key, T>::evict(bool force)
 			if (key == m_l1_key[i])
 			{
 				invalidate_key(m_l1_key[i]);
-				m_l1_mapped[i] = NULL;
-				assert(! m_l1_mapped[i]);
+				m_l1_mapped[i] = m_cache.end();
 				// break;
 			}
 
@@ -316,7 +344,7 @@ void LRUCache<SIZE, Key, T>::clear_l1()
 	for (int i = 0; i < L1_SIZE; i++)
 	{
 		invalidate_key(m_l1_key[i]);
-		m_l1_mapped[i] = NULL;
+		m_l1_mapped[i] = m_cache.end();
 	}
 	m_l1_last = -1;
 }
@@ -334,8 +362,7 @@ typename std::pair<Key, T> LRUCache<SIZE, Key, T>::pop()
 	if (! oldest(age))
 		return std::pair<Key, T>();
 	key_type key = m_age2key[age];
-	mapped_type mapped;
-	m_cache.get(key, mapped);
+	mapped_type mapped = m_cache[key];
 	m_age2key.erase(age);
 	m_key2age.erase(key);
 	m_cache.erase(key);
@@ -346,7 +373,7 @@ typename std::pair<Key, T> LRUCache<SIZE, Key, T>::pop()
 		if (key == m_l1_key[i])
 		{
 			invalidate_key(m_l1_key[i]);
-			m_l1_mapped[i] = NULL;
+			m_l1_mapped[i] = m_cache.end();
 			// break;
 		}
 
@@ -356,3 +383,4 @@ typename std::pair<Key, T> LRUCache<SIZE, Key, T>::pop()
 } /* end of namespace milliways */
 
 #endif /* MILLIWAYS_LRUCACHE_IMPL_H */
+

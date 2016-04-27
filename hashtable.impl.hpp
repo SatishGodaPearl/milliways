@@ -273,7 +273,7 @@ hashtable<Key, T, KeyCompare>::~hashtable()
 }
 
 template < typename Key, typename T, class KeyCompare >
-typename hashtable<Key, T, KeyCompare>::hash_type hashtable<Key, T, KeyCompare>::compute_hash2(const key_type& key) const
+typename hashtable<Key, T, KeyCompare>::hash_type hashtable<Key, T, KeyCompare>::compute_hash2(const key_type& /* key */) const
 {
 	return 3;
 	// hash_type prime = static_cast<hash_type>(m_prime_lt_capacity);

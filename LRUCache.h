@@ -29,6 +29,7 @@
 #include <fstream>
 #include <string>
 #include <map>
+#include <unordered_map>
 #include <deque>
 #include <functional>
 
@@ -36,12 +37,11 @@
 #include <assert.h>
 
 #include "config.h"
-#include "ordered_map.h"
 #include "hashtable.h"
 
 namespace milliways {
 
-static const int LRUCACHE_L1_CACHE_SIZE = 16;
+static const int LRUCACHE_L1_CACHE_SIZE = 12;
 
 template <size_t SIZE, typename Key, typename T>
 class LRUCache
@@ -50,12 +50,12 @@ public:
 	typedef Key key_type;
 	typedef T mapped_type;
 	typedef std::pair<Key, T> value_type;
-	typedef ordered_map<key_type, mapped_type> ordered_map_type;
-	typedef typename ordered_map<key_type, mapped_type>::size_type size_type;
+	typedef size_t size_type;
 
 	typedef long age_t;
-	typedef hashtable<key_type, age_t> key_to_age_t;
-	typedef hashtable<key_type, mapped_type> map_t;
+	typedef std::unordered_map<key_type, age_t> key_to_age_t;
+	typedef std::unordered_map<key_type, mapped_type> map_t;
+	typedef typename map_t::iterator map_iter_t;
 
 	static const size_type Size = SIZE;
 	static const int L1_SIZE = LRUCACHE_L1_CACHE_SIZE;
@@ -129,7 +129,7 @@ private:
 	}
 
 	mutable key_type m_l1_key[L1_SIZE];
-	mutable mapped_type* m_l1_mapped[L1_SIZE];
+	mutable map_iter_t m_l1_mapped[L1_SIZE];
 	mutable int m_l1_last;
 
 	mutable age_t                     m_current_age;
