@@ -147,6 +147,19 @@ public:
 		find_bucket(key, pos);
 		return const_iterator(this, static_cast<int64_t>(pos));
 	}
+	bool erase(iterator& pos) {
+		if (! pos) return false;
+		bucket* bk = pos.m_bucket;
+		if (bk) {
+			bk->key(Key());
+			bk->value(T());
+			bk->state(bucket::DELETED);
+			m_size--;
+			pos.invalidate();
+			return true;
+		}
+		return false;
+	}
 
 	class iterator
 	{
@@ -158,20 +171,24 @@ public:
 		typedef std::forward_iterator_tag iterator_category;
 		typedef int difference_type;
 
-		iterator() : m_parent(NULL), m_pos(-1), m_bucket(NULL), m_has_value(false) { }
-		iterator(hashtable* parent, int64_t bucket_pos) : m_parent(parent), m_pos(bucket_pos), m_bucket(NULL), m_has_value(false) { if (m_pos >= 0) { m_pos--; advance(); } }
-		iterator(const iterator& other) : m_parent(other.m_parent), m_pos(other.m_pos), m_bucket(other.m_bucket), m_has_value(false) { }
-		iterator(const const_iterator& other) : m_parent(other.m_parent), m_pos(other.m_pos), m_bucket(other.m_bucket), m_has_value(false) { }
-		iterator& operator= (const iterator& other) { m_parent = other.m_parent; m_pos = other.m_pos; m_bucket = other.m_bucket; m_has_value = false; return *this; }
+		iterator() : m_parent(NULL), m_pos(-1), m_buckets(NULL), m_bucket(NULL), m_has_value(false) { }
+		iterator(hashtable* parent, int64_t bucket_pos) : m_parent(parent), m_pos(bucket_pos), m_buckets(parent->m_buckets), m_bucket(NULL), m_has_value(false) { if (m_pos >= 0) { m_pos--; advance(); } }
+		iterator(const iterator& other) : m_parent(other.m_parent), m_pos(other.m_pos), m_buckets(other.m_buckets), m_bucket(other.m_bucket), m_has_value(false) { }
+		iterator(const const_iterator& other) : m_parent(other.m_parent), m_pos(other.m_pos), m_buckets(other.m_buckets), m_bucket(other.m_bucket), m_has_value(false) { }
+		iterator& operator= (const iterator& other) { m_parent = other.m_parent; m_pos = other.m_pos; m_buckets = other.m_buckets; m_bucket = other.m_bucket; m_has_value = false; return *this; }
 
 		self_type& operator++() { advance(); return *this; }										/* prefix  */
 		self_type operator++(int) { self_type i = *this; advance(); return i; }						/* postfix */
 		reference operator*() { update_value(); return m_value; }
 		pointer operator->() { update_value(); return &m_value; }
-		bool operator==(const self_type& rhs) { return (m_parent == rhs.m_parent) && (m_pos == rhs.m_pos) && (m_bucket == rhs.m_bucket); }
-		bool operator!=(const self_type& rhs) { return (m_parent != rhs.m_parent) || (m_pos != rhs.m_pos) || (m_bucket != rhs.m_bucket); }
+		bool operator==(const self_type& rhs) {
+			if (m_parent != rhs.m_parent) return false;
+			if ((! valid()) && (! rhs.valid())) return true;
+			return (m_pos == rhs.m_pos) && (m_bucket == rhs.m_bucket);
+		}
+		bool operator!=(const self_type& rhs) { return ! (*this == rhs); }
 
-		operator bool() const { return (m_parent && (m_pos >= 0) && m_bucket); }
+		operator bool() const { return (m_parent && (m_buckets == m_parent->m_buckets) && (m_pos >= 0) && m_bucket && m_bucket->isUsed()); }
 
 		const key_type& key() const { assert(m_bucket); return m_bucket->key(); }
 		key_type& key() { assert(m_bucket); return m_bucket->key(); }
@@ -181,15 +198,24 @@ public:
 		mapped_type& value() { assert(m_bucket); return m_bucket->value(); }
 		iterator& value(const mapped_type& value_) { assert(m_bucket); m_bucket->value(value_); return *this; }
 
+		bool valid() const { return m_parent && (m_buckets == m_parent->m_buckets) && m_bucket && m_bucket->isUsed() && (m_pos >= 0); }
+		void invalidate() { m_pos = -1; m_buckets = NULL; m_bucket = NULL; m_has_value = false; }
+
 	private:
 		hashtable* m_parent;
 		int64_t m_pos;
+		bucket* m_buckets;
 		bucket* m_bucket;
 		value_type m_value;
 		bool m_has_value;
 		friend class const_iterator;
+		friend class hashtable;
 
 		void advance() {
+			if ((! m_parent) || (m_parent->m_buckets != m_buckets)) {
+				invalidate();
+				return;
+			}
 			m_has_value = false;
 			do {
 				if (++m_pos >= static_cast<int64_t>(m_parent->m_capacity)) {
@@ -213,33 +239,45 @@ public:
 		typedef std::forward_iterator_tag iterator_category;
 		typedef int difference_type;
 
-		const_iterator() : m_parent(NULL), m_pos(-1), m_bucket(NULL), m_has_value(false) { }
-		const_iterator(const hashtable* parent, int64_t bucket_pos) : m_parent(parent), m_pos(bucket_pos), m_bucket(NULL), m_has_value(false) { if (m_pos >= 0) { m_pos--; advance(); } }
-		const_iterator(const const_iterator& other) : m_parent(other.m_parent), m_pos(other.m_pos), m_bucket(other.m_bucket), m_has_value(false) { }
-		const_iterator(const iterator& other) : m_parent(other.m_parent), m_pos(other.m_pos), m_bucket(other.m_bucket), m_has_value(false) { }
-		const_iterator& operator= (const const_iterator& other) { m_parent = other.m_parent; m_pos = other.m_pos; m_bucket = other.m_bucket; m_has_value = false; return *this; }
+		const_iterator() : m_parent(NULL), m_pos(-1), m_buckets(NULL), m_bucket(NULL), m_has_value(false) { }
+		const_iterator(const hashtable* parent, int64_t bucket_pos) : m_parent(parent), m_pos(bucket_pos), m_buckets(parent->m_buckets), m_bucket(NULL), m_has_value(false) { if (m_pos >= 0) { m_pos--; advance(); } }
+		const_iterator(const const_iterator& other) : m_parent(other.m_parent), m_pos(other.m_pos), m_buckets(other.m_buckets), m_bucket(other.m_bucket), m_has_value(false) { }
+		const_iterator(const iterator& other) : m_parent(other.m_parent), m_pos(other.m_pos), m_buckets(other.m_buckets), m_bucket(other.m_bucket), m_has_value(false) { }
+		const_iterator& operator= (const const_iterator& other) { m_parent = other.m_parent; m_pos = other.m_pos; m_buckets = other.m_buckets; m_bucket = other.m_bucket; m_has_value = false; return *this; }
 
 		self_type& operator++() { advance(); return *this; }										/* prefix  */
 		self_type operator++(int) { self_type i = *this; advance(); return i; }						/* postfix */
 		reference operator*() { update_value(); return m_value; }
 		pointer operator->() { update_value(); return &m_value; }
-		bool operator==(const self_type& rhs) { return (m_parent == rhs.m_parent) && (m_pos == rhs.m_pos) && (m_bucket == rhs.m_bucket); }
-		bool operator!=(const self_type& rhs) { return (m_parent != rhs.m_parent) || (m_pos != rhs.m_pos) || (m_bucket != rhs.m_bucket); }
+		bool operator==(const self_type& rhs) {
+			if (m_parent != rhs.m_parent) return false;
+			if ((! valid()) && (! rhs.valid())) return true;
+			return (m_pos == rhs.m_pos) && (m_bucket == rhs.m_bucket);
+		}
+		bool operator!=(const self_type& rhs) { return ! (*this == rhs); }
 
-		operator bool() const { return (m_parent && (m_pos > 0) && m_bucket); }
+		operator bool() const { return (m_parent && (m_buckets == m_parent->m_buckets) && (m_pos > 0) && m_bucket && m_bucket->isUsed()); }
 
 		const key_type& key() const { assert(m_bucket); return m_bucket->key(); }
 		const mapped_type& value() const { assert(m_bucket); return m_bucket->value(); }
 
+		bool valid() const { return m_parent && (m_buckets == m_parent->m_buckets) && m_bucket && m_bucket->isUsed() && (m_pos >= 0); }
+		void invalidate() { m_pos = -1; m_buckets = NULL; m_bucket = NULL; m_has_value = false; }
+
 	private:
 		const hashtable* m_parent;
 		int64_t m_pos;
+		bucket* m_buckets;
 		const bucket* m_bucket;
 		value_type m_value;
 		bool m_has_value;
 		friend class iterator;
 
 		void advance() {
+			if ((! m_parent) || (m_parent->m_buckets != m_buckets)) {
+				invalidate();
+				return;
+			}
 			m_has_value = false;
 			do {
 				if (++m_pos >= static_cast<int64_t>(m_parent->m_capacity)) {
@@ -255,7 +293,7 @@ public:
 
 protected:
 	hash_type compute_hash2(const key_type& key) const;
-	bool expand();
+	bool expand(size_t for_size = 0);
 	size_type capacity_for(size_type size);
 
 	bucket* set_(const key_type& key, const mapped_type& value);

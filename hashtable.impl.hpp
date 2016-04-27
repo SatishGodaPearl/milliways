@@ -275,10 +275,11 @@ hashtable<Key, T, KeyCompare>::~hashtable()
 template < typename Key, typename T, class KeyCompare >
 typename hashtable<Key, T, KeyCompare>::hash_type hashtable<Key, T, KeyCompare>::compute_hash2(const key_type& key) const
 {
-	hash_type prime = static_cast<hash_type>(m_prime_lt_capacity);
-	assert(prime > 0);
+	return 3;
+	// hash_type prime = static_cast<hash_type>(m_prime_lt_capacity);
+	// assert(prime > 0);
 
-	return (prime - (Hasher<Key>::hash2(key) % prime)) + 1;		/* the +1 is to avoid h2 to be zero (with nefarious consequences) */
+	// return (prime - (Hasher<Key>::hash2(key) % prime)) + 1;		 the +1 is to avoid h2 to be zero (with nefarious consequences) 
 }
 
 template < typename Key, typename T, class KeyCompare >
@@ -314,15 +315,18 @@ typename hashtable<Key, T, KeyCompare>::bucket* hashtable<Key, T, KeyCompare>::s
 	size_t pos;
 
 	if (((m_size * 100) / m_capacity) >= hashtable::MAX_LOAD_FACTOR)
-		expand();
+		expand(0);
+
+	int n_expand_cycles = 0;
 
 restart:
 	i = 0;
 	h1 = Hasher<Key>::hash(key);
+	h2 = 0;
 	hf = h1;
-	pos = h1 % m_capacity;
+	pos = hf % m_capacity;
 
-	while (m_buckets[pos].notFree())
+	while (m_buckets[pos].notFree() && (i < m_capacity))
 	{
 		if (KeyCompare()(key, m_buckets[pos].key())) {
 			m_buckets[pos].value(value);
@@ -335,10 +339,25 @@ restart:
 			assert(h2 > 0);
 		}
 
+		i++;
 		hf += h2;								/* hf = h1 + i * h2; */
 		pos = hf % m_capacity;
-		i++;
 	}
+
+	/*
+	 * it could happen that we have not found a free spot, for example
+	 * because all buckets are deleted.
+	 */
+	if (i >= m_capacity)
+	{
+		assert(n_expand_cycles < 2);
+
+		n_expand_cycles++;
+		expand(m_size + 1);
+		goto restart;
+	}
+
+	assert(i < m_capacity);
 
 	bucket& bk = m_buckets[pos];
 
@@ -401,13 +420,12 @@ typename hashtable<Key, T, KeyCompare>::size_type hashtable<Key, T, KeyCompare>:
 }
 
 template < typename Key, typename T, class KeyCompare >
-bool hashtable<Key, T, KeyCompare>::expand()
+bool hashtable<Key, T, KeyCompare>::expand(size_t for_size)
 {
-	size_t new_capacity = static_cast<size_t>(prime_gt(static_cast<long>(m_capacity * hashtable::EXPANSION_FACTOR + 37)));
-	while ((((m_size + 1) * 100) / new_capacity) >= hashtable::MAX_LOAD_FACTOR)
-		new_capacity += 23;
+	if (for_size == 0)
+		for_size = static_cast<size_t>( m_size * hashtable::EXPANSION_FACTOR + 1 );
 
-	hashtable lamb(new_capacity);
+	hashtable lamb(for_size);
 
 	for (size_t i = 0; i < m_capacity; i++)
 	{
@@ -445,7 +463,7 @@ const typename hashtable<Key, T, KeyCompare>::bucket* hashtable<Key, T, KeyCompa
 	hash_type h2, hf = h1;
 	size_t pos = h1 % m_capacity;
 
-	while (m_buckets[pos].notFree())
+	while (m_buckets[pos].notFree() && (i < m_capacity))
 	{
 		if (m_buckets[pos].isUsed() && KeyCompare()(key, m_buckets[pos].key())) {
 			pos_ = static_cast<ssize_t>(pos);
@@ -472,7 +490,7 @@ const typename hashtable<Key, T, KeyCompare>::bucket* hashtable<Key, T, KeyCompa
 	hash_type h2, hf = h1;
 	size_t pos = h1 % m_capacity;
 
-	while (m_buckets[pos].notFree())
+	while (m_buckets[pos].notFree() && (i < m_capacity))
 	{
 		if (m_buckets[pos].isUsed() && KeyCompare()(key, m_buckets[pos].key())) {
 			return &m_buckets[pos];
@@ -497,7 +515,7 @@ typename hashtable<Key, T, KeyCompare>::bucket* hashtable<Key, T, KeyCompare>::f
 	hash_type h2, hf = h1;
 	size_t pos = h1 % m_capacity;
 
-	while (m_buckets[pos].notFree())
+	while (m_buckets[pos].notFree() && (i < m_capacity))
 	{
 		if (m_buckets[pos].isUsed() && KeyCompare()(key, m_buckets[pos].key())) {
 			pos_ = static_cast<ssize_t>(pos);
@@ -524,7 +542,7 @@ typename hashtable<Key, T, KeyCompare>::bucket* hashtable<Key, T, KeyCompare>::f
 	hash_type h2, hf = h1;
 	size_t pos = h1 % m_capacity;
 
-	while (m_buckets[pos].notFree())
+	while (m_buckets[pos].notFree() && (i < m_capacity))
 	{
 		if (m_buckets[pos].isUsed() && KeyCompare()(key, m_buckets[pos].key())) {
 			return &m_buckets[pos];
