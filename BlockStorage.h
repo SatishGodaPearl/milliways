@@ -266,7 +266,6 @@ public:
 	typedef MW_SHPTR<block_type> block_ptr_type;
 	typedef block_ptr_type mapped_type;
 	typedef std::pair<key_type, mapped_type> value_type;
-	typedef ordered_map<key_type, mapped_type> ordered_map_type;
 	typedef LRUCache< CACHESIZE, block_id_t, MW_SHPTR<block_type> > base_type;
 	typedef typename base_type::size_type size_type;
 
