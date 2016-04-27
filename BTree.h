@@ -60,6 +60,7 @@ public:
 	typedef BTreeLookup<B_, KeyTraits, TTraits, Compare> lookup_type;
 	typedef BTreeStorage<B_, KeyTraits, TTraits, Compare> storage_type;
 	typedef BTreeMemoryStorage<B_, KeyTraits, TTraits, Compare> memory_storage_type;
+	typedef BTreeNodeManager<B_, KeyTraits, TTraits, Compare> manager_type;
 
 	static const int B = B_;
 
@@ -98,6 +99,11 @@ public:
 	bool open() { return m_io ? m_io->open() : false; }
 	bool close(){ return m_io ? m_io->close() : false; }
 	bool flush() { return m_io ? m_io->flush() : false; }
+
+	/* -- Node Manager --------------------------------------------- */
+
+	manager_type& manager() { assert(m_io); return m_io->manager(); }
+	MW_SHPTR<node_type> node(node_id_t node_id) { return manager().get_object(node_id); }
 
 	/* -- Root ----------------------------------------------------- */
 
@@ -392,6 +398,7 @@ public:
 	/* -- Node Manager --------------------------------------------- */
 
 	manager_type& manager() { return m_manager; }
+	MW_SHPTR<node_type> node(node_id_t node_id) { return manager().get_object(node_id); }
 
 protected:
 	tree_type* m_tree;

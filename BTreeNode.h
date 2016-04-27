@@ -195,7 +195,7 @@ public:
 	MW_SHPTR<node_type> child_node(int i) const { node_id_t node_id = child(i); return (node_id != NODE_ID_INVALID) ? node_read(node_id) : MW_SHPTR<node_type>(); }
 	void child_node(int i, const MW_SHPTR<node_type>& node) { assert(node); assert(node->id() != NODE_ID_INVALID); m_children[i] = node->id(); }
 
-	lookup_type* create_lookup(bool found, int pos, const key_type& key_) { return new lookup_type(this_node(), found, pos, key_); }
+	lookup_type* create_lookup(bool found, int pos, const key_type& key_) { return new lookup_type(self_read(), found, pos, key_); }
 
 	bool search(lookup_type& res, const key_type& key_);
 	void truncate(int num);
@@ -206,6 +206,9 @@ public:
 
 	/* -- Node I/O ------------------------------------------------- */
 
+	MW_SHPTR<node_type> self() { assert(m_tree); assert(node_id_valid(id())); return m_tree->node(id()); }
+	MW_SHPTR<node_type> self_read() const { assert(m_tree); assert(node_id_valid(id())); return m_tree->node_read(id()); }
+
 	MW_SHPTR<node_type> node_alloc() { assert(m_tree); return m_tree->node_alloc(); }
 	MW_SHPTR<node_type> node_child_alloc(MW_SHPTR<node_type> parent_) { assert(m_tree); return m_tree->node_child_alloc(parent_); }
 	void node_dispose(MW_SHPTR<node_type>& node) { assert(m_tree); return m_tree->node_dispose(node); }
@@ -213,9 +216,7 @@ public:
 	MW_SHPTR<node_type> node_read(MW_SHPTR<node_type>& node) const { assert(m_tree); return m_tree->node_read(node); }
 	MW_SHPTR<node_type> node_write(MW_SHPTR<node_type>& node) const { assert(m_tree); return m_tree->node_write(node); }
 
-	MW_SHPTR<BTreeNode> child_alloc() { MW_SHPTR<BTreeNode> self( this_node() ); return node_child_alloc(self); }
-
-	MW_SHPTR<node_type> this_node() const { assert(m_tree); assert(node_id_valid(id())); return m_tree->node_read(id()); }
+	MW_SHPTR<BTreeNode> child_alloc() { return node_child_alloc(self()); }
 
 	/* -- Output --------------------------------------------------- */
 
@@ -225,6 +226,7 @@ public:
 
 private:
 	/* lifetime managed by BTreeStorage */
+	BTreeNode() : m_tree(NULL), m_id(NODE_ID_INVALID), m_parent_id(NODE_ID_INVALID), m_left_id(NODE_ID_INVALID), m_right_id(NODE_ID_INVALID), m_leaf(true), m_n(0), m_rank(0), m_dirty(false), m_keys(), m_values(), m_children() {}
 	BTreeNode(tree_type* tree, node_id_t node_id, node_id_t parent_id = NODE_ID_INVALID);
 	BTreeNode(const BTreeNode& other);
 	~BTreeNode() {}

@@ -81,21 +81,21 @@ bool BTreeNode<B_, KeyTraits, TTraits, Compare>::search(lookup_type& res, const 
 #if 0
 	if (leaf())
 	{
-		MW_SHPTR<node_type> self( this_node() );
+		MW_SHPTR<node_type> self_( self_read() );
 		int i;
 		for (i = 0; i < n(); i++)
 		{
 			if (key_ < key(i))
 			{
-				res.node(self).found(false).pos(i).key(key_);
+				res.node(self_).found(false).pos(i).key(key_);
 				return false;
 			} else if (key_ == key(i))
 			{
-				res.node(self).found(true).pos(i).key(key_);
+				res.node(self_).found(true).pos(i).key(key_);
 				return true;
 			}
 		}
-		res.node(self).found(false).pos(i).key(key_);
+		res.node(self_).found(false).pos(i).key(key_);
 		return false;
 	} else
 	{
@@ -137,7 +137,7 @@ bool BTreeNode<B_, KeyTraits, TTraits, Compare>::bsearch(lookup_type& res, const
 {
 	int lo = 0;
 	int hi = n() - 1;
-	MW_SHPTR<node_type> self( this_node() );
+	MW_SHPTR<node_type> self_( self_read() );
 
 	while (hi >= lo)
 	{
@@ -153,15 +153,15 @@ bool BTreeNode<B_, KeyTraits, TTraits, Compare>::bsearch(lookup_type& res, const
 		{
 			// found!
 			if (leaf())
-				res.node(self).found(true).pos(m).key(key_);
+				res.node(self_).found(true).pos(m).key(key_);
 			else
-				res.node(self).found(true).pos(m + 1).key(key_);    // internal nodes handled differently
+				res.node(self_).found(true).pos(m + 1).key(key_);    // internal nodes handled differently
 			return true;
 		}
 	}
 
 	// not found
-	res.node(self).found(false).pos(lo).key(key_);
+	res.node(self_).found(false).pos(lo).key(key_);
 	return false;
 }
 
@@ -228,8 +228,8 @@ void BTreeNode<B_, KeyTraits, TTraits, Compare>::split_child(int i)
 
 	node_write(y);
 	node_write(z);
-	MW_SHPTR<node_type> self( this_node() );
-	node_write(self);
+	MW_SHPTR<node_type> self_( self() );
+	node_write(self_);
 }
 
 template < int B_, typename KeyTraits, typename TTraits, class Compare >
@@ -254,9 +254,9 @@ MW_SHPTR<typename BTreeNode<B_, KeyTraits, TTraits, Compare>::node_type> BTreeNo
 		key(where.pos()) = key_;
 		value(where.pos()) = value_;
 		n(n() + 1);
-		MW_SHPTR<node_type> self( this_node() );
-		node_write(self);
-		return self;
+		MW_SHPTR<node_type> self_( self() );
+		node_write(self_);
+		return self_;
 	} else
 	{
 		assert(! leaf());
@@ -304,8 +304,8 @@ bool BTreeNode<B_, KeyTraits, TTraits, Compare>::remove(lookup_type& res, const 
 			value(j) = value(j + 1);
 		}
 		n(n() - 1);
-		MW_SHPTR<node_type> self( this_node() );
-		node_write(self);
+		MW_SHPTR<node_type> self_( self() );
+		node_write(self_);
 		return true;
 	} else
 	{
@@ -354,7 +354,7 @@ inline std::ostream& BTreeNode<B_, KeyTraits, TTraits, Compare>::dotGraph(std::o
 
 	rankmap_type rankmap;
 	node_set_type visitedmap;
-	L::aggregate_by_rank(this_node(), rankmap, visitedmap);
+	L::aggregate_by_rank(self_read(), rankmap, visitedmap);
 
 	out << "digraph btree {" << std::endl;
 	out << "    node [shape=plaintext]" << std::endl;
