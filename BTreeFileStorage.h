@@ -123,8 +123,12 @@ public:
 			{
 				if (node->id() != NODE_ID_INVALID)
 				{
+#ifdef NDEBUG
+					m_storage->ll_node_write(*node);
+#else
 					bool ok = m_storage->ll_node_write(*node);
 					assert(ok);
+#endif
 				}
 				// node->id(NODE_ID_INVALID);
 				// value.reset();

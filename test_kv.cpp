@@ -52,6 +52,7 @@ TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 	typedef milliways::KeyValueStore kv_t;
 	typedef XTYPENAME kv_t::block_storage_type kv_blockstorage_t;
 
+#if 0
 	SECTION( "freshly created kv store works" ) {
 		const std::string test_pathname("/tmp/test_kv");
 
@@ -276,7 +277,7 @@ TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 
 		kv.close();
 	}
-
+#endif
 	SECTION( "largish sets works" ) {
 		const std::string test_pathname("/tmp/test_kv");
 
