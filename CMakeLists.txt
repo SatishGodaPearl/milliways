@@ -133,6 +133,54 @@ check_cxx_source_compiles("
   #include <stdint.h>
   #include <stddef.h>
   #include <unistd.h>
+  #include <arpa/inet.h>
+  int main() { uint16_t r = htons(1); return 0; }
+" HAVE_HTONS)
+
+check_cxx_source_compiles("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <unistd.h>
+  #include <arpa/inet.h>
+  int main() { uint16_t r = ntohs(1); return 0; }
+" HAVE_NTOHS)
+
+check_cxx_source_compiles("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <unistd.h>
+  #include <arpa/inet.h>
+  int main() { uint32_t r = htonl(1); return 0; }
+" HAVE_HTONL)
+
+check_cxx_source_compiles("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <unistd.h>
+  #include <arpa/inet.h>
+  int main() { uint32_t r = ntohl(1); return 0; }
+" HAVE_NTOHL)
+
+check_cxx_source_compiles("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <unistd.h>
+  #include <arpa/inet.h>
+  int main() { uint64_t r = htonll(1); return 0; }
+" HAVE_HTONLL)
+
+check_cxx_source_compiles("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <unistd.h>
+  #include <arpa/inet.h>
+  int main() { uint64_t r = ntohll(1); return 0; }
+" HAVE_NTOHLL)
+
+check_cxx_source_compiles("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <unistd.h>
   int main() { size_t s = 1; return 0; }
 " HAVE_SIZE_T)
 
@@ -150,6 +198,8 @@ check_cxx_source_compiles("
   #if defined(_MSC_VER)
   #include <BaseTsd.h>
   typedef SSIZE_T ssize_t;
+  #else
+  #error \"not on Windows / MSC\"
   #endif
   int main() { ssize_t s = -1; return 0; }
 " HAVE_WIN_SSIZE_T)
