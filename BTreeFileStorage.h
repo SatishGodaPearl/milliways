@@ -25,11 +25,19 @@
 #ifndef MILLIWAYS_BTREEFILESTORAGE_H
 #define MILLIWAYS_BTREEFILESTORAGE_H
 
+#include "config.h"
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <functional>
+#ifdef USE_STD_ARRAY
 #include <array>
+#elif USE_TR1_ARRAY
+#include <tr1/array>
+#elif USE_BOOST_ARRAY
+#include <boost/array.hpp>
+#endif
 
 #include <stdint.h>
 #include <assert.h>

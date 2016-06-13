@@ -25,8 +25,16 @@
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 #include "catch.hpp"
 
+#include "config.h"
+
 #include <map>
+#ifdef USE_STD_UNORDERED_MAP
 #include <unordered_map>
+#elif USE_TR1_UNORDERED_MAP
+#include <tr1/unordered_map>
+#elif USE_BOOST_UNORDERED_MAP
+#include <boost/unordered_map.hpp>
+#endif
 
 #include "hashtable.h"
 
@@ -58,7 +66,7 @@ static std::string random_string(int length)
 
 TEST_CASE( "Hash Table", "[hashtable]" ) {
 	typedef milliways::hashtable<std::string, int> ht_t;
-	typedef std::unordered_map<std::string, int> test_set_t;
+	typedef cxx_um::unordered_map<std::string, int> test_set_t;
 
 	test_set_t test_set;
 	const int test_set_size = 2048;
@@ -186,7 +194,7 @@ TEST_CASE( "Hash Table", "[hashtable]" ) {
 TEST_CASE( "Hash Table uint32_t", "[hashtable_u32]" ) {
 	typedef milliways::hashtable<uint32_t, uint32_t> ht_t;
 	typedef milliways::hashtable<uint32_t, uint32_t>::iterator ht_it_t;
-	typedef std::unordered_map<uint32_t, uint32_t> test_set_t;
+	typedef cxx_um::unordered_map<uint32_t, uint32_t> test_set_t;
 
 	test_set_t test_set;
 	const long test_set_size = 131072;

@@ -216,6 +216,44 @@ check_cxx_source_compiles("
     #include <boost/shared_ptr.hpp>
     int main() { boost::shared_ptr<int> p; return 0; }
 " HAVE_BOOST_SHARED_PTR)
+check_cxx_source_compiles("
+    #include <memory>
+    int main() { std::weak_ptr<int> p; return 0; }
+" HAVE_STD_WEAK_PTR)
+check_cxx_source_compiles("
+    #include <tr1/memory>
+    int main() { std::tr1::weak_ptr<int> p; return 0; }
+" HAVE_STD_TR1_WEAK_PTR)
+check_cxx_source_compiles("
+    #include <boost/weak_ptr.hpp>
+    int main() { boost::weak_ptr<int> p; return 0; }
+" HAVE_BOOST_WEAK_PTR)
+
+check_cxx_source_compiles("
+    #include <array>
+    int main() { std::array<int, 20> a; return 0; }
+" HAVE_STD_ARRAY)
+check_cxx_source_compiles("
+    #include <tr1/array>
+    int main() { std::tr1::array<int, 20> a; return 0; }
+" HAVE_STD_TR1_ARRAY)
+check_cxx_source_compiles("
+    #include <boost/array.hpp>
+    int main() { boost::array<int, 20> a; return 0; }
+" HAVE_BOOST_ARRAY)
+
+check_cxx_source_compiles("
+    #include <unordered_map>
+    int main() { std::unordered_map<int, int> a; return 0; }
+" HAVE_STD_UNORDERED_MAP)
+check_cxx_source_compiles("
+    #include <tr1/unordered_map>
+    int main() { std::tr1::unordered_map<int, int> a; return 0; }
+" HAVE_STD_TR1_UNORDERED_MAP)
+check_cxx_source_compiles("
+    #include <boost/unordered_map.hpp>
+    int main() { boost::unordered_map<int, int> a; return 0; }
+" HAVE_BOOST_UNORDERED_MAP)
 
 check_cxx_source_compiles("
 	#include <stdint.h>

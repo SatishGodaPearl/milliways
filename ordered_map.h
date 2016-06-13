@@ -26,8 +26,14 @@
 #define MILLIWAYS_ORDERED_MAP_H
 
 #include <map>
-#include <unordered_map>
-#include <deque>
+// #ifdef USE_STD_UNORDERED_MAP
+// #include <unordered_map>
+// #elif USE_TR1_UNORDERED_MAP
+// #include <tr1/unordered_map>
+// #elif USE_BOOST_UNORDERED_MAP
+// #include <boost/unordered_map.hpp>
+// #endif
+// #include <deque>
 
 #include <stdint.h>
 #include <assert.h>

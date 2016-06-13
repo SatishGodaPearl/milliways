@@ -25,14 +25,35 @@
 #ifndef MILLIWAYS_BTREENODE_H
 #define MILLIWAYS_BTREENODE_H
 
+#include "config.h"
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <functional>
+#ifdef USE_STD_ARRAY
 #include <array>
+#elif USE_TR1_ARRAY
+#include <tr1/array>
+#elif USE_BOOST_ARRAY
+#include <boost/array.hpp>
+#endif
 #include <map>
+#ifdef USE_STD_UNORDERED_MAP
 #include <unordered_map>
+#elif USE_TR1_UNORDERED_MAP
+#include <tr1/unordered_map>
+#elif USE_BOOST_UNORDERED_MAP
+#include <boost/unordered_map.hpp>
+#endif
+#ifdef USE_STD_MEMORY
 #include <memory>
+#elif USE_TR1_MEMORY
+#include <tr1/memory>
+#elif USE_BOOST_MEMORY
+#include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
+#endif
 
 #include <stdint.h>
 #include <assert.h>
@@ -125,9 +146,9 @@ public:
 	typedef BTreeNode<B_, KeyTraits, TTraits, Compare> node_type;
 	typedef BTreeLookup<B_, KeyTraits, TTraits, Compare> lookup_type;
 
-	typedef std::array<key_type, 2*B - 1> keys_array_type;
-	typedef std::array<mapped_type, 2*B - 1> values_array_type;
-	typedef std::array<node_id_t, 2*B> children_array_type;
+	typedef cxx_a::array<key_type, 2*B - 1> keys_array_type;
+	typedef cxx_a::array<mapped_type, 2*B - 1> values_array_type;
+	typedef cxx_a::array<node_id_t, 2*B> children_array_type;
 
 	BTreeNode& operator= (const BTreeNode& other);
 
@@ -269,9 +290,9 @@ public:
 	BTreeNodeManager() : m_objects(), m_tree(NULL) {}
 	BTreeNodeManager(tree_type* tree_) : m_objects(), m_tree(tree_) {}
 	~BTreeNodeManager() {
-		typename std::unordered_map< node_id_t, std::weak_ptr<node_type> >::iterator it;
+		typename cxx_um::unordered_map< node_id_t, cxx_mem::weak_ptr<node_type> >::iterator it;
 		for (it = m_objects.begin(); it != m_objects.end(); ++it) {
-			std::weak_ptr<node_type> wp = it->second;
+			cxx_mem::weak_ptr<node_type> wp = it->second;
 			if ((wp.use_count() > 0) && wp.expired()) {
 				std::cerr << "WARNING: weak pointer expired BUT use count not zero for managed node! (in use:" << wp.use_count() << ")" << std::endl;
 			} else if (wp.use_count() > 0) {
@@ -284,38 +305,38 @@ public:
 	handler_type& tree(tree_type* tree_) { m_tree = tree_; return *this; }
 	tree_type* tree() { return m_tree; }
 
-	std::shared_ptr<node_type> get_object(node_id_t id, bool createIfNotFound = true)
+	cxx_mem::shared_ptr<node_type> get_object(node_id_t id, bool createIfNotFound = true)
 	{
-		typename std::unordered_map< node_id_t, std::weak_ptr<node_type> >::const_iterator it = m_objects.find(id);
+		typename cxx_um::unordered_map< node_id_t, cxx_mem::weak_ptr<node_type> >::const_iterator it = m_objects.find(id);
 		if (it != m_objects.end()) {
 			assert(it->first == id);
 			return it->second.lock();
 		} else if (createIfNotFound) {
 			return make_object(id);
 		} else
-			return std::shared_ptr<node_type>();
+			return cxx_mem::shared_ptr<node_type>();
 	}
 
 	bool has(node_type id) {
-		typename std::unordered_map< node_id_t, std::weak_ptr<node_type> >::const_iterator it = m_objects.find(id);
+		typename cxx_um::unordered_map< node_id_t, cxx_mem::weak_ptr<node_type> >::const_iterator it = m_objects.find(id);
 		return (it != m_objects.end()) ? true : false;
 	}
 
 	size_t count() const { return m_objects.size(); }
 
 private:
-	typedef std::unordered_map< node_id_t, std::weak_ptr<node_type> > weak_map_t;
+	typedef cxx_um::unordered_map< node_id_t, cxx_mem::weak_ptr<node_type> > weak_map_t;
 
 	friend class BTreeNode<B_, KeyTraits, TTraits, Compare>;
 
 	class node_deleter;
 	friend class node_deleter;
 
-	std::shared_ptr<node_type> make_object(node_id_t id)
+	cxx_mem::shared_ptr<node_type> make_object(node_id_t id)
 	{
 		assert(m_tree);
 		assert(m_objects.count(id) == 0);
-		std::shared_ptr<node_type> sp(new node_type(m_tree, id), node_deleter(this, id));
+		cxx_mem::shared_ptr<node_type> sp(new node_type(m_tree, id), node_deleter(this, id));
 
 		m_objects[id] = sp;
 
@@ -341,7 +362,7 @@ private:
 		node_id_t m_id;
 	};
 
-	std::unordered_map< node_id_t, std::weak_ptr<node_type> > m_objects;
+	cxx_um::unordered_map< node_id_t, cxx_mem::weak_ptr<node_type> > m_objects;
 	tree_type* m_tree;
 };
 

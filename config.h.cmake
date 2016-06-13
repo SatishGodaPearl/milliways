@@ -60,6 +60,33 @@
 /* Define to 1 if <boost/shared_ptr.hpp> exists and defines boost::shared_ptr. */
 #cmakedefine HAVE_BOOST_SHARED_PTR 1
 
+/* Define to 1 if <tr1/memory> exists and defines std::tr1::weak_ptr. */
+#cmakedefine HAVE_STD_TR1_WEAK_PTR 1
+
+/* Define to 1 if <memory> exists and defines std::weak_ptr. */
+#cmakedefine HAVE_STD_WEAK_PTR 1
+
+/* Define to 1 if <boost/weak_ptr.hpp> exists and defines boost::weak_ptr. */
+#cmakedefine HAVE_BOOST_WEAK_PTR 1
+
+/* Define to 1 if <tr1/array> exists and defines std::tr1::array. */
+#cmakedefine HAVE_STD_TR1_ARRAY 1
+
+/* Define to 1 if <array> exists and defines std::array. */
+#cmakedefine HAVE_STD_ARRAY 1
+
+/* Define to 1 if <boost/array.hpp> exists and defines boost::array. */
+#cmakedefine HAVE_BOOST_ARRAY 1
+
+/* Define to 1 if <tr1/unordered_map> exists and defines std::tr1::unordered_map. */
+#cmakedefine HAVE_STD_TR1_UNORDERED_MAP 1
+
+/* Define to 1 if <unordered_map> exists and defines std::unordered_map. */
+#cmakedefine HAVE_STD_UNORDERED_MAP 1
+
+/* Define to 1 if <boost/unordered_map.hpp> exists and defines boost::unordered_map. */
+#cmakedefine HAVE_BOOST_UNORDERED_MAP 1
+
 /* Define to 1 if <functional> exists and defines std::function. */
 #cmakedefine HAVE_STD_FUNCTION 1
 
@@ -165,5 +192,44 @@
 
 /* Define to 1 if ssize_t is same as int */
 #cmakedefine SSIZE_T_IS_I 1
+
+#if defined(HAVE_STD_SHARED_PTR)
+  #define USE_STD_MEMORY
+  #define cxx_mem std
+#elif defined(HAVE_STD_TR1_SHARED_PTR)
+  #define USE_TR1_MEMORY
+  #define cxx_mem std::tr1
+#elif defined(HAVE_BOOST_SHARED_PTR)
+  #define USE_BOOST_MEMORY
+  #define cxx_mem boost
+#else
+  #error "no shared pointer implementation available!"
+#endif
+
+#if defined(HAVE_STD_ARRAY)
+  #define USE_STD_ARRAY
+  #define cxx_a std
+#elif defined(HAVE_STD_TR1_ARRAY)
+  #define USE_TR1_ARRAY
+  #define cxx_a std::tr1
+#elif defined(HAVE_BOOST_ARRAY)
+  #define USE_BOOST_ARRAY
+  #define cxx_a boost
+#else
+  #error "no templated array implementation available!"
+#endif
+
+#if defined(HAVE_STD_UNORDERED_MAP)
+  #define USE_STD_UNORDERED_MAP
+  #define cxx_um std
+#elif defined(HAVE_STD_TR1_UNORDERED_MAP)
+  #define USE_TR1_UNORDERED_MAP
+  #define cxx_um std::tr1
+#elif defined(HAVE_BOOST_UNORDERED_MAP)
+  #define USE_BOOST_UNORDERED_MAP
+  #define cxx_um boost
+#else
+  #error "no unoredered map implementation available!"
+#endif
 
 #endif /* MILLIWAYS_CONFIG_H */
