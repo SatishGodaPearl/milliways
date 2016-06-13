@@ -62,7 +62,7 @@ public:
 	typedef long age_t;
 	typedef cxx_um::unordered_map<key_type, age_t> key_to_age_t;
 	typedef cxx_um::unordered_map<key_type, mapped_type> map_t;
-	typedef typename map_t::iterator map_iter_t;
+	typedef XTYPENAME map_t::iterator map_iter_t;
 
 	static const size_type Size = SIZE;
 	static const int L1_SIZE = LRUCACHE_L1_CACHE_SIZE;

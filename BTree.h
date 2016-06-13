@@ -49,8 +49,8 @@ class BTree
 public:
 	typedef KeyTraits key_traits_type;
 	typedef TTraits mapped_traits_type;
-	typedef typename KeyTraits::type key_type;
-	typedef typename TTraits::type mapped_type;
+	typedef XTYPENAME KeyTraits::type key_type;
+	typedef XTYPENAME TTraits::type mapped_type;
 	typedef std::pair<key_type, mapped_type> value_type;
 	typedef Compare key_compare;
 	typedef size_t size_type;
@@ -150,7 +150,7 @@ public:
 	{
 	public:
 		typedef iterator self_type;
-		typedef typename tree_type::lookup_type value_type;
+		typedef XTYPENAME tree_type::lookup_type value_type;
 		typedef value_type& reference;
 		typedef value_type* pointer;
 		typedef std::forward_iterator_tag iterator_category;
@@ -226,8 +226,8 @@ class BTreeStorage
 public:
 	typedef KeyTraits key_traits_type;
 	typedef TTraits mapped_traits_type;
-	typedef typename KeyTraits::type key_type;
-	typedef typename TTraits::type mapped_type;
+	typedef XTYPENAME KeyTraits::type key_type;
+	typedef XTYPENAME TTraits::type mapped_type;
 	typedef std::pair<key_type, mapped_type> value_type;
 	typedef Compare key_compare;
 	typedef size_t size_type;
@@ -420,8 +420,8 @@ class BTreeMemoryStorage : public BTreeStorage<B_, KeyTraits, TTraits, Compare>
 public:
 	typedef KeyTraits key_traits_type;
 	typedef TTraits mapped_traits_type;
-	typedef typename KeyTraits::type key_type;
-	typedef typename TTraits::type mapped_type;
+	typedef XTYPENAME KeyTraits::type key_type;
+	typedef XTYPENAME TTraits::type mapped_type;
 	typedef std::pair<key_type, mapped_type> value_type;
 	typedef Compare key_compare;
 	typedef size_t size_type;

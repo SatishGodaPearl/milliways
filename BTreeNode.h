@@ -71,8 +71,8 @@ public:
 
 	typedef KeyTraits key_traits_type;
 	typedef TTraits mapped_traits_type;
-	typedef typename KeyTraits::type key_type;
-	typedef typename TTraits::type mapped_type;
+	typedef XTYPENAME KeyTraits::type key_type;
+	typedef XTYPENAME TTraits::type mapped_type;
 	typedef std::pair<key_type, mapped_type> value_type;
 	typedef Compare key_compare;
 	typedef value_type& reference;
@@ -133,8 +133,8 @@ public:
 
 	typedef KeyTraits key_traits_type;
 	typedef TTraits mapped_traits_type;
-	typedef typename KeyTraits::type key_type;
-	typedef typename TTraits::type mapped_type;
+	typedef XTYPENAME KeyTraits::type key_type;
+	typedef XTYPENAME TTraits::type mapped_type;
 	typedef std::pair<key_type, mapped_type> value_type;
 	typedef Compare key_compare;
 	typedef value_type& reference;

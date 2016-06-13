@@ -53,7 +53,7 @@ public:
 	typedef hashtable<key_type, mapped_type> key_value_map_t;
 	typedef hashtable<key_type, order_type> key_to_order_t;
 	typedef hashtable<order_type, key_type> order_to_key_t;
-	typedef typename key_value_map_t::size_type size_type;
+	typedef XTYPENAME key_value_map_t::size_type size_type;
 
 	class iterator;
 	class const_iterator;

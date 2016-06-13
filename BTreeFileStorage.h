@@ -58,7 +58,7 @@ public:
 	typedef node_ptr_type mapped_type;
 	typedef std::pair<key_type, mapped_type> value_type;
 	typedef LRUCache<CACHESIZE, node_id_t, node_ptr_type> base_type;
-	typedef typename base_type::size_type size_type;
+	typedef XTYPENAME base_type::size_type size_type;
 
 	typedef BTreeStorage<B_, KeyTraits, TTraits, Compare>* storage_ptr_type;
 
@@ -167,8 +167,8 @@ public:
 
 	typedef KeyTraits key_traits_type;
 	typedef TTraits mapped_traits_type;
-	typedef typename KeyTraits::type key_type;
-	typedef typename TTraits::type mapped_type;
+	typedef XTYPENAME KeyTraits::type key_type;
+	typedef XTYPENAME TTraits::type mapped_type;
 	typedef std::pair<key_type, mapped_type> value_type;
 	typedef Compare key_compare;
 	typedef size_t size_type;

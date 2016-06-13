@@ -136,8 +136,8 @@ public:
 	typedef Block<BLOCKSIZE> block_type;
 	typedef BlockManager<BLOCKSIZE> handler_type;
 	typedef cxx_um::unordered_map< block_id_t, cxx_mem::weak_ptr<block_type> > weak_map_t;
-	typedef typename weak_map_t::iterator weak_map_iter;
-	typedef typename weak_map_t::const_iterator weak_map_citer;
+	typedef XTYPENAME weak_map_t::iterator weak_map_iter;
+	typedef XTYPENAME weak_map_t::const_iterator weak_map_citer;
 
 	BlockManager() : m_objects() {}
 	~BlockManager() {
@@ -288,7 +288,7 @@ public:
 	typedef block_ptr_type mapped_type;
 	typedef std::pair<key_type, mapped_type> value_type;
 	typedef LRUCache< CACHESIZE, block_id_t, MW_SHPTR<block_type> > base_type;
-	typedef typename base_type::size_type size_type;
+	typedef XTYPENAME base_type::size_type size_type;
 
 	typedef BlockStorage<BLOCKSIZE>* storage_ptr_type;
 
