@@ -1,6 +1,23 @@
 #ifndef MILLIWAYS_CONFIG_H
 #define MILLIWAYS_CONFIG_H
 
+#cmakedefine HAVE_STDINT_H 1
+#cmakedefine HAVE_STDDEF_H 1
+#cmakedefine HAVE_SYS_TYPES_H 1
+#cmakedefine HAVE_UNISTD_H 1
+#cmakedefine HAVE_ASSERT_H 1
+#cmakedefine HAVE_STRING_H 1
+#cmakedefine HAVE_LIMITS_H 1
+#cmakedefine HAVE_ARPA_INET_H 1
+#cmakedefine HAVE_WINDOWS_H 1
+#cmakedefine HAVE_BASETSD_H 1
+
+/* Define to 1 if you have the system is little endian */
+#cmakedefine IS_LITTLE_ENDIAN 1
+
+/* Define to 1 if you have the system is big endian */
+#cmakedefine IS_BIG_ENDIAN 1
+
 /* Define to 1 if you have the <sys/endian.h> header file. */
 #cmakedefine HAVE_ENDIAN_H 1
 

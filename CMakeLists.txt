@@ -89,9 +89,71 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
       -Wvolatile-register-var  -Wwrite-strings" )
 endif()
 
+include(CheckIncludeFiles)
 include(CheckCXXSourceCompiles)
 include(CheckCXXSourceRuns)
 include(CheckTypeSize)
+
+CHECK_INCLUDE_FILES (stdint.h HAVE_STDINT_H)
+CHECK_INCLUDE_FILES (stddef.h HAVE_STDDEF_H)
+CHECK_INCLUDE_FILES (sys/types.h HAVE_SYS_TYPES_H)
+CHECK_INCLUDE_FILES (unistd.h HAVE_UNISTD_H)
+CHECK_INCLUDE_FILES (assert.h HAVE_ASSERT_H)
+CHECK_INCLUDE_FILES (string.h HAVE_STRING_H)
+CHECK_INCLUDE_FILES (limits.h HAVE_LIMITS_H)
+CHECK_INCLUDE_FILES (arpa/inet.h HAVE_ARPA_INET_H)
+CHECK_INCLUDE_FILES (Windows.h HAVE_WINDOWS_H)
+CHECK_INCLUDE_FILES (BaseTsd.h HAVE_BASETSD_H)
+
+check_cxx_source_runs("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <stdlib.h>
+  int main() {
+    uint32_t number = 0x1A2B3C4D;
+    unsigned char *numPtr = (unsigned char *) &number;
+    if (numPtr[0] != 0x4D) abort();
+    return 0;
+  }
+" IS_LITTLE_ENDIAN)
+
+check_cxx_source_runs("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <stdlib.h>
+  int main() {
+    uint32_t number = 0x1A2B3C4D;
+    unsigned char *numPtr = (unsigned char *) &number;
+    if (numPtr[0] != 0x1A) abort();
+    return 0;
+  }
+" IS_BIG_ENDIAN)
+
+check_cxx_source_compiles("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <unistd.h>
+  int main() { size_t s = 1; return 0; }
+" HAVE_SIZE_T)
+
+check_cxx_source_compiles("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <unistd.h>
+  int main() { ssize_t s = -1; return 0; }
+" HAVE_SSIZE_T)
+
+check_cxx_source_compiles("
+  #include <stdint.h>
+  #include <stddef.h>
+  #include <unistd.h>
+  #if defined(_MSC_VER)
+  #include <BaseTsd.h>
+  typedef SSIZE_T ssize_t;
+  #endif
+  int main() { ssize_t s = -1; return 0; }
+" HAVE_WIN_SSIZE_T)
+
 check_cxx_source_compiles("
     #include <memory>
     int main() { std::shared_ptr<int> p; return 0; }
@@ -139,6 +201,10 @@ check_cxx_source_compiles("
   #include <stdint.h>
   #include <stddef.h>
   #include <unistd.h>
+  #if defined(_MSC_VER)
+  #include <BaseTsd.h>
+  typedef SSIZE_T ssize_t;
+  #endif
 
   template <typename T>
   struct Traits;
@@ -196,6 +262,10 @@ check_cxx_source_compiles("
   #include <stdint.h>
   #include <stddef.h>
   #include <unistd.h>
+  #if defined(_MSC_VER)
+  #include <BaseTsd.h>
+  typedef SSIZE_T ssize_t;
+  #endif
 
   template <typename T>
   struct Traits;
@@ -363,7 +433,13 @@ check_cxx_source_runs("
 check_cxx_source_runs("
   #include <stdint.h>
   #include <stddef.h>
+  #include <unistd.h>
   #include <stdlib.h>
+  #if defined(_MSC_VER)
+  #include <BaseTsd.h>
+  typedef SSIZE_T ssize_t;
+  #endif
+
   template<class T, class U>
   struct is_same {
       enum { value = 0 };
@@ -380,6 +456,11 @@ check_cxx_source_runs("
   #include <stddef.h>
   #include <unistd.h>
   #include <stdlib.h>
+  #if defined(_MSC_VER)
+  #include <BaseTsd.h>
+  typedef SSIZE_T ssize_t;
+  #endif
+
   template<class T, class U>
   struct is_same {
       enum { value = 0 };
@@ -396,6 +477,11 @@ check_cxx_source_runs("
   #include <stddef.h>
   #include <unistd.h>
   #include <stdlib.h>
+  #if defined(_MSC_VER)
+  #include <BaseTsd.h>
+  typedef SSIZE_T ssize_t;
+  #endif
+
   template<class T, class U>
   struct is_same {
       enum { value = 0 };
