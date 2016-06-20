@@ -17,9 +17,22 @@ endif()
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
+if (CMAKE_COMPILER_IS_GNUCC)
+    execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion
+                    OUTPUT_VARIABLE GCC_VERSION)
+    string(REGEX MATCHALL "[0-9]+" GCC_VERSION_COMPONENTS ${GCC_VERSION})
+    list(GET GCC_VERSION_COMPONENTS 0 GCC_MAJOR)
+    list(GET GCC_VERSION_COMPONENTS 1 GCC_MINOR)
+    # message(STATUS ${GCC_MAJOR})
+    # message(STATUS ${GCC_MINOR})
+endif()
+
+execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
+                OUTPUT_VARIABLE GCC_VERSION)
+
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   # using Clang
-  SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -Weffc++ -pedantic \
+  SET( CMAKE_CUSTOM_CXX_FLAGS  "-Wall -Weffc++ -pedantic \
   	-pedantic-errors -Wextra -Wcast-align \
       -Wcast-qual  -Wchar-subscripts  -Wcomment -Wconversion \
       -Wdisabled-optimization \
@@ -42,52 +55,16 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
       -Wvolatile-register-var  -Wwrite-strings" )
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   # using GCC
-  # SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -Weffc++ -pedantic" )
 
-  # SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -Weffc++ -pedantic \
-  # 	-pedantic-errors -Wextra -Waggregate-return -Wcast-align \
-  #     -Wcast-qual  -Wchar-subscripts  -Wcomment -Wconversion \
-  #     -Wdisabled-optimization \
-  #     -Werror -Wfloat-equal  -Wformat  -Wformat=2 \
-  #     -Wformat-nonliteral -Wformat-security  \
-  #     -Wformat-y2k \
-  #     -Wimplicit  -Wimport  -Winit-self  -Winline \
-  #     -Winvalid-pch   \
-  #     -Wunsafe-loop-optimizations  -Wlong-long -Wmissing-braces \
-  #     -Wmissing-field-initializers -Wmissing-format-attribute   \
-  #     -Wmissing-include-dirs -Wmissing-noreturn \
-  #     -Wpacked  -Wpadded -Wparentheses  -Wpointer-arith \
-  #     -Wredundant-decls -Wreturn-type \
-  #     -Wsequence-point  -Wshadow -Wsign-compare  -Wstack-protector \
-  #     -Wstrict-aliasing -Wstrict-aliasing=2 -Wswitch  -Wswitch-default \
-  #     -Wswitch-enum -Wtrigraphs  -Wuninitialized \
-  #     -Wunknown-pragmas  -Wunreachable-code -Wunused \
-  #     -Wunused-function  -Wunused-label  -Wunused-parameter \
-  #     -Wunused-value  -Wunused-variable  -Wvariadic-macros \
-  #     -Wvolatile-register-var  -Wwrite-strings" )
-
-  SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -Weffc++ -pedantic \
-  	-pedantic-errors -Wextra -Wcast-align \
-      -Wcast-qual  -Wchar-subscripts  -Wcomment -Wconversion \
-      -Wdisabled-optimization \
-      -Wfloat-equal  -Wformat  -Wformat=2 \
-      -Wformat-nonliteral -Wformat-security  \
-      -Wformat-y2k \
-      -Wimplicit  -Wimport  -Winit-self  -Winline \
-      -Winvalid-pch   \
-      -Wunsafe-loop-optimizations  -Wlong-long -Wmissing-braces \
-      -Wmissing-field-initializers -Wmissing-format-attribute   \
-      -Wmissing-include-dirs -Wmissing-noreturn \
-      -Wpacked -Wparentheses  -Wpointer-arith \
-      -Wredundant-decls -Wreturn-type \
-      -Wsequence-point  -Wshadow -Wsign-compare \
-      -Wstrict-aliasing -Wstrict-aliasing=2 -Wswitch  -Wswitch-default \
-      -Wswitch-enum -Wtrigraphs  -Wuninitialized \
-      -Wunknown-pragmas  -Wunused \
-      -Wunused-function  -Wunused-label  -Wunused-parameter \
-      -Wunused-value  -Wunused-variable  -Wvariadic-macros \
-      -Wvolatile-register-var  -Wwrite-strings" )
+  SET( CMAKE_CUSTOM_CXX_FLAGS  "-Wall -Weffc++ -pedantic -pedantic-errors -Wextra -Wcast-align -Wcast-qual  -Wchar-subscripts  -Wcomment -Wconversion -Wdisabled-optimization -Wfloat-equal  -Wformat  -Wformat=2 -Wformat-nonliteral -Wformat-security -Wformat-y2k -Wimplicit  -Wimport  -Winit-self  -Winline -Winvalid-pch -Wunsafe-loop-optimizations  -Wlong-long -Wmissing-braces -Wmissing-field-initializers -Wmissing-format-attribute -Wmissing-include-dirs -Wmissing-noreturn -Wpacked -Wparentheses  -Wpointer-arith -Wredundant-decls -Wreturn-type -Wsequence-point  -Wshadow -Wsign-compare -Wstrict-aliasing -Wstrict-aliasing=2 -Wswitch  -Wswitch-default -Wswitch-enum -Wtrigraphs  -Wuninitialized -Wunknown-pragmas  -Wunused -Wunused-function  -Wunused-label  -Wunused-parameter -Wunused-value  -Wunused-variable  -Wvariadic-macros -Wvolatile-register-var  -Wwrite-strings" )
 endif()
+
+if ((GCC_VERSION VERSION_EQUAL 4.1 OR GCC_VERSION VERSION_GREATER 4.1) AND GCC_VERSION VERSION_LESS 4.2)
+  message(STATUS "GCC version == 4.1.x")
+  SET( CMAKE_CUSTOM_CXX_FLAGS  "-Wall -Wextra -Wcast-align -Wcast-qual  -Wchar-subscripts  -Wcomment -Wconversion -Wdisabled-optimization -Wfloat-equal  -Wformat  -Wformat=2 -Wformat-nonliteral -Wformat-security -Wformat-y2k -Wimplicit  -Wimport  -Winit-self  -Winline -Winvalid-pch -Wunsafe-loop-optimizations  -Wlong-long -Wmissing-braces -Wmissing-field-initializers -Wmissing-format-attribute -Wmissing-include-dirs -Wmissing-noreturn -Wpacked -Wparentheses  -Wpointer-arith -Wredundant-decls -Wreturn-type -Wsequence-point  -Wshadow -Wsign-compare -Wstrict-aliasing -Wstrict-aliasing=2 -Wswitch  -Wswitch-default -Wswitch-enum -Wtrigraphs  -Wuninitialized -Wunknown-pragmas  -Wunused -Wunused-function  -Wunused-label  -Wunused-parameter -Wunused-value  -Wunused-variable  -Wvariadic-macros -Wvolatile-register-var  -Wwrite-strings" )
+endif()
+
+  SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${CMAKE_CUSTOM_CXX_FLAGS}" )
 
 include(CheckIncludeFiles)
 include(CheckCXXSourceCompiles)
@@ -101,6 +78,7 @@ CHECK_INCLUDE_FILES (unistd.h HAVE_UNISTD_H)
 CHECK_INCLUDE_FILES (assert.h HAVE_ASSERT_H)
 CHECK_INCLUDE_FILES (string.h HAVE_STRING_H)
 CHECK_INCLUDE_FILES (limits.h HAVE_LIMITS_H)
+CHECK_INCLUDE_FILES (errno.h HAVE_ERRNO_H)
 CHECK_INCLUDE_FILES (arpa/inet.h HAVE_ARPA_INET_H)
 CHECK_INCLUDE_FILES (Windows.h HAVE_WINDOWS_H)
 CHECK_INCLUDE_FILES (BaseTsd.h HAVE_BASETSD_H)
@@ -298,20 +276,20 @@ check_cxx_source_compiles("
   struct Traits;
 
   template <>
-  struct Traits<uint8_t>
-  { typedef uint8_t type; static size_t size() { return sizeof(type); } };
+  struct Traits<int8_t>
+  { typedef int8_t type; static size_t size() { return sizeof(type); } };
 
   template <>
-  struct Traits<uint16_t>
-  { typedef uint16_t type; static size_t size() { return sizeof(type); } };
+  struct Traits<int16_t>
+  { typedef int16_t type; static size_t size() { return sizeof(type); } };
 
   template <>
-  struct Traits<uint32_t>
-  { typedef uint32_t type; static size_t size() { return sizeof(type); } };
+  struct Traits<int32_t>
+  { typedef int32_t type; static size_t size() { return sizeof(type); } };
 
   template <>
-  struct Traits<uint64_t>
-  { typedef uint64_t type; static size_t size() { return sizeof(type); } };
+  struct Traits<int64_t>
+  { typedef int64_t type; static size_t size() { return sizeof(type); } };
 
   template <>
   struct Traits<ssize_t>
@@ -376,6 +354,24 @@ check_cxx_source_compiles("
 
   int main() { size_t size = Traits<ssize_t>::size(); size++; }
 " DOESNT_NEED_TEMPLATED_SSIZE_T)
+
+check_cxx_source_compiles("
+  #include <vector>
+
+  template <typename T>
+  class MyClass
+  {
+  public:
+    typedef T value_type;
+    typedef typename std::vector<value_type> vec_type;
+
+    MyClass() : m_vec() { m_vec.push_back(1); }
+
+    vec_type m_vec;
+  };
+
+  int main() { MyClass<int> inst; }
+" ALLOWS_TYPENAME_INSIDE_TEMPLATES)
 
 check_cxx_source_compiles("
 	#include <vector>

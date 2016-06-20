@@ -31,11 +31,11 @@
 #include <fstream>
 #include <string>
 #include <map>
-#ifdef USE_STD_UNORDERED_MAP
+#if defined(USE_STD_UNORDERED_MAP)
 #include <unordered_map>
-#elif USE_TR1_UNORDERED_MAP
+#elif defined(USE_TR1_UNORDERED_MAP)
 #include <tr1/unordered_map>
-#elif USE_BOOST_UNORDERED_MAP
+#elif defined(USE_BOOST_UNORDERED_MAP)
 #include <boost/unordered_map.hpp>
 #endif
 // #include <deque>
@@ -62,7 +62,7 @@ public:
 	typedef long age_t;
 	typedef cxx_um::unordered_map<key_type, age_t> key_to_age_t;
 	typedef cxx_um::unordered_map<key_type, mapped_type> map_t;
-	typedef XTYPENAME map_t::iterator map_iter_t;
+	typedef ITYPENAME map_t::iterator map_iter_t;
 
 	static const size_type Size = SIZE;
 	static const int L1_SIZE = LRUCACHE_L1_CACHE_SIZE;

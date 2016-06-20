@@ -1,6 +1,9 @@
 #ifndef MILLIWAYS_CONFIG_H
 #define MILLIWAYS_CONFIG_H
 
+#cmakedefine COMPILER_SUPPORTS_CXX0X 1
+#cmakedefine COMPILER_SUPPORTS_CXX11 1
+
 #cmakedefine HAVE_STDINT_H 1
 #cmakedefine HAVE_STDDEF_H 1
 #cmakedefine HAVE_SYS_TYPES_H 1
@@ -8,6 +11,7 @@
 #cmakedefine HAVE_ASSERT_H 1
 #cmakedefine HAVE_STRING_H 1
 #cmakedefine HAVE_LIMITS_H 1
+#cmakedefine HAVE_ERRNO_H 1
 #cmakedefine HAVE_ARPA_INET_H 1
 #cmakedefine HAVE_WINDOWS_H 1
 #cmakedefine HAVE_BASETSD_H 1
@@ -148,8 +152,17 @@
 /* Define to 1 if an explicit template for ssize_t is allowed even if all the int*_t types are there */
 #cmakedefine ALLOWS_TEMPLATED_SSIZE_T 1
 
+/* Define to 1 if "typename" keyword is allowed inside templates */
+#cmakedefine ALLOWS_TYPENAME_INSIDE_TEMPLATES 1
+
 /* Define to 1 if "typename" keyword is allowed outside templates (it is not in C++03) */
 #cmakedefine ALLOWS_TYPENAME_OUTSIDE_TEMPLATES 1
+
+#if ALLOWS_TYPENAME_INSIDE_TEMPLATES
+#define ITYPENAME typename
+#else /* ! ALLOWS_TYPENAME_INSIDE_TEMPLATES */
+#define ITYPENAME
+#endif /* ! ALLOWS_TYPENAME_INSIDE_TEMPLATES */
 
 #if ALLOWS_TYPENAME_OUTSIDE_TEMPLATES
 #define XTYPENAME typename

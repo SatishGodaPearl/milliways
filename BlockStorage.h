@@ -34,25 +34,25 @@
 #include <functional>
 
 #include <map>
-#ifdef USE_STD_ARRAY
+#if defined(USE_STD_ARRAY)
 #include <array>
-#elif USE_TR1_ARRAY
+#elif defined(USE_TR1_ARRAY)
 #include <tr1/array>
-#elif USE_BOOST_ARRAY
+#elif defined(USE_BOOST_ARRAY)
 #include <boost/array.hpp>
 #endif
-#ifdef USE_STD_UNORDERED_MAP
+#if defined(USE_STD_UNORDERED_MAP)
 #include <unordered_map>
-#elif USE_TR1_UNORDERED_MAP
+#elif defined(USE_TR1_UNORDERED_MAP)
 #include <tr1/unordered_map>
-#elif USE_BOOST_UNORDERED_MAP
+#elif defined(USE_BOOST_UNORDERED_MAP)
 #include <boost/unordered_map.hpp>
 #endif
-#ifdef USE_STD_MEMORY
+#if defined(USE_STD_MEMORY)
 #include <memory>
-#elif USE_TR1_MEMORY
+#elif defined(USE_TR1_MEMORY)
 #include <tr1/memory>
-#elif USE_BOOST_MEMORY
+#elif defined(USE_BOOST_MEMORY)
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 #endif
@@ -103,13 +103,25 @@ public:
 	bool dirty() const { return m_dirty; }
 	bool dirty(bool value) { bool old = m_dirty; m_dirty = value; return old; }
 
+#if defined(COMPILER_SUPPORTS_CXX11)
+	/* lifetime managed by BlockStorage (and we are on C++11) */
+private:
+	Block() {}
+	~Block() {}
+#else
+	/* lifetime managed by BlockStorage but we are on C++03... */
+public:
+	Block() {}
+	~Block() {}
+#endif
+
 private:
 	/* lifetime managed by BlockManager */
-	Block() {}
+	// Block() {}
 	Block(block_id_t index_) :
 			m_index(index_), m_dirty(false) { memset(m_data, 0, sizeof(m_data)); }
 	Block(const Block<BLOCKSIZE>& other) : m_index(other.m_index), m_data(other.m_data), m_dirty(other.m_dirty) { }
-	~Block() {}
+	// ~Block() {}
 
 	friend class BlockManager<BLOCKSIZE>;
 	friend class BlockManager<BLOCKSIZE>::block_deleter;
@@ -136,8 +148,8 @@ public:
 	typedef Block<BLOCKSIZE> block_type;
 	typedef BlockManager<BLOCKSIZE> handler_type;
 	typedef cxx_um::unordered_map< block_id_t, cxx_mem::weak_ptr<block_type> > weak_map_t;
-	typedef XTYPENAME weak_map_t::iterator weak_map_iter;
-	typedef XTYPENAME weak_map_t::const_iterator weak_map_citer;
+	typedef ITYPENAME weak_map_t::iterator weak_map_iter;
+	typedef ITYPENAME weak_map_t::const_iterator weak_map_citer;
 
 	BlockManager() : m_objects() {}
 	~BlockManager() {
@@ -288,7 +300,7 @@ public:
 	typedef block_ptr_type mapped_type;
 	typedef std::pair<key_type, mapped_type> value_type;
 	typedef LRUCache< CACHESIZE, block_id_t, MW_SHPTR<block_type> > base_type;
-	typedef XTYPENAME base_type::size_type size_type;
+	typedef ITYPENAME base_type::size_type size_type;
 
 	typedef BlockStorage<BLOCKSIZE>* storage_ptr_type;
 
@@ -564,7 +576,7 @@ struct StreamSizedPos : public StreamPos<BLOCKSIZE>
 public:
 	typedef StreamPos<BLOCKSIZE> base_type;
 	typedef StreamPos<BLOCKSIZE> data_locator_t;
-	typedef XTYPENAME StreamPos<BLOCKSIZE>::offset_t offset_t;
+	typedef ITYPENAME StreamPos<BLOCKSIZE>::offset_t offset_t;
 	typedef size_t size_type;
 
 	StreamSizedPos() : base_type(), m_full_size(0) {}
@@ -660,6 +672,7 @@ public:
 private:
 	IOBuffer();
 	IOBuffer(const IOBuffer& other);
+	IOBuffer& operator=(const IOBuffer& other);
 
 	char   *m_bufp;
 	size_t  m_len;
@@ -690,10 +703,10 @@ class WriteStream
 public:
 	typedef StreamPos<BLOCKSIZE> data_locator_t;
 	typedef StreamSizedPos<BLOCKSIZE> sized_locator_t;
-	typedef XTYPENAME sized_locator_t::offset_t offset_t;
-	typedef XTYPENAME StreamPos<BLOCKSIZE>::block_offset_t block_offset_t;
+	typedef ITYPENAME sized_locator_t::offset_t offset_t;
+	typedef ITYPENAME StreamPos<BLOCKSIZE>::block_offset_t block_offset_t;
 	typedef FileBlockStorage<BLOCKSIZE, CACHE_SIZE> block_storage_t;
-	typedef XTYPENAME block_storage_t::block_t block_type;
+	typedef ITYPENAME block_storage_t::block_t block_type;
 
 	WriteStream(block_storage_t* bs, const sized_locator_t& location_) :
 		m_bs(bs), m_location_start(location_), m_location(location_),
@@ -847,10 +860,10 @@ private:
 public:
 	typedef StreamPos<BLOCKSIZE> data_locator_t;
 	typedef StreamSizedPos<BLOCKSIZE> sized_locator_t;
-	typedef XTYPENAME sized_locator_t::offset_t offset_t;
-	typedef XTYPENAME StreamPos<BLOCKSIZE>::block_offset_t block_offset_t;
+	typedef ITYPENAME sized_locator_t::offset_t offset_t;
+	typedef ITYPENAME StreamPos<BLOCKSIZE>::block_offset_t block_offset_t;
 	typedef FileBlockStorage<BLOCKSIZE, CACHE_SIZE> block_storage_t;
-	typedef XTYPENAME block_storage_t::block_t block_type;
+	typedef ITYPENAME block_storage_t::block_t block_type;
 
 	ReadStream(block_storage_t* bs, const sized_locator_t& location_) :
 		m_bs(bs), m_location_start(location_), m_location(location_),

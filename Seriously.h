@@ -309,8 +309,8 @@ struct Traits<unsigned long long>
 	enum { Size = sizeof(type) };
 	enum { SerializedSize = sizeof(serialized_type) };
 
-	static ssize_t serialize(char*& dst, size_t& avail, const type& v)    { serialized_type t(static_cast<serialized_type>(v)); return Traits<serialized_type>::serialize(dst, aval, t); }
-	static ssize_t deserialize(const char*& src, size_t& avail, type& v)  { serialized_type t = 0; ssize_t rv = Traits<serialized_type>::deserialize(src, aval, t); v = static_cast<type>(t); return rv; }
+	static ssize_t serialize(char*& dst, size_t& avail, const type& v)    { serialized_type t(static_cast<serialized_type>(v)); return Traits<serialized_type>::serialize(dst, avail, t); }
+	static ssize_t deserialize(const char*& src, size_t& avail, type& v)  { serialized_type t = 0; ssize_t rv = Traits<serialized_type>::deserialize(src, avail, t); v = static_cast<type>(t); return rv; }
 
 	static size_t size(const type& value)    { UNUSED(value); return Size; }
 	static size_t maxsize(const type& value) { UNUSED(value); return Size; }
@@ -331,8 +331,8 @@ struct Traits<unsigned long>
 	enum { Size = sizeof(type) };
 	enum { SerializedSize = sizeof(serialized_type) };
 
-	static ssize_t serialize(char*& dst, size_t& avail, const type& v)    { serialized_type t(static_cast<serialized_type>(v)); return Traits<serialized_type>::serialize(dst, aval, t); }
-	static ssize_t deserialize(const char*& src, size_t& avail, type& v)  { serialized_type t = 0; ssize_t rv = Traits<serialized_type>::deserialize(src, aval, t); v = static_cast<type>(t); return rv; }
+	static ssize_t serialize(char*& dst, size_t& avail, const type& v)    { serialized_type t(static_cast<serialized_type>(v)); return Traits<serialized_type>::serialize(dst, avail, t); }
+	static ssize_t deserialize(const char*& src, size_t& avail, type& v)  { serialized_type t = 0; ssize_t rv = Traits<serialized_type>::deserialize(src, avail, t); v = static_cast<type>(t); return rv; }
 
 	static size_t size(const type& value)    { UNUSED(value); return Size; }
 	static size_t maxsize(const type& value) { UNUSED(value); return Size; }
@@ -353,8 +353,8 @@ struct Traits<long long>
 	enum { Size = sizeof(type) };
 	enum { SerializedSize = sizeof(serialized_type) };
 
-	static ssize_t serialize(char*& dst, size_t& avail, const type& v)    { serialized_type t(static_cast<serialized_type>(v)); return Traits<serialized_type>::serialize(dst, aval, t); }
-	static ssize_t deserialize(const char*& src, size_t& avail, type& v)  { serialized_type t = 0; ssize_t rv = Traits<serialized_type>::deserialize(src, aval, t); v = static_cast<type>(t); return rv; }
+	static ssize_t serialize(char*& dst, size_t& avail, const type& v)    { serialized_type t(static_cast<serialized_type>(v)); return Traits<serialized_type>::serialize(dst, avail, t); }
+	static ssize_t deserialize(const char*& src, size_t& avail, type& v)  { serialized_type t = 0; ssize_t rv = Traits<serialized_type>::deserialize(src, avail, t); v = static_cast<type>(t); return rv; }
 
 	static size_t size(const type& value)    { UNUSED(value); return Size; }
 	static size_t maxsize(const type& value) { UNUSED(value); return Size; }
@@ -375,8 +375,8 @@ struct Traits<long>
 	enum { Size = sizeof(type) };
 	enum { SerializedSize = sizeof(serialized_type) };
 
-	static ssize_t serialize(char*& dst, size_t& avail, const type& v)    { serialized_type t(static_cast<serialized_type>(v)); return Traits<serialized_type>::serialize(dst, aval, t); }
-	static ssize_t deserialize(const char*& src, size_t& avail, type& v)  { serialized_type t = 0; ssize_t rv = Traits<serialized_type>::deserialize(src, aval, t); v = static_cast<type>(t); return rv; }
+	static ssize_t serialize(char*& dst, size_t& avail, const type& v)    { serialized_type t(static_cast<serialized_type>(v)); return Traits<serialized_type>::serialize(dst, avail, t); }
+	static ssize_t deserialize(const char*& src, size_t& avail, type& v)  { serialized_type t = 0; ssize_t rv = Traits<serialized_type>::deserialize(src, avail, t); v = static_cast<type>(t); return rv; }
 
 	static size_t size(const type& value)    { UNUSED(value); return Size; }
 	static size_t maxsize(const type& value) { UNUSED(value); return Size; }

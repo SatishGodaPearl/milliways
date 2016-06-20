@@ -31,26 +31,26 @@
 #include <fstream>
 #include <string>
 #include <functional>
-#ifdef USE_STD_ARRAY
+#if defined(USE_STD_ARRAY)
 #include <array>
-#elif USE_TR1_ARRAY
+#elif defined(USE_TR1_ARRAY)
 #include <tr1/array>
-#elif USE_BOOST_ARRAY
+#elif defined(USE_BOOST_ARRAY)
 #include <boost/array.hpp>
 #endif
 #include <map>
-#ifdef USE_STD_UNORDERED_MAP
+#if defined(USE_STD_UNORDERED_MAP)
 #include <unordered_map>
-#elif USE_TR1_UNORDERED_MAP
+#elif defined(USE_TR1_UNORDERED_MAP)
 #include <tr1/unordered_map>
-#elif USE_BOOST_UNORDERED_MAP
+#elif defined(USE_BOOST_UNORDERED_MAP)
 #include <boost/unordered_map.hpp>
 #endif
-#ifdef USE_STD_MEMORY
+#if defined(USE_STD_MEMORY)
 #include <memory>
-#elif USE_TR1_MEMORY
+#elif defined(USE_TR1_MEMORY)
 #include <tr1/memory>
-#elif USE_BOOST_MEMORY
+#elif defined(USE_BOOST_MEMORY)
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 #endif
@@ -71,8 +71,8 @@ public:
 
 	typedef KeyTraits key_traits_type;
 	typedef TTraits mapped_traits_type;
-	typedef XTYPENAME KeyTraits::type key_type;
-	typedef XTYPENAME TTraits::type mapped_type;
+	typedef ITYPENAME KeyTraits::type key_type;
+	typedef ITYPENAME TTraits::type mapped_type;
 	typedef std::pair<key_type, mapped_type> value_type;
 	typedef Compare key_compare;
 	typedef value_type& reference;
@@ -133,8 +133,8 @@ public:
 
 	typedef KeyTraits key_traits_type;
 	typedef TTraits mapped_traits_type;
-	typedef XTYPENAME KeyTraits::type key_type;
-	typedef XTYPENAME TTraits::type mapped_type;
+	typedef ITYPENAME KeyTraits::type key_type;
+	typedef ITYPENAME TTraits::type mapped_type;
 	typedef std::pair<key_type, mapped_type> value_type;
 	typedef Compare key_compare;
 	typedef value_type& reference;
@@ -245,12 +245,24 @@ public:
 	void dotGraph(const std::string& basename, bool display = false);
 	std::ostream& dotGraph(std::ostream& out, std::map<node_id_t, bool>& visitedMap, int level = 0, int indent_ = 1);
 
+#if defined(COMPILER_SUPPORTS_CXX11)
+	/* lifetime managed by BTreeStorage (and we are on C++11) */
+private:
+	BTreeNode() : m_tree(NULL), m_id(NODE_ID_INVALID), m_parent_id(NODE_ID_INVALID), m_left_id(NODE_ID_INVALID), m_right_id(NODE_ID_INVALID), m_leaf(true), m_n(0), m_rank(0), m_dirty(false), m_keys(), m_values(), m_children() {}
+	~BTreeNode() {}
+#else
+	/* lifetime managed by BTreeStorage but we are on C++03... */
+public:
+	BTreeNode() : m_tree(NULL), m_id(NODE_ID_INVALID), m_parent_id(NODE_ID_INVALID), m_left_id(NODE_ID_INVALID), m_right_id(NODE_ID_INVALID), m_leaf(true), m_n(0), m_rank(0), m_dirty(false), m_keys(), m_values(), m_children() {}
+	~BTreeNode() {}
+#endif
+
 private:
 	/* lifetime managed by BTreeStorage */
-	BTreeNode() : m_tree(NULL), m_id(NODE_ID_INVALID), m_parent_id(NODE_ID_INVALID), m_left_id(NODE_ID_INVALID), m_right_id(NODE_ID_INVALID), m_leaf(true), m_n(0), m_rank(0), m_dirty(false), m_keys(), m_values(), m_children() {}
+	// BTreeNode() : m_tree(NULL), m_id(NODE_ID_INVALID), m_parent_id(NODE_ID_INVALID), m_left_id(NODE_ID_INVALID), m_right_id(NODE_ID_INVALID), m_leaf(true), m_n(0), m_rank(0), m_dirty(false), m_keys(), m_values(), m_children() {}
 	BTreeNode(tree_type* tree, node_id_t node_id, node_id_t parent_id = NODE_ID_INVALID);
 	BTreeNode(const BTreeNode& other);
-	~BTreeNode() {}
+	// ~BTreeNode() {}
 
 	friend class BTreeNodeManager<B_, KeyTraits, TTraits, Compare>;
 	friend class BTreeNodeManager<B_, KeyTraits, TTraits, Compare>::node_deleter;
@@ -317,6 +329,11 @@ public:
 			return cxx_mem::shared_ptr<node_type>();
 	}
 
+	cxx_mem::shared_ptr<node_type> null_object()
+	{
+		return cxx_mem::shared_ptr<node_type>();
+	}
+
 	bool has(node_type id) {
 		typename cxx_um::unordered_map< node_id_t, cxx_mem::weak_ptr<node_type> >::const_iterator it = m_objects.find(id);
 		return (it != m_objects.end()) ? true : false;
@@ -325,6 +342,10 @@ public:
 	size_t count() const { return m_objects.size(); }
 
 private:
+	BTreeNodeManager(const BTreeNodeManager& other);
+	BTreeNodeManager& operator=(const BTreeNodeManager& other);
+
+
 	typedef cxx_um::unordered_map< node_id_t, cxx_mem::weak_ptr<node_type> > weak_map_t;
 
 	friend class BTreeNode<B_, KeyTraits, TTraits, Compare>;

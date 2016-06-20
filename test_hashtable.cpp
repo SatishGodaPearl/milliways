@@ -28,11 +28,11 @@
 #include "config.h"
 
 #include <map>
-#ifdef USE_STD_UNORDERED_MAP
+#if defined(USE_STD_UNORDERED_MAP)
 #include <unordered_map>
-#elif USE_TR1_UNORDERED_MAP
+#elif defined(USE_TR1_UNORDERED_MAP)
 #include <tr1/unordered_map>
-#elif USE_BOOST_UNORDERED_MAP
+#elif defined(USE_BOOST_UNORDERED_MAP)
 #include <boost/unordered_map.hpp>
 #endif
 
