@@ -72,7 +72,14 @@ static const block_id_t BLOCK_ID_INVALID = static_cast<block_id_t>(-1);
 inline bool block_id_valid(block_id_t block_id) { return (block_id != BLOCK_ID_INVALID); }
 
 template <size_t BLOCKSIZE>
+class Block;
+
+template <size_t BLOCKSIZE>
 class BlockManager;
+
+/* ----------------------------------------------------------------- *
+ *   Block                                                           *
+ * ----------------------------------------------------------------- */
 
 template <size_t BLOCKSIZE>
 class Block
@@ -124,7 +131,7 @@ private:
 	// ~Block() {}
 
 	friend class BlockManager<BLOCKSIZE>;
-	friend class BlockManager<BLOCKSIZE>::block_deleter;
+	// friend class BlockManager<BLOCKSIZE>::block_deleter;
 	template < size_t BLOCKSIZE_, int B_, typename KeyTraits, typename TTraits, class Compare >
 		friend class BTreeFileStorage;
 
@@ -187,19 +194,6 @@ public:
 private:
 	friend class Block<BLOCKSIZE>;
 
-	class block_deleter;
-	friend class block_deleter;
-
-	cxx_mem::shared_ptr<block_type> make_object(block_id_t id)
-	{
-		assert(m_objects.count(id) == 0);
-		cxx_mem::shared_ptr<block_type> sp(new block_type(id), block_deleter(this, id));
-
-		m_objects[id] = sp;
-
-		return sp;
-	}
-
 	/* custom block deleter */
 	class block_deleter
 	{
@@ -218,6 +212,18 @@ private:
 		handler_type* m_handler;
 		block_id_t m_id;
 	};
+
+	friend class block_deleter;
+
+	cxx_mem::shared_ptr<block_type> make_object(block_id_t id)
+	{
+		assert(m_objects.count(id) == 0);
+		cxx_mem::shared_ptr<block_type> sp(new block_type(id), block_deleter(this, id));
+
+		m_objects[id] = sp;
+
+		return sp;
+	}
 
 	weak_map_t m_objects;
 };
