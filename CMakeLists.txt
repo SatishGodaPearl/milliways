@@ -634,5 +634,5 @@ add_executable(test_shptr ${SOURCE_FILES})
 set(SOURCE_FILES benchmark_kv.cpp Utils.h Utils.impl.hpp Seriously.h Seriously.impl.hpp ordered_map.h ordered_map.impl.hpp hashtable.h hashtable.impl.hpp LRUCache.h LRUCache.impl.hpp BlockStorage.h BlockStorage.impl.hpp BTreeCommon.h BTreeNode.h BTreeNode.impl.hpp BTree.h BTree.impl.hpp BTreeFileStorage.h BTreeFileStorage.impl.hpp KeyValueStore.h KeyValueStore.impl.hpp lz4.c)
 add_executable(benchmark_kv ${SOURCE_FILES})
 
-# set(SOURCE_FILES benchmark_hashtable.cpp hashtable.h hashtable.impl.hpp)
-# add_executable(benchmark_hashtable ${SOURCE_FILES})
+set(SOURCE_FILES benchmark_hashtable.cpp hashtable.h hashtable.impl.hpp)
+add_executable(benchmark_hashtable ${SOURCE_FILES})
