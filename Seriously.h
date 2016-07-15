@@ -28,7 +28,6 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include <unistd.h>
 #include <string.h>
 
 #include "config.h"
@@ -39,6 +38,10 @@
 #endif
 #include <BaseTsd.h>
 typedef SSIZE_T ssize_t;
+#else
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif /* HAVE_UNISTD_H */
 #endif
 
 #ifndef UNUSED

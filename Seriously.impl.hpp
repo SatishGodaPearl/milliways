@@ -33,7 +33,7 @@
 #include <string.h>
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
-#endif
+#endif /* HAVE_ARPA_INET_H */
 #include <assert.h>
 
 namespace seriously {
