@@ -545,6 +545,21 @@ inline std::string KeyValueStore::get(const std::string& key)
 	return value;
 }
 
+inline bool KeyValueStore::get(const iterator& it, std::string& value, ssize_t partial)
+{
+	if (it.end())
+		return false;
+
+	assert(! it.end());
+
+	/*
+	 * at this time, pass through the Search mechanism to get the various
+	 * pieces, then in a future we'll probably get rid of it entirely
+	 */
+	Search result = find(it.key());
+	return get(result, value, partial);
+}
+
 inline bool KeyValueStore::rename(const std::string& old_key, const std::string& new_key)
 {
 	if ((old_key.length() > KEY_MAX_SIZE) || (new_key.length() > KEY_MAX_SIZE))

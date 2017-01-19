@@ -351,6 +351,8 @@ public:
 	bool get(const std::string& key, std::string& value);
 	bool get(Search& result, std::string& value, ssize_t partial = -1);			/* streaming/partial reads */ 
 	std::string get(const std::string& key);
+	bool get(const iterator& it, std::string& value, ssize_t partial = -1); 	/* streaming/partial reads */ 
+	std::string get(const iterator& it) { std::string value; get(it, value); return value; }
 	bool put(const std::string& key, const std::string& value, bool overwrite = true);
 	bool rename(const std::string& old_key, const std::string& new_key);
 

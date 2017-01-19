@@ -314,6 +314,7 @@ TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 		REQUIRE(it.lookupKey() == "prefix:cool");
 		REQUIRE(it.key() == "prefix:cool");
 		REQUIRE((*it) == "prefix:cool");
+		REQUIRE(kv.get(it) == "sandwich");
 
 		it = kv.findIterator("prefix:");
 		std::cerr << it << std::endl;
@@ -326,6 +327,7 @@ TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 		REQUIRE(it.lookupKey() == "prefix:");
 		REQUIRE(it.key() == "prefix:atmosphere");
 		REQUIRE((*it) == "prefix:atmosphere");
+		REQUIRE(kv.get(it) == "air");
 
 		it = kv.findIterator("prefix:zzzz");
 		std::cerr << it << std::endl;
@@ -337,6 +339,7 @@ TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 		REQUIRE(it.lookupKey() == "prefix:zzzz");
 		REQUIRE(it.key() == "qbert:world");
 		REQUIRE((*it) == "qbert:world");
+		REQUIRE(kv.get(it) == "isometric");
 
 		kv.close();
 	}
