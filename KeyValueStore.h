@@ -347,7 +347,8 @@ public:
 
 	bool has(const std::string& key);
 	bool find(const std::string& key, Search& result);
-	Search find(const std::string& key) { Search result; find(key, result); return result; }
+	Search search(const std::string &key) { Search result; find(key, result); return result; }
+	iterator find(const std::string &key);
 	bool get(const std::string& key, std::string& value);
 	bool get(Search& result, std::string& value, ssize_t partial = -1);			/* streaming/partial reads */ 
 	std::string get(const std::string& key);
@@ -363,8 +364,6 @@ public:
 
 	iterator rbegin() { return iterator(this, /* forward */ false); }
 	iterator rend() { return iterator(this, /* forward */ false, /* end */ true); }
-
-	iterator findIterator(const std::string& key);
 
 	class base_iterator
 	{

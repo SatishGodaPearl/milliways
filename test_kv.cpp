@@ -304,7 +304,7 @@ TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 		kv.put("prefix:quote", "quick");
 		kv.put("qbert:world", "isometric");
 
-		kv_t::iterator it = kv.findIterator("prefix:cool");
+		kv_t::iterator it = kv.find("prefix:cool");
 		std::cerr << it << std::endl;
 		std::cerr << "lookup:" << it.lookup() << std::endl;
 		REQUIRE(it);
@@ -316,7 +316,7 @@ TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 		REQUIRE((*it) == "prefix:cool");
 		REQUIRE(kv.get(it) == "sandwich");
 
-		it = kv.findIterator("prefix:");
+		it = kv.find("prefix:");
 		std::cerr << it << std::endl;
 		std::cerr << "lookup:" << it.lookup() << std::endl;
 		std::cerr << "lookup-key:" << it.lookupKey() << std::endl;
@@ -329,7 +329,7 @@ TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 		REQUIRE((*it) == "prefix:atmosphere");
 		REQUIRE(kv.get(it) == "air");
 
-		it = kv.findIterator("prefix:zzzz");
+		it = kv.find("prefix:zzzz");
 		std::cerr << it << std::endl;
 		std::cerr << "lookup:" << it.lookup() << std::endl;
 		REQUIRE(! it);

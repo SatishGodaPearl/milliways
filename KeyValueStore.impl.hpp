@@ -298,7 +298,7 @@ inline bool KeyValueStore::find(const std::string& key, Search& result)
 	return true;
 }
 
-inline typename KeyValueStore::iterator KeyValueStore::findIterator(const std::string& key)
+inline typename KeyValueStore::iterator KeyValueStore::find(const std::string &key)
 {
 	if (key.length() > KEY_MAX_SIZE)
 	{
@@ -556,7 +556,7 @@ inline bool KeyValueStore::get(const iterator& it, std::string& value, ssize_t p
 	 * at this time, pass through the Search mechanism to get the various
 	 * pieces, then in a future we'll probably get rid of it entirely
 	 */
-	Search result = find(it.key());
+	Search result = search(it.key());
 	return get(result, value, partial);
 }
 
