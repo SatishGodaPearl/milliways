@@ -362,6 +362,8 @@ public:
 	iterator rbegin() { return iterator(this, /* forward */ false); }
 	iterator rend() { return iterator(this, /* forward */ false, /* end */ true); }
 
+	iterator findIterator(const std::string& key);
+
 	class base_iterator
 	{
 	public:
@@ -407,9 +409,13 @@ public:
 
 		kv_type* kv() const { return m_kv; }
 		const_reference key() const { m_current_key = (*m_tree_it).key(); return m_current_key; }
+		std::string lookupKey() const { return m_tree_it.current().lookupKey(); }
 		bool forward() const { return m_forward; }
 		bool backward() const { return (! m_forward); }
 		bool end() const { return m_end || (m_tree_it.end()); }
+
+		const kv_tree_lookup_type& lookup() const { return m_tree_it.current(); }
+		bool found() const { return m_tree_it.current().found(); }			/* same as bool operator */
 
 	protected:
 		kv_type* m_kv;
@@ -418,6 +424,8 @@ public:
 		bool m_forward;
 		bool m_end;
 		mutable std::string m_current_key;
+
+		friend class KeyValueStore;
 	};
 
 	class iterator : public base_iterator

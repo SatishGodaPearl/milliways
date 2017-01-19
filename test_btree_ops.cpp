@@ -82,18 +82,21 @@ TEST_CASE( "BTree Operations", "[BTreeOps]" ) {
 		REQUIRE(lookup.found());
 		REQUIRE(lookup.pos() == 1);
 		REQUIRE(lookup.key() == "about");
+		REQUIRE(lookup.lookupKey() == "about");
 
 		found = child1->search(lookup, "abridged");
 		REQUIRE(! found);
 		REQUIRE(! lookup.found());
 		REQUIRE(lookup.pos() == 2);
-		REQUIRE(lookup.key() == "abridged");
+		REQUIRE(lookup.key() == "antiparticle");
+		REQUIRE(lookup.lookupKey() == "abridged");
 
 		found = root->search(lookup, "def");
 		REQUIRE(found);
 		REQUIRE(lookup.found());
 		REQUIRE(lookup.pos() == 0);
 		REQUIRE(lookup.key() == "def");
+		REQUIRE(lookup.lookupKey() == "def");
 
 		tree.close();
 	}
@@ -122,6 +125,7 @@ TEST_CASE( "BTree Operations", "[BTreeOps]" ) {
 		bool found = tree.search(lookup, "13");
 		REQUIRE(found);
 		REQUIRE(lookup.found());
+		REQUIRE(lookup.lookupKey() == "13");
 		REQUIRE(lookup.key() == "13");
 		std::cerr << lookup << std::endl;
 
@@ -182,7 +186,8 @@ TEST_CASE( "BTree Operations", "[BTreeOps]" ) {
 		found = tree.search(lookup, "foo");
 		REQUIRE(! found);
 		REQUIRE(! lookup.found());
-		REQUIRE(lookup.key() == "foo");
+		REQUIRE(lookup.lookupKey() == "foo");
+		REQUIRE(lookup.key() == "7");
 		std::cerr << lookup << std::endl;
 
 		tree.dotGraph("/tmp/tree-dot", /* display */ true);

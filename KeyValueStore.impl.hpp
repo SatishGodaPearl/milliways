@@ -298,6 +298,91 @@ inline bool KeyValueStore::find(const std::string& key, Search& result)
 	return true;
 }
 
+inline typename KeyValueStore::iterator KeyValueStore::findIterator(const std::string& key)
+{
+	if (key.length() > KEY_MAX_SIZE)
+	{
+		return end();
+	}
+	assert(key.size() <= KEY_MAX_SIZE);
+
+	assert(m_kv_tree);
+	assert(m_kv_tree->isOpen());
+
+	// do we have this key?
+	kv_tree_iterator_type t_it = m_kv_tree->find(key);
+	iterator it(this);
+	it.m_tree_it = t_it;
+#if 0
+	it.m_tree_it
+	kv_tree_lookup_type& where = result.lookup();
+	if (m_kv_tree->search(where, key))
+	{
+		assert(where.found());
+
+		MW_SHPTR<kv_tree_node_type> node( where.node() );
+		assert(node);
+
+		// we store only the position inside the btree
+		// so we need to read the size separately
+		result.dataLocator(node->value(where.pos()));
+
+		result.full_size(0);
+		assert(result.locator().valid());
+		assert(result.valid());
+	} else
+	{
+		result.invalidate();
+		return false;
+	}
+
+	assert(result.valid());
+
+	/*
+	 * Key-Value Storage
+	 * -----------------
+	 *
+	 * [ key-length | value-length | key | value ]
+	 *
+	 * key-length: (4 bytes) key length in bytes (serialized)
+	 * value-length: (4 bytes) value length in bytes (serialized)
+	 * key: key data (key-length bytes)
+	 * value: value data (value-length bytes)
+	 */
+
+	/*
+	 * Step 1 - Read key-length and value-length
+	 */
+
+	// we store only the position inside the btree
+	// so we need to read the size separately
+	// To do that, preliminarily set the size to the "envelope"/header
+	// size only, to be able to use the various reading
+	// methods
+	// NOTE: the envelope is the FullLocator one!
+	result.full_size(FullLocator::ENVELOPE_SIZE);
+
+	// ok, now we can use the various read stream methods...
+	serialized_value_size_type v_value_length = 0;
+	serialized_value_size_type v_compressed_length = 0;
+
+	read_stream_t rs(m_blockstorage, result.locator().sizedLocator());
+	rs >> v_value_length >> v_compressed_length;
+	assert(! rs.fail());
+	assert(rs.nread() == FullLocator::ENVELOPE_SIZE);
+
+	if (v_compressed_length == 0) {
+		result.set_uncompressed(static_cast<kv_stream_sized_pos_t::size_type>(v_value_length));
+		assert(! result.isCompressed());
+	} else {
+
+		result.set_compressed(static_cast<kv_stream_sized_pos_t::size_type>(v_compressed_length), static_cast<kv_stream_sized_pos_t::size_type>(v_value_length));
+		assert(result.isCompressed());
+	}
+#endif
+	return it;
+}
+
 inline bool KeyValueStore::get(const std::string& key, std::string& value)
 {
 	if (key.length() > KEY_MAX_SIZE)
