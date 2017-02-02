@@ -344,6 +344,103 @@ TEST_CASE( "KeyValue store", "[KeyValueStore]" ) {
 		kv.close();
 	}
 
+	SECTION( "glob works" ) {
+		const std::string test_pathname("/tmp/test_kv");
+
+		std::remove(test_pathname.c_str());
+
+		kv_blockstorage_t* bs = new kv_blockstorage_t(test_pathname);
+
+		kv_t kv(bs);
+
+		kv.open();
+		REQUIRE(kv.isOpen());
+
+		kv.put("foo", "bar");
+		kv.put("Mickey", "Mouse");
+		kv.put("color", "blue");
+		kv.put("z", "534");
+		kv.put("height", "928m");
+		kv.put("aaa", "12");
+		kv.put("longish", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
+		kv.put("prefix:ciao", "hello");
+		kv.put("prefix:atmosphere", "air");
+		kv.put("prefix:cool", "sandwich");
+		kv.put("prefix:fire", "flame");
+		kv.put("prefix:quote", "quick");
+		kv.put("qbert:world", "isometric");
+
+		kv_t::glob_iterator it = kv.glob("prefix:*");
+		std::cerr << it << std::endl;
+		std::cerr << "lookup:" << it.lookup() << std::endl;
+		REQUIRE(! it);
+		REQUIRE(! it.found());
+		REQUIRE(it.found() == it);
+		REQUIRE(! it.end());
+		REQUIRE(it.lookupPattern() == "prefix:*");
+		REQUIRE(it.lookupKey() == "prefix:");
+		REQUIRE(it.key() == "prefix:atmosphere");
+		REQUIRE((*it) == "prefix:atmosphere");
+
+		++it;
+		REQUIRE(it);
+		REQUIRE(it.found());
+		REQUIRE(! it.end());
+		REQUIRE(it.lookupPattern() == "prefix:*");
+		REQUIRE(it.lookupKey() == "prefix:");
+		REQUIRE(it.key() == "prefix:ciao");
+		REQUIRE((*it) == "prefix:ciao");
+
+		++it;
+		REQUIRE(it);
+		REQUIRE(it.found());
+		REQUIRE(! it.end());
+		REQUIRE(it.lookupPattern() == "prefix:*");
+		REQUIRE(it.lookupKey() == "prefix:");
+		REQUIRE(it.key() == "prefix:cool");
+		REQUIRE((*it) == "prefix:cool");
+
+		++it;
+		REQUIRE(it);
+		REQUIRE(it.found());
+		REQUIRE(! it.end());
+		REQUIRE(it.lookupPattern() == "prefix:*");
+		REQUIRE(it.lookupKey() == "prefix:");
+		REQUIRE(it.key() == "prefix:fire");
+		REQUIRE((*it) == "prefix:fire");
+
+		++it;
+		REQUIRE(it);
+		REQUIRE(it.found());
+		REQUIRE(! it.end());
+		REQUIRE(it.lookupPattern() == "prefix:*");
+		REQUIRE(it.lookupKey() == "prefix:");
+		REQUIRE(it.key() == "prefix:quote");
+		REQUIRE((*it) == "prefix:quote");
+
+		/* ends... */
+		++it;
+		REQUIRE(! it);
+		REQUIRE(! it.found());
+		REQUIRE(it.end());
+		REQUIRE(it.lookupPattern() == "prefix:*");
+		REQUIRE(it.lookupKey() == "prefix:");
+		REQUIRE(it.key() == "qbert:world");
+		REQUIRE((*it) == "qbert:world");
+
+		/* ...and does not advance from the end */
+		++it;
+		REQUIRE(! it);
+		REQUIRE(! it.found());
+		REQUIRE(it.end());
+		REQUIRE(it.lookupPattern() == "prefix:*");
+		REQUIRE(it.lookupKey() == "prefix:");
+		REQUIRE(it.key() == "qbert:world");
+		REQUIRE((*it) == "qbert:world");
+
+		kv.close();
+	}
+
 	SECTION( "largish sets works" ) {
 		const std::string test_pathname("/tmp/test_kv");
 

@@ -383,6 +383,42 @@ inline typename KeyValueStore::iterator KeyValueStore::find(const std::string &k
 	return it;
 }
 
+static std::string nonGlobbingPrefix(const std::string& pattern)
+{
+	std::string prefix;
+
+	for (size_t i = 0; i < pattern.length(); i++)
+	{
+		char ch = pattern[i];
+		if ((ch == '?') || (ch == '*') || (ch == '[') || (ch == '\\'))
+			return prefix;
+		prefix += ch;
+	}
+
+	return prefix;
+}
+
+inline typename KeyValueStore::glob_iterator KeyValueStore::glob(const std::string& pattern)
+{
+	if (pattern.length() > KEY_MAX_SIZE)
+	{
+		/* return 'end' */
+		return glob_iterator(this, pattern, /* forward */ true, /* end */ true);
+	}
+	assert(pattern.size() <= KEY_MAX_SIZE);
+
+	assert(m_kv_tree);
+	assert(m_kv_tree->isOpen());
+
+	std::string patternPrefix = nonGlobbingPrefix(pattern);
+
+	// do we have this prefix?
+	kv_tree_iterator_type t_it = m_kv_tree->find(patternPrefix);
+	glob_iterator it(this, pattern);
+	it.m_tree_it = t_it;
+	return it;
+}
+
 inline bool KeyValueStore::get(const std::string& key, std::string& value)
 {
 	if (key.length() > KEY_MAX_SIZE)

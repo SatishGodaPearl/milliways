@@ -607,6 +607,9 @@ add_executable(test_ordered_map ${SOURCE_FILES})
 set(SOURCE_FILES test_hashtable.cpp catch.hpp  hashtable.h hashtable.impl.hpp)
 add_executable(test_hashtable ${SOURCE_FILES})
 
+set(SOURCE_FILES test_glob.cpp catch.hpp  glob.h glob.impl.hpp)
+add_executable(test_glob ${SOURCE_FILES})
+
 set(SOURCE_FILES test_lrucache.cpp catch.hpp ordered_map.h ordered_map.impl.hpp hashtable.h hashtable.impl.hpp LRUCache.h LRUCache.impl.hpp)
 add_executable(test_lrucache ${SOURCE_FILES})
 
@@ -619,10 +622,10 @@ add_executable(test_btree_filestorage ${SOURCE_FILES})
 set(SOURCE_FILES test_btree_ops.cpp catch.hpp Utils.h Utils.impl.hpp Seriously.h Seriously.impl.hpp ordered_map.h ordered_map.impl.hpp hashtable.h hashtable.impl.hpp LRUCache.h LRUCache.impl.hpp BlockStorage.h BlockStorage.impl.hpp BTreeCommon.h BTreeNode.h BTreeNode.impl.hpp BTree.h BTree.impl.hpp BTreeFileStorage.h BTreeFileStorage.impl.hpp)
 add_executable(test_btree_ops ${SOURCE_FILES})
 
-set(SOURCE_FILES test_kv.cpp catch.hpp Utils.h Utils.impl.hpp Seriously.h Seriously.impl.hpp ordered_map.h ordered_map.impl.hpp hashtable.h hashtable.impl.hpp LRUCache.h LRUCache.impl.hpp BlockStorage.h BlockStorage.impl.hpp BTreeCommon.h BTreeNode.h BTreeNode.impl.hpp BTree.h BTree.impl.hpp BTreeFileStorage.h BTreeFileStorage.impl.hpp KeyValueStore.h KeyValueStore.impl.hpp lz4.c)
+set(SOURCE_FILES test_kv.cpp catch.hpp Utils.h Utils.impl.hpp Seriously.h Seriously.impl.hpp ordered_map.h ordered_map.impl.hpp hashtable.h hashtable.impl.hpp LRUCache.h LRUCache.impl.hpp BlockStorage.h BlockStorage.impl.hpp BTreeCommon.h BTreeNode.h BTreeNode.impl.hpp BTree.h BTree.impl.hpp BTreeFileStorage.h BTreeFileStorage.impl.hpp KeyValueStore.h KeyValueStore.impl.hpp glob.h glob.impl.hpp lz4.c)
 add_executable(test_kv ${SOURCE_FILES})
 
-set(SOURCE_FILES test_kv.cpp catch.hpp Utils.h Utils.impl.hpp Seriously.h Seriously.impl.hpp ordered_map.h ordered_map.impl.hpp hashtable.h hashtable.impl.hpp LRUCache.h LRUCache.impl.hpp BlockStorage.h BlockStorage.impl.hpp BTreeCommon.h BTreeNode.h BTreeNode.impl.hpp BTree.h BTree.impl.hpp BTreeFileStorage.h BTreeFileStorage.impl.hpp KeyValueStore.h KeyValueStore.impl.hpp lz4.c)
+set(SOURCE_FILES test_kv.cpp catch.hpp Utils.h Utils.impl.hpp Seriously.h Seriously.impl.hpp ordered_map.h ordered_map.impl.hpp hashtable.h hashtable.impl.hpp LRUCache.h LRUCache.impl.hpp BlockStorage.h BlockStorage.impl.hpp BTreeCommon.h BTreeNode.h BTreeNode.impl.hpp BTree.h BTree.impl.hpp BTreeFileStorage.h BTreeFileStorage.impl.hpp KeyValueStore.h KeyValueStore.impl.hpp glob.h glob.impl.hpp lz4.c)
 add_executable(test_kv_lz4 ${SOURCE_FILES})
 
 set(SOURCE_FILES test_kv2.cpp catch.hpp Utils.h Utils.impl.hpp Seriously.h Seriously.impl.hpp ordered_map.h ordered_map.impl.hpp hashtable.h hashtable.impl.hpp LRUCache.h LRUCache.impl.hpp BlockStorage.h BlockStorage.impl.hpp BTreeCommon.h BTreeNode.h BTreeNode.impl.hpp BTree.h BTree.impl.hpp BTreeFileStorage.h BTreeFileStorage.impl.hpp KeyValueStore.h KeyValueStore.impl.hpp lz4.c)
