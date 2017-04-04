@@ -58,6 +58,7 @@
 
 #if ! defined(NDEBUG)
 
+#ifndef TRACE
 #undef TRACE
 #define TRACE( TEXT )                  \
 do                                     \
@@ -67,6 +68,7 @@ do                                     \
     std::cerr.flush();                 \
 }                                      \
 while( 0 )
+#endif
 
 #undef CTRACE
 #define CTRACE( COND, TEXT )               \
